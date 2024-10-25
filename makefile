@@ -1,4 +1,4 @@
-DBName = sssa 
+DBName = asplay
 
 # PSQL　ダウンロード　と　作成
 postgres:
@@ -16,6 +16,10 @@ createDB:
 # DB 削除
 dropDB:
 	docker exec -it psql dropdb $(DBName)
+
+# Migrate 初期設定
+createMigrate:
+	migrate create -ext sql -dir db/migration -seq init_info_schema
 
 
 
