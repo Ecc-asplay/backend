@@ -19,8 +19,14 @@ dropDB:
 
 # Migrate 初期設定
 createMigrate:
-	migrate create -ext sql -dir db/migration -seq init_info_schema
+	migrate create -ext sql -dir db/migration -seq init_table
+
+#up
+migrateup:
+	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose up
+#down
+migratedown:
+	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose down
 
 
-
-.PHONY: postgres dropPsql createDB dropDB
+.PHONY: postgres dropPsql createDB dropDB migrateup migratedown
