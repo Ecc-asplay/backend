@@ -18,6 +18,9 @@ func main() {
 		log.Println("DB 接続できない")
 	}
 
-	defer psql.Close()
+	if err := psql.Ping(); err != nil {
+		log.Println("Error ：", err.Error())
+		return
+	}
 
 }
