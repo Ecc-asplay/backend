@@ -3,8 +3,8 @@ CREATE TABLE "User" (
     "Name" VARCHAR NOT NULL,
     "Email" VARCHAR UNIQUE NOT NULL,
     "Birth" DATE NOT NULL,
-    "Gender" ENUM NOT NULL,
-    "IsPrivacy" BOOL NOT NULL DEFAULT FALSE,
+    "Gender" VARCHAR NOT NULL,
+    "IsPrivacy" BOOLEAN NOT NULL DEFAULT FALSE,
     "Disease" VARCHAR NOT NULL,
     "Condition" VARCHAR NOT NULL,
     "Password" VARCHAR NOT NULL,
@@ -19,10 +19,10 @@ CREATE TABLE "Posts" (
     "PostsID" UUID UNIQUE PRIMARY KEY NOT NULL,
     "ShowID" VARCHAR NOT NULL,
     "Title" VARCHAR NOT NULL,
-    "Feel" ENUM NOT NULL,
+    "Feel" VARCHAR NOT NULL,
     "Content" VARCHAR NOT NULL,
     "Reaction" INT NOT NULL,
-    "Image" VARBINARY,
+    "Image" BYTEA[],
     "IsSensitive" BOOLEAN DEFAULT FALSE,
     "Status" VARCHAR NOT NULL,
     "CreatedAt" TIMESTAMP NOT NULL DEFAULT (NOW()),
@@ -33,11 +33,11 @@ CREATE TABLE "Comments" (
     "CommentID" UUID UNIQUE PRIMARY KEY NOT NULL,
     "UserID" UUID NOT NULL,
     "PostsID" UUID NOT NULL,
-    "Status" ENUM NOT NULL,
-    "IsPublic" BOOL NOT NULL,
+    "Status" VARCHAR NOT NULL,
+    "IsPublic" BOOLEAN NOT NULL,
     "Comment" VARCHAR NOT NULL,
     "Reaction" INT NOT NULL,
-    "IsCensored" BOOL NOT NULL DEFAULT FALSE,
+    "IsCensored" BOOLEAN NOT NULL DEFAULT FALSE,
     "CreatedAt" TIMESTAMP NOT NULL DEFAULT (NOW())
 );
 
@@ -76,7 +76,7 @@ CREATE TABLE "Tap" (
 CREATE TABLE "Token" (
     "Token" VARCHAR UNIQUE NOT NULL,
     "Email" VARCHAR NOT NULL,
-    "Role" ENUM NOT NULL,
+    "Role" VARCHAR NOT NULL,
     "Status" VARCHAR NOT NULL,
     "TakeAt" TIMESTAMP NOT NULL DEFAULT (NOW()),
     "ExpiresAt" TIMESTAMP NOT NULL
