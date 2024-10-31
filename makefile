@@ -24,6 +24,7 @@ createMigrate:
 #up
 migrateup:
 	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose up
+	
 #down
 migratedown:
 	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose down

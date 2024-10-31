@@ -19,7 +19,7 @@ func main() {
 	}
 
 	if err := psql.Ping(); err != nil {
-		log.Println("Error ：", err.Error())
+		log.Println("Error :", err.Error())
 		return
 	}
 
