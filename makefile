@@ -29,5 +29,8 @@ migrateup:
 migratedown:
 	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose down
 
+#Sqlc
+sqlc:
+	sqlc generate
 
-.PHONY: postgres dropPsql createDB dropDB migrateup migratedown
+.PHONY: postgres dropPsql createDB dropDB migrateup migratedown sqlc
