@@ -1,147 +1,147 @@
-CREATE TABLE "User" (
-    "UserID" UUID UNIQUE PRIMARY KEY NOT NULL,
-    "Name" VARCHAR NOT NULL,
-    "Email" VARCHAR UNIQUE NOT NULL,
-    "Birth" DATE NOT NULL,
-    "Gender" VARCHAR NOT NULL,
-    "IsPrivacy" BOOLEAN NOT NULL DEFAULT FALSE,
-    "Disease" VARCHAR NOT NULL,
-    "Condition" VARCHAR NOT NULL,
-    "Password" VARCHAR NOT NULL,
-    "Certification" BOOLEAN DEFAULT FALSE,
-    "ResetPasswordAt" TIMESTAMP DEFAULT (NOW()),
-    "CreatedAt" TIMESTAMP NOT NULL DEFAULT (NOW()),
-    "UpdatedAt" TIMESTAMP NOT NULL DEFAULT (NOW())
+CREATE TABLE "users" (
+    "user_id" UUID UNIQUE PRIMARY KEY NOT NULL,
+    "username" VARCHAR NOT NULL,
+    "email" VARCHAR UNIQUE NOT NULL,
+    "birth" DATE NOT NULL,
+    "gender" VARCHAR NOT NULL,
+    "is_privacy" BOOLEAN NOT NULL DEFAULT FALSE,
+    "disease" VARCHAR NOT NULL,
+    "condition" VARCHAR NOT NULL,
+    "hashpassword" VARCHAR NOT NULL,
+    "certification" BOOLEAN DEFAULT FALSE,
+    "reset_password_at" TIMESTAMP DEFAULT (NOW()),
+    "created_at" TIMESTAMP NOT NULL DEFAULT (NOW()),
+    "updated_at" TIMESTAMP NOT NULL DEFAULT (NOW())
 );
 
-CREATE TABLE "Posts" (
-    "UserID" UUID NOT NULL,
-    "PostsID" UUID UNIQUE PRIMARY KEY NOT NULL,
-    "ShowID" VARCHAR NOT NULL,
-    "Title" VARCHAR NOT NULL,
-    "Feel" VARCHAR NOT NULL,
-    "Content" VARCHAR NOT NULL,
-    "Reaction" INT NOT NULL,
-    "Image" BYTEA[],
-    "IsSensitive" BOOLEAN DEFAULT FALSE,
-    "Status" VARCHAR NOT NULL,
-    "CreatedAt" TIMESTAMP NOT NULL DEFAULT (NOW()),
-    "UpdatedAt" TIMESTAMP DEFAULT (NOW())
+CREATE TABLE "posts" (
+    "user_id" UUID NOT NULL,
+    "post_id" UUID UNIQUE PRIMARY KEY NOT NULL,
+    "show_id" VARCHAR NOT NULL,
+    "title" VARCHAR NOT NULL,
+    "feel" VARCHAR NOT NULL,
+    "content" VARCHAR NOT NULL,
+    "reaction" INT NOT NULL,
+    "image" BYTEA[],
+    "is_sensitive" BOOLEAN DEFAULT FALSE,
+    "status" VARCHAR NOT NULL,
+    "created_at" TIMESTAMP NOT NULL DEFAULT (NOW()),
+    "updated_at" TIMESTAMP DEFAULT (NOW())
 );
 
-CREATE TABLE "Comments" (
-    "CommentID" UUID UNIQUE PRIMARY KEY NOT NULL,
-    "UserID" UUID NOT NULL,
-    "PostsID" UUID NOT NULL,
-    "Status" VARCHAR NOT NULL,
-    "IsPublic" BOOLEAN NOT NULL,
-    "Comment" VARCHAR NOT NULL,
-    "Reaction" INT NOT NULL,
-    "IsCensored" BOOLEAN NOT NULL DEFAULT FALSE,
-    "CreatedAt" TIMESTAMP NOT NULL DEFAULT (NOW())
+CREATE TABLE "comments" (
+    "comment_id" UUID UNIQUE PRIMARY KEY NOT NULL,
+    "user_id" UUID NOT NULL,
+    "post_id" UUID NOT NULL,
+    "status" VARCHAR NOT NULL,
+    "is_public" BOOLEAN NOT NULL,
+    "comment" VARCHAR NOT NULL,
+    "reaction" INT NOT NULL,
+    "is_censored" BOOLEAN NOT NULL DEFAULT FALSE,
+    "created_at" TIMESTAMP NOT NULL DEFAULT (NOW())
 );
 
-CREATE TABLE "Bookmarks" (
-    "PostID" UUID NOT NULL,
-    "UserID" UUID NOT NULL,
-    "CreatedAt" TIMESTAMP NOT NULL DEFAULT (NOW())
+CREATE TABLE "bookmarks" (
+    "post_id" UUID NOT NULL,
+    "user_id" UUID NOT NULL,
+    "created_at" TIMESTAMP NOT NULL DEFAULT (NOW())
 );
 
-CREATE TABLE "SearchRecord" (
-    "SearchContent" VARCHAR NOT NULL,
-    "isUser" BOOLEAN NOT NULL DEFAULT FALSE,
-    "SearchedAt" TIMESTAMP NOT NULL DEFAULT (NOW())
+CREATE TABLE "searchrecord" (
+    "search_content" VARCHAR NOT NULL,
+    "is_user" BOOLEAN NOT NULL DEFAULT FALSE,
+    "searched_at" TIMESTAMP NOT NULL DEFAULT (NOW())
 );
 
-CREATE TABLE "Block" (
-    "UserID" UUID NOT NULL,
-    "BlockUserID" UUID NOT NULL,
-    "Reason" VARCHAR NOT NULL,
-    "BlockAt" TIMESTAMP NOT NULL DEFAULT (NOW()),
-    "UnBlockAt" TIMESTAMP DEFAULT (NOW())
+CREATE TABLE "block" (
+    "user_id" UUID NOT NULL,
+    "blockuser_id" UUID NOT NULL,
+    "reason" VARCHAR NOT NULL,
+    "block_at" TIMESTAMP NOT NULL DEFAULT (NOW()),
+    "unblock_at" TIMESTAMP DEFAULT (NOW())
 );
 
-CREATE TABLE "AdminUser" (
-    "Email" VARCHAR UNIQUE NOT NULL,
-    "Password" VARCHAR NOT NULL,
-    "Name" VARCHAR NOT NULL,
-    "Department" VARCHAR NOT NULL
+CREATE TABLE "adminuser" (
+    "email" VARCHAR UNIQUE NOT NULL,
+    "hash_password" VARCHAR NOT NULL,
+    "staff_name" VARCHAR NOT NULL,
+    "department" VARCHAR NOT NULL
 );
 
-CREATE TABLE "Tap" (
-    "PostID" UUID PRIMARY KEY,
-    "Tap" VARCHAR[] NOT NULL
+CREATE TABLE "tap" (
+    "post_id" UUID PRIMARY KEY,
+    "tap" VARCHAR[] NOT NULL
 );
 
-CREATE TABLE "Token" (
-    "Token" VARCHAR UNIQUE NOT NULL,
-    "Email" VARCHAR NOT NULL,
-    "Role" VARCHAR NOT NULL,
-    "Status" VARCHAR NOT NULL,
-    "TakeAt" TIMESTAMP NOT NULL DEFAULT (NOW()),
-    "ExpiresAt" TIMESTAMP NOT NULL
+CREATE TABLE "token" (
+    "token" VARCHAR UNIQUE NOT NULL,
+    "email" VARCHAR NOT NULL,
+    "role" VARCHAR NOT NULL,
+    "status" VARCHAR NOT NULL,
+    "take_at" TIMESTAMP NOT NULL DEFAULT (NOW()),
+    "expires_at" TIMESTAMP NOT NULL
 );
 
-ALTER TABLE "Posts"
+ALTER TABLE "posts"
     ADD FOREIGN KEY (
-        "UserID"
+        "user_id"
     )
-        REFERENCES "User" (
-            "UserID"
+        REFERENCES "users" (
+            "user_id"
         );
 
-ALTER TABLE "Comments"
+ALTER TABLE "comments"
     ADD FOREIGN KEY (
-        "UserID"
+        "user_id"
     )
-        REFERENCES "User" (
-            "UserID"
+        REFERENCES "users" (
+            "user_id"
         );
 
-ALTER TABLE "Comments"
+ALTER TABLE "comments"
     ADD FOREIGN KEY (
-        "PostsID"
+        "post_id"
     )
-        REFERENCES "Posts" (
-            "PostsID"
+        REFERENCES "posts" (
+            "post_id"
         );
 
-ALTER TABLE "Bookmarks"
+ALTER TABLE "bookmarks"
     ADD FOREIGN KEY (
-        "PostID"
+        "post_id"
     )
-        REFERENCES "Posts" (
-            "PostsID"
+        REFERENCES "posts" (
+            "post_id"
         );
 
-ALTER TABLE "Bookmarks"
+ALTER TABLE "bookmarks"
     ADD FOREIGN KEY (
-        "UserID"
+        "user_id"
     )
-        REFERENCES "User" (
-            "UserID"
+        REFERENCES "users" (
+            "user_id"
         );
 
-ALTER TABLE "Block"
+ALTER TABLE "block"
     ADD FOREIGN KEY (
-        "UserID"
+        "user_id"
     )
-        REFERENCES "User" (
-            "UserID"
+        REFERENCES "users" (
+            "user_id"
         );
 
-ALTER TABLE "Tap"
+ALTER TABLE "tap"
     ADD FOREIGN KEY (
-        "PostID"
+        "post_id"
     )
-        REFERENCES "Posts" (
-            "PostsID"
+        REFERENCES "posts" (
+            "post_id"
         );
 
-ALTER TABLE "Token"
+ALTER TABLE "token"
     ADD FOREIGN KEY (
-        "Email"
+        "email"
     )
-        REFERENCES "User" (
-            "Email"
+        REFERENCES "users" (
+            "email"
         );
