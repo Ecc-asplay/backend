@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS "token";
 
 DROP TABLE IF EXISTS "tap";
 
-DROP TABLE IF EXISTS "block";
+DROP TABLE IF EXISTS "blockuser";
 
 DROP TABLE IF EXISTS "bookmarks";
 
