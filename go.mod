@@ -3,9 +3,11 @@ module github.com/Ecc-asplay/backend
 go 1.23.2
 
 require (
+	github.com/alexedwards/argon2id v1.0.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/uuid v1.4.0
 	github.com/jackc/pgx/v5 v5.7.1
+	github.com/sethvargo/go-password v0.3.1
 	github.com/spf13/viper v1.19.0
 )
 

@@ -33,4 +33,13 @@ migratedown:
 sqlc:
 	sqlc generate
 
-.PHONY: postgres dropPsql createDB dropDB migrateup migratedown sqlc
+
+test:
+	go test -v -cover ./...
+
+
+server:
+	go run main.go
+
+
+.PHONY: postgres dropPsql createDB dropDB migrateup migratedown sqlc server test

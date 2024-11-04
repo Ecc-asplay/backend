@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/Ecc-asplay/backend/api"
 	db "github.com/Ecc-asplay/backend/db/sqlc"
 	"github.com/Ecc-asplay/backend/util"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -21,7 +22,7 @@ func main() {
 	}
 
 	store := db.NewStore(conn)
-	server, err := api.NewServer(config, store)
+	server, err := api.SetupRouter(config, store)
 	if err != nil {
 		log.Fatal("cannot create server:", err)
 	}
