@@ -7,20 +7,23 @@ import (
 )
 
 type Server struct {
-	store  *db.Querier
+	store  db.Querier
 	router *gin.Engine
 	config util.Config
 }
 
-func setupRouter(store *db.Querier) Server {
-	server := &Server{store: store}
+func SetupRouter(config *util.Config, store db.Querier) (Server, error) {
+	server := &Server{
+		store:  store,
+		config: *config,
+	}
 	r := gin.Default()
 
 	r.GET("/", server.Createuser)
 
 	server.router = r
 
-	return *server
+	return *server, nil
 
 }
 
