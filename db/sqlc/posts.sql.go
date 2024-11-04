@@ -14,6 +14,7 @@ import (
 
 const createPost = `-- name: CreatePost :exec
 INSERT INTO POSTS (
+    POST_ID,
     USER_ID,
     SHOW_ID,
     TITLE,
@@ -32,11 +33,13 @@ INSERT INTO POSTS (
     $6,
     $7,
     $8,
-    $9
+    $9,
+    $10
 )
 `
 
 type CreatePostParams struct {
+	PostID      uuid.UUID   `json:"post_id"`
 	UserID      uuid.UUID   `json:"user_id"`
 	ShowID      string      `json:"show_id"`
 	Title       string      `json:"title"`
@@ -50,6 +53,7 @@ type CreatePostParams struct {
 
 func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) error {
 	_, err := q.db.Exec(ctx, createPost,
+		arg.PostID,
 		arg.UserID,
 		arg.ShowID,
 		arg.Title,

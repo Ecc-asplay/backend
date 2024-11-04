@@ -1,5 +1,6 @@
 -- name: CreateUser :one
 INSERT INTO USERS (
+    USER_ID,
     USERNAME,
     EMAIL,
     BIRTH,
@@ -14,7 +15,8 @@ INSERT INTO USERS (
     $4,
     $5,
     $6,
-    $7
+    $7,
+    $8
 ) RETURNING *;
 
 -- name: GetUserData :one
