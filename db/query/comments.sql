@@ -1,5 +1,6 @@
 -- name: CreateComments :one
 INSERT INTO COMMENTS (
+    COMMENT_ID,
     USER_ID,
     POST_ID,
     STATUS,
@@ -14,7 +15,8 @@ INSERT INTO COMMENTS (
     $4,
     $5,
     $6,
-    $7
+    $7,
+    $8
 ) RETURNING *;
 
 -- name: GetCommentsList :many

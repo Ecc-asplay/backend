@@ -13,6 +13,7 @@ import (
 
 const createComments = `-- name: CreateComments :one
 INSERT INTO COMMENTS (
+    COMMENT_ID,
     USER_ID,
     POST_ID,
     STATUS,
@@ -27,11 +28,13 @@ INSERT INTO COMMENTS (
     $4,
     $5,
     $6,
-    $7
+    $7,
+    $8
 ) RETURNING comment_id, user_id, post_id, status, is_public, comments, reaction, is_censored, created_at
 `
 
 type CreateCommentsParams struct {
+	CommentID  uuid.UUID `json:"comment_id"`
 	UserID     uuid.UUID `json:"user_id"`
 	PostID     uuid.UUID `json:"post_id"`
 	Status     string    `json:"status"`
@@ -43,6 +46,7 @@ type CreateCommentsParams struct {
 
 func (q *Queries) CreateComments(ctx context.Context, arg CreateCommentsParams) (Comment, error) {
 	row := q.db.QueryRow(ctx, createComments,
+		arg.CommentID,
 		arg.UserID,
 		arg.PostID,
 		arg.Status,
