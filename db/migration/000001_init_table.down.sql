@@ -1,6 +1,6 @@
 DROP TABLE IF EXISTS "token";
 
-DROP TABLE IF EXISTS "tap";
+DROP TABLE IF EXISTS "tag";
 
 DROP TABLE IF EXISTS "blockuser";
 

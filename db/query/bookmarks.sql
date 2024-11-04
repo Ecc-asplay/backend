@@ -1,5 +1,5 @@
---name: CreateBookmark :one
-INSERT INTO BOOKMARK (
+-- name: CreateBookmarks :one
+INSERT INTO BOOKMARKS (
     POST_ID,
     USER_ID
 ) VALUES(
@@ -7,18 +7,18 @@ INSERT INTO BOOKMARK (
     $2
 ) RETURNING *;
 
---name: GetBookmarks :many
+-- name: GetBookmarks :many
 SELECT
     *
 FROM
-    BOOKMARK
+    BOOKMARKS
 WHERE
     USER_ID = $1
 ORDER BY
-    CREATED_AT DESC RETURNING *;
+    CREATED_AT DESC;
 
---name: DeleteBookmarks :one
-DELETE FROM BOOKMARK
+-- name: DeleteBookmarks :one
+DELETE FROM BOOKMARKS
 WHERE
     USER_ID = $1
     AND POST_ID = $2 RETURNING *;

@@ -65,13 +65,13 @@ WHERE
 -- name: ResetPassword :exec
 UPDATE USERS
 SET
-    HASHPASSWORD $2,
+    HASHPASSWORD = $2,
     RESET_PASSWORD_AT = $3
 WHERE
-    USER_ID = $1;
+    USER_ID = $1 RETURNING *;
 
--- name: DeleteUser
+-- name: DeleteUser :exec
 DELETE FROM USERS
 WHERE
-    USER_ID = $1,
-    EMAIL = $2;
+    USER_ID = $1
+    AND EMAIL = $2;

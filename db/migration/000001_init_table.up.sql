@@ -35,7 +35,7 @@ CREATE TABLE "comments" (
     "post_id" UUID NOT NULL,
     "status" VARCHAR NOT NULL,
     "is_public" BOOLEAN NOT NULL,
-    "comment" VARCHAR NOT NULL,
+    "comments" VARCHAR NOT NULL,
     "reaction" INT NOT NULL,
     "is_censored" BOOLEAN NOT NULL DEFAULT FALSE,
     "created_at" TIMESTAMP NOT NULL DEFAULT (NOW())
@@ -70,9 +70,9 @@ CREATE TABLE "adminuser" (
     "joined_at" TIMESTAMP NOT NULL DEFAULT (NOW())
 );
 
-CREATE TABLE "tap" (
+CREATE TABLE "tag" (
     "post_id" UUID PRIMARY KEY,
-    "tap" VARCHAR[] NOT NULL
+    "tag_comments" VARCHAR[] NOT NULL
 );
 
 CREATE TABLE "token" (
@@ -133,7 +133,7 @@ ALTER TABLE "blockuser"
             "user_id"
         );
 
-ALTER TABLE "tap"
+ALTER TABLE "tag"
     ADD FOREIGN KEY (
         "post_id"
     )

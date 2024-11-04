@@ -1,7 +1,7 @@
---name: CreateBlock: one
+-- name: CreateBlock :one
 INSERT INTO BLOCKUSER (
     USER_ID,
-    BLOCK_USER_ID,
+    BLOCKUSER_ID,
     REASON,
     STATUS
 ) VALUES (
@@ -11,15 +11,15 @@ INSERT INTO BLOCKUSER (
     $4
 ) RETURNING *;
 
---name: GetAllBlockUsersList:many
+-- name: GetAllBlockUsersList :many
 SELECT
     *
 FROM
     BLOCKUSER
 ORDER BY
-    BLOCK_AT DESC RETURNING *;
+    BLOCK_AT DESC;
 
---name: GetBlockUserlist: many
+-- name: GetBlockUserlist :many
 SELECT
     *
 FROM
@@ -27,13 +27,13 @@ FROM
 WHERE
     USER_ID = $1
 ORDER BY
-    BLOCK_AT DESC RETURNING *;
+    BLOCK_AT DESC;
 
---name: UnBlockUser: one
-UPDATE TABLE BLOCKUSER
+-- name: UnBlockUser :one
+UPDATE BLOCKUSER
 SET
-    STATUS,
-    UNBLOCK_AT
+    STATUS = $3,
+    UNBLOCK_AT = $4
 WHERE
     USER_ID = $1
-    AND BLOCK_USER_ID = $2 RETURNING *;
+    AND BLOCKUSER_ID = $2 RETURNING *;

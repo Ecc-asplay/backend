@@ -1,4 +1,4 @@
---name: CreateAdminUser :one
+-- name: CreateAdminUser :one
 INSERT INTO ADMINUSER (
     EMAIL,
     HASHPASSWORD,
@@ -11,7 +11,7 @@ INSERT INTO ADMINUSER (
     $4
 ) RETURNING *;
 
---name: GetPasswordToAdminLogin :one
+-- name: GetPasswordToAdminLogin :one
 SELECT
     HASHPASSWORD
 FROM
@@ -19,7 +19,7 @@ FROM
 WHERE
     EMAIL = $1 LIMIT 1;
 
---name: DeleteAdminUser :exec
+-- name: DeleteAdminUser :exec
 DELETE FROM ADMINUSER
 WHERE
     EMAIL = $1;
