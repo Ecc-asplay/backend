@@ -1,10 +1,12 @@
 package main
 
 import (
-	"database/sql"
+	"context"
 	"log"
 
+	db "github.com/Ecc-asplay/backend/db/sqlc"
 	"github.com/Ecc-asplay/backend/util"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 func main() {
@@ -13,14 +15,20 @@ func main() {
 		log.Println("app.env 見つけてない")
 	}
 
-	psql, err := sql.Open(config.DBDriver, config.DBSource)
+	conn, err := pgxpool.New(context.Background(), config.DBSource)
 	if err != nil {
-		log.Println("DB 接続できない")
+		log.Fatal("cannot connect to db")
 	}
 
-	if err := psql.Ping(); err != nil {
-		log.Println("Error :", err.Error())
-		return
+	store := db.NewStore(conn)
+	server, err := api.NewServer(config, store)
+	if err != nil {
+		log.Fatal("cannot create server:", err)
+	}
+
+	err = server.Start(config.HTTPServerAddress)
+	if err != nil {
+		log.Fatal("cannot start server:", err)
 	}
 
 }
