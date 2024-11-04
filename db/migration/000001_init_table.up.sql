@@ -4,14 +4,14 @@ CREATE TABLE "users" (
     "email" VARCHAR UNIQUE NOT NULL,
     "birth" DATE NOT NULL,
     "gender" VARCHAR NOT NULL,
-    "is_privacy" BOOLEAN NOT NULL DEFAULT FALSE,
+    "is_privacy" BOOLEAN DEFAULT FALSE,
     "disease" VARCHAR NOT NULL,
     "condition" VARCHAR NOT NULL,
     "hashpassword" VARCHAR NOT NULL,
     "certification" BOOLEAN DEFAULT FALSE,
-    "reset_password_at" TIMESTAMP DEFAULT (NOW()),
+    "reset_password_at" TIMESTAMP,
     "created_at" TIMESTAMP NOT NULL DEFAULT (NOW()),
-    "updated_at" TIMESTAMP NOT NULL DEFAULT (NOW())
+    "updated_at" TIMESTAMP
 );
 
 CREATE TABLE "posts" (
@@ -26,7 +26,7 @@ CREATE TABLE "posts" (
     "is_sensitive" BOOLEAN DEFAULT FALSE,
     "status" VARCHAR NOT NULL,
     "created_at" TIMESTAMP NOT NULL DEFAULT (NOW()),
-    "updated_at" TIMESTAMP DEFAULT (NOW())
+    "updated_at" TIMESTAMP
 );
 
 CREATE TABLE "comments" (
@@ -42,8 +42,8 @@ CREATE TABLE "comments" (
 );
 
 CREATE TABLE "bookmarks" (
-    "post_id" UUID NOT NULL,
     "user_id" UUID NOT NULL,
+    "post_id" UUID NOT NULL,
     "created_at" TIMESTAMP NOT NULL DEFAULT (NOW())
 );
 
@@ -53,19 +53,21 @@ CREATE TABLE "searchrecord" (
     "searched_at" TIMESTAMP NOT NULL DEFAULT (NOW())
 );
 
-CREATE TABLE "block" (
+CREATE TABLE "blockuser" (
     "user_id" UUID NOT NULL,
     "blockuser_id" UUID NOT NULL,
     "reason" VARCHAR NOT NULL,
+    "status" VARCHAR NOT NULL,
     "block_at" TIMESTAMP NOT NULL DEFAULT (NOW()),
-    "unblock_at" TIMESTAMP DEFAULT (NOW())
+    "unblock_at" TIMESTAMP
 );
 
 CREATE TABLE "adminuser" (
     "email" VARCHAR UNIQUE NOT NULL,
-    "hash_password" VARCHAR NOT NULL,
+    "hashpassword" VARCHAR NOT NULL,
     "staff_name" VARCHAR NOT NULL,
-    "department" VARCHAR NOT NULL
+    "department" VARCHAR NOT NULL,
+    "joined_at" TIMESTAMP NOT NULL DEFAULT (NOW())
 );
 
 CREATE TABLE "tap" (
@@ -74,9 +76,10 @@ CREATE TABLE "tap" (
 );
 
 CREATE TABLE "token" (
-    "token" VARCHAR UNIQUE NOT NULL,
+    "id" UUID UNIQUE PRIMARY KEY NOT NULL,
     "email" VARCHAR NOT NULL,
-    "role" VARCHAR NOT NULL,
+    "access_token" VARCHAR UNIQUE NOT NULL,
+    "roles" VARCHAR NOT NULL,
     "status" VARCHAR NOT NULL,
     "take_at" TIMESTAMP NOT NULL DEFAULT (NOW()),
     "expires_at" TIMESTAMP NOT NULL
@@ -108,21 +111,21 @@ ALTER TABLE "comments"
 
 ALTER TABLE "bookmarks"
     ADD FOREIGN KEY (
-        "post_id"
-    )
-        REFERENCES "posts" (
-            "post_id"
-        );
-
-ALTER TABLE "bookmarks"
-    ADD FOREIGN KEY (
         "user_id"
     )
         REFERENCES "users" (
             "user_id"
         );
 
-ALTER TABLE "block"
+ALTER TABLE "bookmarks"
+    ADD FOREIGN KEY (
+        "post_id"
+    )
+        REFERENCES "posts" (
+            "post_id"
+        );
+
+ALTER TABLE "blockuser"
     ADD FOREIGN KEY (
         "user_id"
     )
