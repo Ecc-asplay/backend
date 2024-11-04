@@ -1,4 +1,4 @@
---name: CreateSearchedRecord :one
+-- name: CreateSearchedRecord :one
 INSERT INTO SEARCHRECORD (
     SEARCH_CONTENT,
     IS_USER
@@ -7,15 +7,15 @@ INSERT INTO SEARCHRECORD (
     $2
 ) RETURNING *;
 
---name: GetSearchedRecordList :many
+-- name: GetSearchedRecordList :many
 SELECT
     *
 FROM
     SEARCHRECORD
 ORDER BY
-    SEARCHED_AT DESC RETURNING *;
+    SEARCHED_AT DESC;
 
---name: GetKeyWordSearchedRecord :many
+-- name: GetKeyWordSearchedRecord :many
 SELECT
     *
 FROM

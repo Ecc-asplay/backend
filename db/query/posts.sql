@@ -27,7 +27,7 @@ SELECT
 FROM
     POSTS
 WHERE
-    USER_ID = $1 RETURNING *;
+    USER_ID = $1;
 
 -- name: GetPostsList :many
 SELECT
@@ -35,7 +35,7 @@ SELECT
 FROM
     POSTS
 ORDER BY
-    CREATED_AT DESC RETURNING *;
+    CREATED_AT DESC;
 
 -- name: UpdatePosts :exec
 UPDATE POSTS
