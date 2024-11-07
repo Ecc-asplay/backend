@@ -9,6 +9,10 @@ dropPsql:
 	docker stop psql || true
 	docker rm psql || true
 
+# Psql Start
+dbStart:
+	docker start 69ee5d5b45500a5cc7b1d60eeddb1df99e58854b5322287bf9f007909fb64d99
+
 # DB 作成
 createDB:
 	docker exec -it psql createdb --username=root --owner=root $(DBName)
@@ -42,4 +46,4 @@ server:
 	go run main.go
 
 
-.PHONY: postgres dropPsql createDB dropDB migrateup migratedown sqlc server test
+.PHONY: postgres dropPsql dbStart createDB dropDB migrateup migratedown sqlc server test

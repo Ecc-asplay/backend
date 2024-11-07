@@ -116,3 +116,15 @@ func RandomCondition() string {
 	rand.Seed(time.Now().UnixNano())
 	return conditions[rand.Intn(len(conditions))]
 }
+
+func RandomStatus() string {
+	statuses := []string{
+		"処理中",
+		"封鎖されました",
+		"封鎖却下",
+	}
+
+	rand.Seed(time.Now().UnixNano())
+
+	return statuses[rand.Intn(len(statuses))]
+}
