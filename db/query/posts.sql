@@ -1,4 +1,4 @@
--- name: CreatePost :exec
+-- name: CreatePost :one
 INSERT INTO POSTS (
     POST_ID,
     USER_ID,
