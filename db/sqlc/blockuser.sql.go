@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createBlock = `-- name: CreateBlock :one
@@ -130,26 +129,21 @@ const unBlockUser = `-- name: UnBlockUser :one
 UPDATE BLOCKUSER
 SET
     STATUS = $3,
-    UNBLOCK_AT = $4
+    UNBLOCK_AT = NOW(
+    )
 WHERE
     USER_ID = $1
     AND BLOCKUSER_ID = $2 RETURNING user_id, blockuser_id, reason, status, block_at, unblock_at
 `
 
 type UnBlockUserParams struct {
-	UserID      uuid.UUID        `json:"user_id"`
-	BlockuserID uuid.UUID        `json:"blockuser_id"`
-	Status      string           `json:"status"`
-	UnblockAt   pgtype.Timestamp `json:"unblock_at"`
+	UserID      uuid.UUID `json:"user_id"`
+	BlockuserID uuid.UUID `json:"blockuser_id"`
+	Status      string    `json:"status"`
 }
 
 func (q *Queries) UnBlockUser(ctx context.Context, arg UnBlockUserParams) (Blockuser, error) {
-	row := q.db.QueryRow(ctx, unBlockUser,
-		arg.UserID,
-		arg.BlockuserID,
-		arg.Status,
-		arg.UnblockAt,
-	)
+	row := q.db.QueryRow(ctx, unBlockUser, arg.UserID, arg.BlockuserID, arg.Status)
 	var i Blockuser
 	err := row.Scan(
 		&i.UserID,

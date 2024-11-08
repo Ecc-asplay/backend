@@ -3,11 +3,9 @@ package db
 import (
 	"context"
 	"testing"
-	"time"
 
 	"github.com/Ecc-asplay/backend/util"
 	"github.com/brianvoe/gofakeit/v7"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/require"
 )
 
@@ -47,6 +45,7 @@ func TestGetAllBlockUsersList(t *testing.T) {
 	allBlockData, err := testQueries.GetAllBlockUsersList(context.Background())
 	require.NoError(t, err)
 	require.NotEmpty(t, allBlockData)
+	require.GreaterOrEqual(t, len(allBlockData), 20)
 }
 
 func TestGetBlockUserlist(t *testing.T) {
@@ -59,17 +58,13 @@ func TestGetBlockUserlist(t *testing.T) {
 	blockList, err := testQueries.GetBlockUserlist(context.Background(), user1.UserID)
 	require.NoError(t, err)
 	require.NotEmpty(t, blockList)
+	require.GreaterOrEqual(t, len(blockList), 20)
 }
 
 func TestUnBlockUser(t *testing.T) {
 	user1 := CreateRandomUser(t)
 	user2 := CreateRandomUser(t)
 	oldBlock := CreateRandomBlock(t, user1, user2)
-
-	pgTime := pgtype.Timestamp{
-		Time:  time.Now(),
-		Valid: true,
-	}
 
 	var newStatus string
 
@@ -84,7 +79,6 @@ func TestUnBlockUser(t *testing.T) {
 		UserID:      user1.UserID,
 		BlockuserID: user2.UserID,
 		Status:      newStatus,
-		UnblockAt:   pgTime,
 	}
 
 	unBlocked, err := testQueries.UnBlockUser(context.Background(), unBlockData)

@@ -27,16 +27,18 @@ FROM
 WHERE
     POST_ID = $1
 ORDER BY
-    COMMENT_ID DESC LIMIT $2 OFFSET $3;
+    COMMENT_ID DESC;
 
--- name: UpdateComments :exec
+-- name: UpdateComments :one
 UPDATE COMMENTS
 SET
     STATUS = $2,
     IS_PUBLIC = $3,
     COMMENTS = $4,
     REACTION = $5,
-    IS_CENSORED = $6
+    IS_CENSORED = $6,
+    UPDATED_AT = NOW(
+    )
 WHERE
     COMMENT_ID = $1 RETURNING *;
 

@@ -1,7 +1,6 @@
 package util
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/alexedwards/argon2id"
@@ -10,7 +9,8 @@ import (
 func Hash(password string) (string, error) {
 	hash, err := argon2id.CreateHash(password, argon2id.DefaultParams)
 	if err != nil {
-		return "", fmt.Errorf("failed to hash password: %w", err)
+		ErrorLog(err)
+		return "", err
 	}
 
 	return hash, nil

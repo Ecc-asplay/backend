@@ -7,7 +7,7 @@ INSERT INTO BOOKMARKS (
     $2
 ) RETURNING *;
 
--- name: GetBookmarks :many
+-- name: GetAllBookmarks :many
 SELECT
     *
 FROM
@@ -17,7 +17,7 @@ WHERE
 ORDER BY
     CREATED_AT DESC;
 
--- name: DeleteBookmarks :one
+-- name: DeleteBookmarks :exec
 DELETE FROM BOOKMARKS
 WHERE
     USER_ID = $1

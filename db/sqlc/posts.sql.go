@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createPost = `-- name: CreatePost :one
@@ -39,16 +38,16 @@ INSERT INTO POSTS (
 `
 
 type CreatePostParams struct {
-	PostID      uuid.UUID   `json:"post_id"`
-	UserID      uuid.UUID   `json:"user_id"`
-	ShowID      string      `json:"show_id"`
-	Title       string      `json:"title"`
-	Feel        string      `json:"feel"`
-	Content     string      `json:"content"`
-	Reaction    int32       `json:"reaction"`
-	Image       []byte      `json:"image"`
-	IsSensitive pgtype.Bool `json:"is_sensitive"`
-	Status      string      `json:"status"`
+	PostID      uuid.UUID `json:"post_id"`
+	UserID      uuid.UUID `json:"user_id"`
+	ShowID      string    `json:"show_id"`
+	Title       string    `json:"title"`
+	Feel        string    `json:"feel"`
+	Content     string    `json:"content"`
+	Reaction    int32     `json:"reaction"`
+	Image       []byte    `json:"image"`
+	IsSensitive bool      `json:"is_sensitive"`
+	Status      string    `json:"status"`
 }
 
 func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, error) {
@@ -97,6 +96,53 @@ type DeletePostParams struct {
 func (q *Queries) DeletePost(ctx context.Context, arg DeletePostParams) error {
 	_, err := q.db.Exec(ctx, deletePost, arg.UserID, arg.PostID)
 	return err
+}
+
+const getPostOfKeywords = `-- name: GetPostOfKeywords :many
+SELECT
+    user_id, post_id, show_id, title, feel, content, reaction, image, is_sensitive, status, created_at, updated_at
+FROM
+    POSTS
+WHERE
+    TITLE LIKE '%'
+               || CAST($1 AS TEXT)
+               || '%'
+    OR CONTENT LIKE '%'
+                    || CAST($1 AS TEXT)
+                    || '%'
+`
+
+func (q *Queries) GetPostOfKeywords(ctx context.Context, dollar_1 string) ([]Post, error) {
+	rows, err := q.db.Query(ctx, getPostOfKeywords, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Post{}
+	for rows.Next() {
+		var i Post
+		if err := rows.Scan(
+			&i.UserID,
+			&i.PostID,
+			&i.ShowID,
+			&i.Title,
+			&i.Feel,
+			&i.Content,
+			&i.Reaction,
+			&i.Image,
+			&i.IsSensitive,
+			&i.Status,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getPostsList = `-- name: GetPostsList :many
@@ -192,22 +238,24 @@ SET
     CONTENT = $6,
     REACTION = $7,
     IMAGE = $8,
-    IS_SENSITIVE = $9
+    IS_SENSITIVE = $9,
+    UPDATED_AT = NOW(
+    )
 WHERE
     USER_ID = $1
     AND POST_ID = $2 RETURNING user_id, post_id, show_id, title, feel, content, reaction, image, is_sensitive, status, created_at, updated_at
 `
 
 type UpdatePostsParams struct {
-	UserID      uuid.UUID   `json:"user_id"`
-	PostID      uuid.UUID   `json:"post_id"`
-	ShowID      string      `json:"show_id"`
-	Title       string      `json:"title"`
-	Feel        string      `json:"feel"`
-	Content     string      `json:"content"`
-	Reaction    int32       `json:"reaction"`
-	Image       []byte      `json:"image"`
-	IsSensitive pgtype.Bool `json:"is_sensitive"`
+	UserID      uuid.UUID `json:"user_id"`
+	PostID      uuid.UUID `json:"post_id"`
+	ShowID      string    `json:"show_id"`
+	Title       string    `json:"title"`
+	Feel        string    `json:"feel"`
+	Content     string    `json:"content"`
+	Reaction    int32     `json:"reaction"`
+	Image       []byte    `json:"image"`
+	IsSensitive bool      `json:"is_sensitive"`
 }
 
 func (q *Queries) UpdatePosts(ctx context.Context, arg UpdatePostsParams) (Post, error) {

@@ -4,11 +4,11 @@ CREATE TABLE "users" (
     "email" VARCHAR UNIQUE NOT NULL,
     "birth" DATE NOT NULL,
     "gender" VARCHAR NOT NULL,
-    "is_privacy" BOOLEAN DEFAULT FALSE,
+    "is_privacy" BOOLEAN NOT NULL DEFAULT FALSE,
     "disease" VARCHAR NOT NULL,
     "condition" VARCHAR NOT NULL,
     "hashpassword" VARCHAR NOT NULL,
-    "certification" BOOLEAN DEFAULT FALSE,
+    "certification" BOOLEAN NOT NULL DEFAULT FALSE,
     "reset_password_at" TIMESTAMP,
     "created_at" TIMESTAMP NOT NULL DEFAULT (NOW()),
     "updated_at" TIMESTAMP
@@ -23,7 +23,7 @@ CREATE TABLE "posts" (
     "content" VARCHAR NOT NULL,
     "reaction" INT NOT NULL,
     "image" BYTEA,
-    "is_sensitive" BOOLEAN DEFAULT FALSE,
+    "is_sensitive" BOOLEAN NOT NULL DEFAULT FALSE,
     "status" VARCHAR NOT NULL,
     "created_at" TIMESTAMP NOT NULL DEFAULT (NOW()),
     "updated_at" TIMESTAMP
@@ -38,7 +38,8 @@ CREATE TABLE "comments" (
     "comments" VARCHAR NOT NULL,
     "reaction" INT NOT NULL,
     "is_censored" BOOLEAN NOT NULL DEFAULT FALSE,
-    "created_at" TIMESTAMP NOT NULL DEFAULT (NOW())
+    "created_at" TIMESTAMP NOT NULL DEFAULT (NOW()),
+    "updated_at" TIMESTAMP
 );
 
 CREATE TABLE "bookmarks" (
@@ -72,7 +73,7 @@ CREATE TABLE "adminuser" (
 
 CREATE TABLE "tag" (
     "post_id" UUID PRIMARY KEY,
-    "tag_comments" VARCHAR[] NOT NULL
+    "tag_comments" VARCHAR NOT NULL
 );
 
 CREATE TABLE "token" (

@@ -30,7 +30,7 @@ INSERT INTO COMMENTS (
     $6,
     $7,
     $8
-) RETURNING comment_id, user_id, post_id, status, is_public, comments, reaction, is_censored, created_at
+) RETURNING comment_id, user_id, post_id, status, is_public, comments, reaction, is_censored, created_at, updated_at
 `
 
 type CreateCommentsParams struct {
@@ -66,6 +66,7 @@ func (q *Queries) CreateComments(ctx context.Context, arg CreateCommentsParams) 
 		&i.Reaction,
 		&i.IsCensored,
 		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
@@ -83,23 +84,17 @@ func (q *Queries) DeleteComments(ctx context.Context, commentID uuid.UUID) error
 
 const getCommentsList = `-- name: GetCommentsList :many
 SELECT
-    comment_id, user_id, post_id, status, is_public, comments, reaction, is_censored, created_at
+    comment_id, user_id, post_id, status, is_public, comments, reaction, is_censored, created_at, updated_at
 FROM
     COMMENTS
 WHERE
     POST_ID = $1
 ORDER BY
-    COMMENT_ID DESC LIMIT $2 OFFSET $3
+    COMMENT_ID DESC
 `
 
-type GetCommentsListParams struct {
-	PostID uuid.UUID `json:"post_id"`
-	Limit  int32     `json:"limit"`
-	Offset int32     `json:"offset"`
-}
-
-func (q *Queries) GetCommentsList(ctx context.Context, arg GetCommentsListParams) ([]Comment, error) {
-	rows, err := q.db.Query(ctx, getCommentsList, arg.PostID, arg.Limit, arg.Offset)
+func (q *Queries) GetCommentsList(ctx context.Context, postID uuid.UUID) ([]Comment, error) {
+	rows, err := q.db.Query(ctx, getCommentsList, postID)
 	if err != nil {
 		return nil, err
 	}
@@ -117,6 +112,7 @@ func (q *Queries) GetCommentsList(ctx context.Context, arg GetCommentsListParams
 			&i.Reaction,
 			&i.IsCensored,
 			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -128,16 +124,18 @@ func (q *Queries) GetCommentsList(ctx context.Context, arg GetCommentsListParams
 	return items, nil
 }
 
-const updateComments = `-- name: UpdateComments :exec
+const updateComments = `-- name: UpdateComments :one
 UPDATE COMMENTS
 SET
     STATUS = $2,
     IS_PUBLIC = $3,
     COMMENTS = $4,
     REACTION = $5,
-    IS_CENSORED = $6
+    IS_CENSORED = $6,
+    UPDATED_AT = NOW(
+    )
 WHERE
-    COMMENT_ID = $1 RETURNING comment_id, user_id, post_id, status, is_public, comments, reaction, is_censored, created_at
+    COMMENT_ID = $1 RETURNING comment_id, user_id, post_id, status, is_public, comments, reaction, is_censored, created_at, updated_at
 `
 
 type UpdateCommentsParams struct {
@@ -149,8 +147,8 @@ type UpdateCommentsParams struct {
 	IsCensored bool      `json:"is_censored"`
 }
 
-func (q *Queries) UpdateComments(ctx context.Context, arg UpdateCommentsParams) error {
-	_, err := q.db.Exec(ctx, updateComments,
+func (q *Queries) UpdateComments(ctx context.Context, arg UpdateCommentsParams) (Comment, error) {
+	row := q.db.QueryRow(ctx, updateComments,
 		arg.CommentID,
 		arg.Status,
 		arg.IsPublic,
@@ -158,5 +156,18 @@ func (q *Queries) UpdateComments(ctx context.Context, arg UpdateCommentsParams) 
 		arg.Reaction,
 		arg.IsCensored,
 	)
-	return err
+	var i Comment
+	err := row.Scan(
+		&i.CommentID,
+		&i.UserID,
+		&i.PostID,
+		&i.Status,
+		&i.IsPublic,
+		&i.Comments,
+		&i.Reaction,
+		&i.IsCensored,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }

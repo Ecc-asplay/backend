@@ -162,7 +162,9 @@ const updateDiseaseAndCondition = `-- name: UpdateDiseaseAndCondition :exec
 UPDATE USERS
 SET
     DISEASE = $2,
-    CONDITION = $3
+    CONDITION = $3,
+    UPDATED_AT = NOW(
+    )
 WHERE
     USER_ID = $1 RETURNING user_id, username, email, birth, gender, is_privacy, disease, condition, hashpassword, certification, reset_password_at, created_at, updated_at
 `
@@ -181,7 +183,9 @@ func (q *Queries) UpdateDiseaseAndCondition(ctx context.Context, arg UpdateDisea
 const updateEmail = `-- name: UpdateEmail :exec
 UPDATE USERS
 SET
-    EMAIL = $2
+    EMAIL = $2,
+    UPDATED_AT = NOW(
+    )
 WHERE
     USER_ID = $1 RETURNING user_id, username, email, birth, gender, is_privacy, disease, condition, hashpassword, certification, reset_password_at, created_at, updated_at
 `
@@ -199,14 +203,16 @@ func (q *Queries) UpdateEmail(ctx context.Context, arg UpdateEmailParams) error 
 const updateIsPrivacy = `-- name: UpdateIsPrivacy :exec
 UPDATE USERS
 SET
-    IS_PRIVACY = $2
+    IS_PRIVACY = $2,
+    UPDATED_AT = NOW(
+    )
 WHERE
     USER_ID = $1 RETURNING user_id, username, email, birth, gender, is_privacy, disease, condition, hashpassword, certification, reset_password_at, created_at, updated_at
 `
 
 type UpdateIsPrivacyParams struct {
-	UserID    uuid.UUID   `json:"user_id"`
-	IsPrivacy pgtype.Bool `json:"is_privacy"`
+	UserID    uuid.UUID `json:"user_id"`
+	IsPrivacy bool      `json:"is_privacy"`
 }
 
 func (q *Queries) UpdateIsPrivacy(ctx context.Context, arg UpdateIsPrivacyParams) error {
@@ -217,7 +223,9 @@ func (q *Queries) UpdateIsPrivacy(ctx context.Context, arg UpdateIsPrivacyParams
 const updateName = `-- name: UpdateName :one
 UPDATE USERS
 SET
-    USERNAME = $2
+    USERNAME = $2,
+    UPDATED_AT = NOW(
+    )
 WHERE
     USER_ID = $1 RETURNING user_id, username, email, birth, gender, is_privacy, disease, condition, hashpassword, certification, reset_password_at, created_at, updated_at
 `

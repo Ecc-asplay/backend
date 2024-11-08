@@ -9,10 +9,10 @@ INSERT INTO TAG (
 
 -- name: GetTag :many
 SELECT
-    *
+    TAG_COMMENTS
 FROM
     TAG
 WHERE
     TAG_COMMENTS LIKE '%'
-                      || $1
+                      || CAST($1 AS TEXT)
                       || '%';

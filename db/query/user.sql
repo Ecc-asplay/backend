@@ -38,7 +38,9 @@ WHERE
 -- name: UpdateName :one
 UPDATE USERS
 SET
-    USERNAME = $2
+    USERNAME = $2,
+    UPDATED_AT = NOW(
+    )
 WHERE
     USER_ID = $1 RETURNING *;
 
@@ -46,21 +48,27 @@ WHERE
 UPDATE USERS
 SET
     DISEASE = $2,
-    CONDITION = $3
+    CONDITION = $3,
+    UPDATED_AT = NOW(
+    )
 WHERE
     USER_ID = $1 RETURNING *;
 
 -- name: UpdateIsPrivacy :exec
 UPDATE USERS
 SET
-    IS_PRIVACY = $2
+    IS_PRIVACY = $2,
+    UPDATED_AT = NOW(
+    )
 WHERE
     USER_ID = $1 RETURNING *;
 
 -- name: UpdateEmail :exec
 UPDATE USERS
 SET
-    EMAIL = $2
+    EMAIL = $2,
+    UPDATED_AT = NOW(
+    )
 WHERE
     USER_ID = $1 RETURNING *;
 
