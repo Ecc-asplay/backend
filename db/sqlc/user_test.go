@@ -37,14 +37,15 @@ func CreateRandomUser(t *testing.T) User {
 	user, err := testQueries.CreateUser(context.Background(), userData)
 	require.NoError(t, err)
 	require.NotEmpty(t, user)
-	require.Equal(t, user.UserID, user.UserID)
-	require.Equal(t, user.Username, user.Username)
-	require.Equal(t, user.Email, user.Email)
-	require.Equal(t, user.Birth.Time, user.Birth.Time)
-	require.Equal(t, user.Gender, user.Gender)
-	require.Equal(t, user.Disease, user.Disease)
-	require.Equal(t, user.Condition, user.Condition)
-	require.Equal(t, user.Hashpassword, user.Hashpassword)
+	require.Equal(t, user.UserID, userData.UserID)
+	require.Equal(t, user.Username, userData.Username)
+	require.Equal(t, user.Email, userData.Email)
+	require.Equal(t, user.Birth.Time, userData.Birth.Time)
+	require.Equal(t, user.Gender, userData.Gender)
+	require.Equal(t, user.Disease, userData.Disease)
+	require.Equal(t, user.Condition, userData.Condition)
+	require.Equal(t, user.Hashpassword, userData.Hashpassword)
+	require.NotEmpty(t, user.CreatedAt.Time)
 
 	return user
 }

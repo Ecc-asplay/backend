@@ -33,11 +33,11 @@ type Querier interface {
 	GetKeyWordSearchedRecord(ctx context.Context, dollar_1 pgtype.Text) ([]Searchrecord, error)
 	GetPasswordToAdminLogin(ctx context.Context, email string) (string, error)
 	GetPasswordToUserLogin(ctx context.Context, email string) (string, error)
-	GetPostForUser(ctx context.Context, userID uuid.UUID) (Post, error)
 	GetPostsList(ctx context.Context) ([]Post, error)
 	GetSearchedRecordList(ctx context.Context) ([]Searchrecord, error)
 	GetSession(ctx context.Context, id uuid.UUID) (Token, error)
 	GetTag(ctx context.Context, dollar_1 pgtype.Text) ([]Tag, error)
+	GetUserAllPosts(ctx context.Context, userID uuid.UUID) ([]Post, error)
 	GetUserData(ctx context.Context, userID uuid.UUID) (User, error)
 	ResetPassword(ctx context.Context, arg ResetPasswordParams) error
 	UnBlockUser(ctx context.Context, arg UnBlockUserParams) (Blockuser, error)
@@ -46,7 +46,7 @@ type Querier interface {
 	UpdateEmail(ctx context.Context, arg UpdateEmailParams) error
 	UpdateIsPrivacy(ctx context.Context, arg UpdateIsPrivacyParams) error
 	UpdateName(ctx context.Context, arg UpdateNameParams) (User, error)
-	UpdatePosts(ctx context.Context, arg UpdatePostsParams) error
+	UpdatePosts(ctx context.Context, arg UpdatePostsParams) (Post, error)
 }
 
 var _ Querier = (*Queries)(nil)

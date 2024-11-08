@@ -86,7 +86,7 @@ const deletePost = `-- name: DeletePost :exec
 DELETE FROM POSTS
 WHERE
     USER_ID = $1
-    AND POST_ID = $2
+    AND POST_ID = $2 RETURNING user_id, post_id, show_id, title, feel, content, reaction, image, is_sensitive, status, created_at, updated_at
 `
 
 type DeletePostParams struct {
@@ -97,35 +97,6 @@ type DeletePostParams struct {
 func (q *Queries) DeletePost(ctx context.Context, arg DeletePostParams) error {
 	_, err := q.db.Exec(ctx, deletePost, arg.UserID, arg.PostID)
 	return err
-}
-
-const getPostForUser = `-- name: GetPostForUser :one
-SELECT
-    user_id, post_id, show_id, title, feel, content, reaction, image, is_sensitive, status, created_at, updated_at
-FROM
-    POSTS
-WHERE
-    USER_ID = $1
-`
-
-func (q *Queries) GetPostForUser(ctx context.Context, userID uuid.UUID) (Post, error) {
-	row := q.db.QueryRow(ctx, getPostForUser, userID)
-	var i Post
-	err := row.Scan(
-		&i.UserID,
-		&i.PostID,
-		&i.ShowID,
-		&i.Title,
-		&i.Feel,
-		&i.Content,
-		&i.Reaction,
-		&i.Image,
-		&i.IsSensitive,
-		&i.Status,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
 }
 
 const getPostsList = `-- name: GetPostsList :many
@@ -170,7 +141,49 @@ func (q *Queries) GetPostsList(ctx context.Context) ([]Post, error) {
 	return items, nil
 }
 
-const updatePosts = `-- name: UpdatePosts :exec
+const getUserAllPosts = `-- name: GetUserAllPosts :many
+SELECT
+    user_id, post_id, show_id, title, feel, content, reaction, image, is_sensitive, status, created_at, updated_at
+FROM
+    POSTS
+WHERE
+    USER_ID = $1
+`
+
+func (q *Queries) GetUserAllPosts(ctx context.Context, userID uuid.UUID) ([]Post, error) {
+	rows, err := q.db.Query(ctx, getUserAllPosts, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Post{}
+	for rows.Next() {
+		var i Post
+		if err := rows.Scan(
+			&i.UserID,
+			&i.PostID,
+			&i.ShowID,
+			&i.Title,
+			&i.Feel,
+			&i.Content,
+			&i.Reaction,
+			&i.Image,
+			&i.IsSensitive,
+			&i.Status,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updatePosts = `-- name: UpdatePosts :one
 UPDATE POSTS
 SET
     SHOW_ID = $3,
@@ -197,8 +210,8 @@ type UpdatePostsParams struct {
 	IsSensitive pgtype.Bool `json:"is_sensitive"`
 }
 
-func (q *Queries) UpdatePosts(ctx context.Context, arg UpdatePostsParams) error {
-	_, err := q.db.Exec(ctx, updatePosts,
+func (q *Queries) UpdatePosts(ctx context.Context, arg UpdatePostsParams) (Post, error) {
+	row := q.db.QueryRow(ctx, updatePosts,
 		arg.UserID,
 		arg.PostID,
 		arg.ShowID,
@@ -209,5 +222,20 @@ func (q *Queries) UpdatePosts(ctx context.Context, arg UpdatePostsParams) error 
 		arg.Image,
 		arg.IsSensitive,
 	)
-	return err
+	var i Post
+	err := row.Scan(
+		&i.UserID,
+		&i.PostID,
+		&i.ShowID,
+		&i.Title,
+		&i.Feel,
+		&i.Content,
+		&i.Reaction,
+		&i.Image,
+		&i.IsSensitive,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }

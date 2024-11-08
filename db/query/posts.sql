@@ -23,7 +23,7 @@ INSERT INTO POSTS (
     $10
 ) RETURNING *;
 
--- name: GetPostForUser :one
+-- name: GetUserAllPosts :many
 SELECT
     *
 FROM
@@ -39,7 +39,7 @@ FROM
 ORDER BY
     CREATED_AT DESC;
 
--- name: UpdatePosts :exec
+-- name: UpdatePosts :one
 UPDATE POSTS
 SET
     SHOW_ID = $3,
@@ -57,4 +57,4 @@ WHERE
 DELETE FROM POSTS
 WHERE
     USER_ID = $1
-    AND POST_ID = $2;
+    AND POST_ID = $2 RETURNING *;
