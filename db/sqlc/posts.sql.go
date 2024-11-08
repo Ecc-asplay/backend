@@ -12,7 +12,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createPost = `-- name: CreatePost :exec
+const createPost = `-- name: CreatePost :one
 INSERT INTO POSTS (
     POST_ID,
     USER_ID,
@@ -51,8 +51,8 @@ type CreatePostParams struct {
 	Status      string      `json:"status"`
 }
 
-func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) error {
-	_, err := q.db.Exec(ctx, createPost,
+func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, error) {
+	row := q.db.QueryRow(ctx, createPost,
 		arg.PostID,
 		arg.UserID,
 		arg.ShowID,
@@ -64,7 +64,22 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) error {
 		arg.IsSensitive,
 		arg.Status,
 	)
-	return err
+	var i Post
+	err := row.Scan(
+		&i.UserID,
+		&i.PostID,
+		&i.ShowID,
+		&i.Title,
+		&i.Feel,
+		&i.Content,
+		&i.Reaction,
+		&i.Image,
+		&i.IsSensitive,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const deletePost = `-- name: DeletePost :exec

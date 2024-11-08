@@ -16,7 +16,7 @@ type Querier interface {
 	CreateBlock(ctx context.Context, arg CreateBlockParams) (Blockuser, error)
 	CreateBookmarks(ctx context.Context, arg CreateBookmarksParams) (Bookmark, error)
 	CreateComments(ctx context.Context, arg CreateCommentsParams) (Comment, error)
-	CreatePost(ctx context.Context, arg CreatePostParams) error
+	CreatePost(ctx context.Context, arg CreatePostParams) (Post, error)
 	CreateSearchedRecord(ctx context.Context, arg CreateSearchedRecordParams) (Searchrecord, error)
 	CreateTag(ctx context.Context, arg CreateTagParams) (Tag, error)
 	CreateToken(ctx context.Context, arg CreateTokenParams) (Token, error)
