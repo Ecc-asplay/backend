@@ -35,7 +35,7 @@ INSERT INTO POSTS (
     $8,
     $9,
     $10
-)
+) RETURNING user_id, post_id, show_id, title, feel, content, reaction, image, is_sensitive, status, created_at, updated_at
 `
 
 type CreatePostParams struct {

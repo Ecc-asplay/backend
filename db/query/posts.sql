@@ -21,7 +21,7 @@ INSERT INTO POSTS (
     $8,
     $9,
     $10
-);
+) RETURNING *;
 
 -- name: GetPostForUser :one
 SELECT

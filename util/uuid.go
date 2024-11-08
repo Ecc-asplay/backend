@@ -7,7 +7,7 @@ import (
 )
 
 func CreateUUID() uuid.UUID {
-	id, err := uuid.NewUUID()
+	id, err := uuid.NewV7()
 	if err != nil {
 		fmt.Println("Create UUID Error", err)
 	}
