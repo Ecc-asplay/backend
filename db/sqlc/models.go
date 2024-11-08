@@ -52,7 +52,7 @@ type Post struct {
 	Feel        string           `json:"feel"`
 	Content     string           `json:"content"`
 	Reaction    int32            `json:"reaction"`
-	Image       [][]byte         `json:"image"`
+	Image       []byte           `json:"image"`
 	IsSensitive pgtype.Bool      `json:"is_sensitive"`
 	Status      string           `json:"status"`
 	CreatedAt   pgtype.Timestamp `json:"created_at"`

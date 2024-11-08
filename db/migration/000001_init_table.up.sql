@@ -22,7 +22,7 @@ CREATE TABLE "posts" (
     "feel" VARCHAR NOT NULL,
     "content" VARCHAR NOT NULL,
     "reaction" INT NOT NULL,
-    "image" BYTEA[],
+    "image" BYTEA,
     "is_sensitive" BOOLEAN DEFAULT FALSE,
     "status" VARCHAR NOT NULL,
     "created_at" TIMESTAMP NOT NULL DEFAULT (NOW()),
