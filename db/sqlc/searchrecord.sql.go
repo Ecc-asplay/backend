@@ -7,8 +7,6 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createSearchedRecord = `-- name: CreateSearchedRecord :one
@@ -31,37 +29,6 @@ func (q *Queries) CreateSearchedRecord(ctx context.Context, arg CreateSearchedRe
 	var i Searchrecord
 	err := row.Scan(&i.SearchContent, &i.IsUser, &i.SearchedAt)
 	return i, err
-}
-
-const getKeyWordSearchedRecord = `-- name: GetKeyWordSearchedRecord :many
-SELECT
-    search_content, is_user, searched_at
-FROM
-    SEARCHRECORD
-WHERE
-    SEARCH_CONTENT LIKE '%'
-                        || $1
-                        || '%'
-`
-
-func (q *Queries) GetKeyWordSearchedRecord(ctx context.Context, dollar_1 pgtype.Text) ([]Searchrecord, error) {
-	rows, err := q.db.Query(ctx, getKeyWordSearchedRecord, dollar_1)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Searchrecord{}
-	for rows.Next() {
-		var i Searchrecord
-		if err := rows.Scan(&i.SearchContent, &i.IsUser, &i.SearchedAt); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
 
 const getSearchedRecordList = `-- name: GetSearchedRecordList :many

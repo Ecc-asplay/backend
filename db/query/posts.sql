@@ -39,6 +39,19 @@ FROM
 ORDER BY
     CREATED_AT DESC;
 
+-- name: GetPostOfKeywords :many
+SELECT
+    *
+FROM
+    POSTS
+WHERE
+    TITLE LIKE '%'
+               || CAST($1 AS TEXT)
+               || '%'
+    OR CONTENT LIKE '%'
+                    || CAST($1 AS TEXT)
+                    || '%';
+
 -- name: UpdatePosts :one
 UPDATE POSTS
 SET
@@ -48,7 +61,9 @@ SET
     CONTENT = $6,
     REACTION = $7,
     IMAGE = $8,
-    IS_SENSITIVE = $9
+    IS_SENSITIVE = $9,
+    UPDATED_AT = NOW(
+    )
 WHERE
     USER_ID = $1
     AND POST_ID = $2 RETURNING *;

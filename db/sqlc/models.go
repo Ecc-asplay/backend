@@ -42,6 +42,7 @@ type Comment struct {
 	Reaction   int32            `json:"reaction"`
 	IsCensored bool             `json:"is_censored"`
 	CreatedAt  pgtype.Timestamp `json:"created_at"`
+	UpdatedAt  pgtype.Timestamp `json:"updated_at"`
 }
 
 type Post struct {
@@ -53,7 +54,7 @@ type Post struct {
 	Content     string           `json:"content"`
 	Reaction    int32            `json:"reaction"`
 	Image       []byte           `json:"image"`
-	IsSensitive pgtype.Bool      `json:"is_sensitive"`
+	IsSensitive bool             `json:"is_sensitive"`
 	Status      string           `json:"status"`
 	CreatedAt   pgtype.Timestamp `json:"created_at"`
 	UpdatedAt   pgtype.Timestamp `json:"updated_at"`
@@ -67,7 +68,7 @@ type Searchrecord struct {
 
 type Tag struct {
 	PostID      uuid.UUID `json:"post_id"`
-	TagComments []string  `json:"tag_comments"`
+	TagComments string    `json:"tag_comments"`
 }
 
 type Token struct {
@@ -86,11 +87,11 @@ type User struct {
 	Email           string           `json:"email"`
 	Birth           pgtype.Date      `json:"birth"`
 	Gender          string           `json:"gender"`
-	IsPrivacy       pgtype.Bool      `json:"is_privacy"`
+	IsPrivacy       bool             `json:"is_privacy"`
 	Disease         string           `json:"disease"`
 	Condition       string           `json:"condition"`
 	Hashpassword    string           `json:"hashpassword"`
-	Certification   pgtype.Bool      `json:"certification"`
+	Certification   bool             `json:"certification"`
 	ResetPasswordAt pgtype.Timestamp `json:"reset_password_at"`
 	CreatedAt       pgtype.Timestamp `json:"created_at"`
 	UpdatedAt       pgtype.Timestamp `json:"updated_at"`

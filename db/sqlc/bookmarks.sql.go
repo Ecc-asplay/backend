@@ -33,7 +33,7 @@ func (q *Queries) CreateBookmarks(ctx context.Context, arg CreateBookmarksParams
 	return i, err
 }
 
-const deleteBookmarks = `-- name: DeleteBookmarks :one
+const deleteBookmarks = `-- name: DeleteBookmarks :exec
 DELETE FROM BOOKMARKS
 WHERE
     USER_ID = $1
@@ -45,14 +45,12 @@ type DeleteBookmarksParams struct {
 	PostID uuid.UUID `json:"post_id"`
 }
 
-func (q *Queries) DeleteBookmarks(ctx context.Context, arg DeleteBookmarksParams) (Bookmark, error) {
-	row := q.db.QueryRow(ctx, deleteBookmarks, arg.UserID, arg.PostID)
-	var i Bookmark
-	err := row.Scan(&i.UserID, &i.PostID, &i.CreatedAt)
-	return i, err
+func (q *Queries) DeleteBookmarks(ctx context.Context, arg DeleteBookmarksParams) error {
+	_, err := q.db.Exec(ctx, deleteBookmarks, arg.UserID, arg.PostID)
+	return err
 }
 
-const getBookmarks = `-- name: GetBookmarks :many
+const getAllBookmarks = `-- name: GetAllBookmarks :many
 SELECT
     user_id, post_id, created_at
 FROM
@@ -63,8 +61,8 @@ ORDER BY
     CREATED_AT DESC
 `
 
-func (q *Queries) GetBookmarks(ctx context.Context, userID uuid.UUID) ([]Bookmark, error) {
-	rows, err := q.db.Query(ctx, getBookmarks, userID)
+func (q *Queries) GetAllBookmarks(ctx context.Context, userID uuid.UUID) ([]Bookmark, error) {
+	rows, err := q.db.Query(ctx, getAllBookmarks, userID)
 	if err != nil {
 		return nil, err
 	}

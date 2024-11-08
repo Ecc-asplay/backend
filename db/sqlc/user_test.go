@@ -173,16 +173,13 @@ func TestUpdateIsPrivacy(t *testing.T) {
 	user := CreateRandomUser(t)
 
 	newPrivacy := UpdateIsPrivacyParams{
-		UserID: user.UserID,
-		IsPrivacy: pgtype.Bool{
-			Bool:  util.RandomBool(),
-			Valid: true,
-		},
+		UserID:    user.UserID,
+		IsPrivacy: !user.IsPrivacy,
 	}
 
 	err := testQueries.UpdateIsPrivacy(context.Background(), newPrivacy)
 	require.NoError(t, err)
-	require.NotEqual(t, user.IsPrivacy, newPrivacy.IsPrivacy.Bool)
+	require.NotEqual(t, user.IsPrivacy, newPrivacy.IsPrivacy)
 }
 
 func TestUpdateName(t *testing.T) {

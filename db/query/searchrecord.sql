@@ -14,13 +14,3 @@ FROM
     SEARCHRECORD
 ORDER BY
     SEARCHED_AT DESC;
-
--- name: GetKeyWordSearchedRecord :many
-SELECT
-    *
-FROM
-    SEARCHRECORD
-WHERE
-    SEARCH_CONTENT LIKE '%'
-                        || $1
-                        || '%';
