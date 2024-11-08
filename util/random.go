@@ -128,3 +128,21 @@ func RandomStatus() string {
 
 	return statuses[rand.Intn(len(statuses))]
 }
+
+func RandomMood() string {
+	moods := []string{
+		"幸福",
+		"悲しみ",
+		"興奮",
+		"安らぎ",
+		"疲労",
+		"怒り",
+		"不安",
+		"満足",
+		"驚き",
+		"混乱",
+	}
+
+	rand.Seed(time.Now().UnixNano())
+	return moods[rand.Intn(len(moods))]
+}
