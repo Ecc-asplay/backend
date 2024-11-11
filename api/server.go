@@ -1,21 +1,31 @@
 package api
 
 import (
+	"fmt"
+
 	db "github.com/Ecc-asplay/backend/db/sqlc"
+	"github.com/Ecc-asplay/backend/token"
 	"github.com/Ecc-asplay/backend/util"
 	"github.com/gin-gonic/gin"
 )
 
 type Server struct {
-	store  db.Querier
-	router *gin.Engine
-	config util.Config
+	store      db.Querier
+	router     *gin.Engine
+	config     util.Config
+	tokenMaker token.Maker
 }
 
-func SetupRouter(config *util.Config, store db.Querier) (Server, error) {
+func SetupRouter(config *util.Config, store db.Querier) (*Server, error) {
+	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
+	if err != nil {
+		return nil, fmt.Errorf("cannot create token maker: %w", err)
+	}
+
 	server := &Server{
-		store:  store,
-		config: *config,
+		store:      store,
+		config:     *config,
+		tokenMaker: tokenMaker,
 	}
 	r := gin.Default()
 
@@ -23,7 +33,7 @@ func SetupRouter(config *util.Config, store db.Querier) (Server, error) {
 
 	server.router = r
 
-	return *server, nil
+	return server, nil
 
 }
 

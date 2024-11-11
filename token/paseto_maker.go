@@ -1,43 +1,48 @@
 package token
 
 import (
+	"fmt"
 	"time"
 
-	"aidanwoods.dev/go-paseto"
+	"github.com/aead/chacha20poly1305"
+	"github.com/google/uuid"
+	"github.com/o1egl/paseto"
 )
 
 type PasetoMaker struct {
-	paseto       paseto.Token
-	symmetricKey paseto.V4AsymmetricPublicKey
+	paseto       *paseto.V2
+	symmetricKey []byte
 }
 
-func CreateToken(Email string, role string, duration time.Duration) (*Payload, error) {
-	payload, err := NewPayload(Email, role, duration)
-	if err != nil {
-		return payload, err
+func NewPasetoMaker(symmetricKey string) (Maker, error) {
+	if len(symmetricKey) != chacha20poly1305.KeySize {
+		return nil, fmt.Errorf("invalid key size: must be exactly %d characters", chacha20poly1305.KeySize)
 	}
-
-	token := paseto.NewToken()
-
-	token.SetString("email", payload.Email)
-	token.SetString("role", payload.Role)
-	token.SetIssuedAt(payload.IssuedAt)
-	token.SetExpiration(payload.ExpiredAt)
-
-	// key := paseto.NewV4SymmetricKey()
-
-	// return token, payload, err
+	maker := &PasetoMaker{
+		paseto:       paseto.NewV2(),
+		symmetricKey: []byte(symmetricKey),
+	}
+	return maker, nil
 }
 
-// func VerifyToken(token string) (*Payload, error) {
-// 	payload := &Payload{}
-// 	err := paseto.Decrypt(token, symmetricKey, payload, nil)
-// 	if err != nil {
-// 		return nil, ErrInvalidToken
-// 	}
-// 	err = payload.Valid()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return payload, nil
-// }
+func (maker *PasetoMaker) CreateToken(UserId uuid.UUID, role string, duration time.Duration) (string, *Payload, error) {
+	payload, err := NewPayload(UserId, role, duration)
+	if err != nil {
+		return "", payload, err
+	}
+	token, err := maker.paseto.Encrypt(maker.symmetricKey, payload, nil)
+	return token, payload, err
+}
+
+func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
+	payload := &Payload{}
+	err := maker.paseto.Decrypt(token, maker.symmetricKey, payload, nil)
+	if err != nil {
+		return nil, ErrInvalidToken
+	}
+	err = payload.Valid()
+	if err != nil {
+		return nil, err
+	}
+	return payload, nil
+}

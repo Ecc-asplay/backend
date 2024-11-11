@@ -15,7 +15,7 @@ import (
 const createToken = `-- name: CreateToken :one
 INSERT INTO TOKEN (
     ID,
-    EMAIL,
+    USER_ID,
     ACCESS_TOKEN,
     ROLES,
     STATUS,
@@ -27,12 +27,12 @@ INSERT INTO TOKEN (
     $4,
     $5,
     $6
-) RETURNING id, email, access_token, roles, status, take_at, expires_at
+) RETURNING id, user_id, access_token, roles, status, take_at, expires_at
 `
 
 type CreateTokenParams struct {
 	ID          uuid.UUID        `json:"id"`
-	Email       string           `json:"email"`
+	UserID      uuid.UUID        `json:"user_id"`
 	AccessToken string           `json:"access_token"`
 	Roles       string           `json:"roles"`
 	Status      string           `json:"status"`
@@ -42,7 +42,7 @@ type CreateTokenParams struct {
 func (q *Queries) CreateToken(ctx context.Context, arg CreateTokenParams) (Token, error) {
 	row := q.db.QueryRow(ctx, createToken,
 		arg.ID,
-		arg.Email,
+		arg.UserID,
 		arg.AccessToken,
 		arg.Roles,
 		arg.Status,
@@ -51,7 +51,7 @@ func (q *Queries) CreateToken(ctx context.Context, arg CreateTokenParams) (Token
 	var i Token
 	err := row.Scan(
 		&i.ID,
-		&i.Email,
+		&i.UserID,
 		&i.AccessToken,
 		&i.Roles,
 		&i.Status,
@@ -63,7 +63,7 @@ func (q *Queries) CreateToken(ctx context.Context, arg CreateTokenParams) (Token
 
 const getSession = `-- name: GetSession :one
 SELECT
-    id, email, access_token, roles, status, take_at, expires_at
+    id, user_id, access_token, roles, status, take_at, expires_at
 FROM
     TOKEN
 WHERE
@@ -75,7 +75,7 @@ func (q *Queries) GetSession(ctx context.Context, id uuid.UUID) (Token, error) {
 	var i Token
 	err := row.Scan(
 		&i.ID,
-		&i.Email,
+		&i.UserID,
 		&i.AccessToken,
 		&i.Roles,
 		&i.Status,

@@ -141,11 +141,3 @@ ALTER TABLE "tag"
         REFERENCES "posts" (
             "post_id"
         );
-
-ALTER TABLE "token"
-    ADD FOREIGN KEY (
-        "user_id"
-    )
-        REFERENCES "users" (
-            "user_id"
-        );
