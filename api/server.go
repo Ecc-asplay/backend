@@ -19,10 +19,9 @@ func SetupRouter(config *util.Config, store db.Querier) (Server, error) {
 	}
 	r := gin.Default()
 
-	// メモ：命名が気になるCreateuser→CreateUser
 	// ユーザー関連のルート定義
-	r.POST("/users", server.Createuser)
-	r.DELETE("/users/:id", server.Deleteuser)
+	r.POST("/users", server.CreateUser)
+	r.DELETE("/users/:id", server.DeleteUser)
 	r.GET("/users/:id", server.GetUserData)
 	r.PUT("/users/:id/password", server.ResetPassword)
 	r.PUT("/users/:id/disease-condition", server.UpdateDiseaseAndCondition)

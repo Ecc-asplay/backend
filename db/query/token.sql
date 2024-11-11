@@ -1,14 +1,13 @@
 -- name: CreateToken :one
 INSERT INTO TOKEN (
     ID,
-    EMAIL,
+    user_id,
     ACCESS_TOKEN,
     ROLES,
     STATUS,
     EXPIRES_AT
 ) VALUES (
-    $1,
-    $2,
+    $1,    $2,
     $3,
     $4,
     $5,
