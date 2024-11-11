@@ -5,7 +5,7 @@ import (
 )
 
 func CreateUUID() uuid.UUID {
-	id, err := uuid.NewV7()
+	id, err := uuid.NewRandom()
 	if err != nil {
 		ErrorLog(err)
 	}
