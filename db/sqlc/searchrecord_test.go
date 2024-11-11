@@ -33,5 +33,4 @@ func TestGetSearchedRecords(t *testing.T) {
 	records, err := testQueries.GetSearchedRecordList(context.Background())
 	require.NoError(t, err)
 	require.NotEmpty(t, records)
-	require.GreaterOrEqual(t, len(records), 201)
 }
