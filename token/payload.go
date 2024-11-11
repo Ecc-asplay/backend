@@ -7,15 +7,20 @@ import (
 	"github.com/google/uuid"
 )
 
+var (
+	ErrExpiredToken = errors.New("token has expired")
+	ErrInvalidToken = errors.New("token is invalid")
+)
+
 type Payload struct {
 	ID        uuid.UUID `json:"id"`
-	Email     string    `json:"email"`
+	UserID    uuid.UUID `json:"user_id"`
 	Role      string    `json:"role"`
 	IssuedAt  time.Time `json:"issued_at"`
 	ExpiredAt time.Time `json:"expired_at"`
 }
 
-func NewPayload(Email string, role string, duration time.Duration) (*Payload, error) {
+func NewPayload(UserID uuid.UUID, role string, duration time.Duration) (*Payload, error) {
 	tokenID, err := uuid.NewV7()
 	if err != nil {
 		return nil, err
@@ -23,7 +28,7 @@ func NewPayload(Email string, role string, duration time.Duration) (*Payload, er
 
 	payload := &Payload{
 		ID:        tokenID,
-		Email:     Email,
+		UserID:    UserID,
 		Role:      role,
 		IssuedAt:  time.Now(),
 		ExpiredAt: time.Now().Add(duration),

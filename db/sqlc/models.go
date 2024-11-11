@@ -73,7 +73,7 @@ type Tag struct {
 
 type Token struct {
 	ID          uuid.UUID        `json:"id"`
-	Email       string           `json:"email"`
+	UserID      uuid.UUID        `json:"user_id"`
 	AccessToken string           `json:"access_token"`
 	Roles       string           `json:"roles"`
 	Status      string           `json:"status"`

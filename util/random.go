@@ -60,6 +60,11 @@ func RandomBool() bool {
 	return bo[rand.Intn(len(bo))]
 }
 
+func RandomRole() string {
+	bo := []string{"user", "admin"}
+	return bo[rand.Intn(len(bo))]
+}
+
 func RandomGender() string {
 	gender := []string{"男性", "女性", "その他"}
 	return gender[rand.Intn(len(gender))]
