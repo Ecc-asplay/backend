@@ -1,7 +1,7 @@
 -- name: CreateToken :one
 INSERT INTO TOKEN (
     ID,
-    EMAIL,
+    USER_ID,
     ACCESS_TOKEN,
     ROLES,
     STATUS,

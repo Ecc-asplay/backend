@@ -78,7 +78,7 @@ CREATE TABLE "tag" (
 
 CREATE TABLE "token" (
     "id" UUID UNIQUE PRIMARY KEY NOT NULL,
-    "email" VARCHAR NOT NULL,
+    "user_id" UUID NOT NULL,
     "access_token" VARCHAR UNIQUE NOT NULL,
     "roles" VARCHAR NOT NULL,
     "status" VARCHAR NOT NULL,
@@ -144,8 +144,8 @@ ALTER TABLE "tag"
 
 ALTER TABLE "token"
     ADD FOREIGN KEY (
-        "email"
+        "user_id"
     )
         REFERENCES "users" (
-            "email"
+            "user_id"
         );
