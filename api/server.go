@@ -7,16 +7,18 @@ import (
 	"github.com/Ecc-asplay/backend/token"
 	"github.com/Ecc-asplay/backend/util"
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 )
 
 type Server struct {
 	store      db.Querier
+	redis      *redis.Client
 	router     *gin.Engine
 	config     util.Config
 	tokenMaker token.Maker
 }
 
-func SetupRouter(config *util.Config, store db.Querier) (*Server, error) {
+func SetupRouter(config *util.Config, store db.Querier, rdb *redis.Client) (*Server, error) {
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
@@ -24,6 +26,7 @@ func SetupRouter(config *util.Config, store db.Querier) (*Server, error) {
 
 	server := &Server{
 		store:      store,
+		redis:      rdb,
 		config:     *config,
 		tokenMaker: tokenMaker,
 	}
