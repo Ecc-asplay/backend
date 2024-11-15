@@ -12,7 +12,6 @@ func GinLogger() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		startTime := time.Now()
 
-		// Process the request
 		c.Next()
 
 		duration := time.Since(startTime)
