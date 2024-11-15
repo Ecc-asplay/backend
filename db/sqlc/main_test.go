@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/Ecc-asplay/backend/util"
+	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -32,5 +33,17 @@ func TestMain(m *testing.M) {
 	}
 
 	testQueries = NewStore(connPool)
+
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     config.RedisAddress,
+		Password: "",
+		DB:       1,
+	})
+
+	_, err = rdb.Ping(context.Background()).Result()
+	if err != nil {
+		log.Fatalf("Failed to connect to Redis: %v", err)
+	}
+
 	os.Exit(m.Run())
 }

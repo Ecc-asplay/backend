@@ -1,10 +1,10 @@
 DBName = asplay
 
-# PSQL　ダウンロード　と　作成
+# PSQL　ダウンロードと作成
 postgres:
 	docker run --name psql -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:17-alpine
 
-# コンテナ 削除
+# psql コンテナ 削除
 dropPsql:
 	docker stop psql || true
 	docker rm psql || true
@@ -37,10 +37,21 @@ migratedown1:
 	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose down 1
 
 
+# Redis　ダウンロードと作成
+redis:
+	docker run --name redis -d -p 6379:6379 redis:7-alpine
+
+# redis コンテナ 削除
+dropRedis:
+	docker stop redis || true
+	docker rm redis || true
+
 # reset docker db
 resetDB:
 	make dropPsql
+	make dropRedis
 	make postgres
+	make redis
 	sleep 3
 	make createDB
 	make migrateup
@@ -50,13 +61,14 @@ resetDB:
 sqlc:
 	sqlc generate
 
-
 test:
 	go test -v -cover ./...
-
 
 server:
 	go run main.go
 
 
-.PHONY: postgres dropPsql createDB dropDB migrateup migratedown migrateup1 migratedown1 resetDB sqlc server test
+.PHONY: postgres dropPsql createDB dropDB migrateup migratedown migrateup1 migratedown1 sqlc 
+		redis dropRedis
+		resetDB
+		test server
