@@ -45,6 +45,14 @@ type Comment struct {
 	UpdatedAt  pgtype.Timestamp `json:"updated_at"`
 }
 
+type Notification struct {
+	UserID    uuid.UUID        `json:"user_id"`
+	Content   string           `json:"content"`
+	Icon      []byte           `json:"icon"`
+	IsRead    bool             `json:"is_read"`
+	CreatedAt pgtype.Timestamp `json:"created_at"`
+}
+
 type Post struct {
 	UserID      uuid.UUID        `json:"user_id"`
 	PostID      uuid.UUID        `json:"post_id"`

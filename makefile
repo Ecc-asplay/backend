@@ -22,8 +22,8 @@ dropDB:
 	docker exec -it psql dropdb $(DBName)
 
 # Migrate 初期設定
-createMigrate:
-	migrate create -ext sql -dir db/migration -seq init_table
+# createMigrate:
+# 	migrate create -ext sql -dir db/migration -seq init_table
 
 #up
 migrateup:
@@ -32,6 +32,13 @@ migrateup:
 #down
 migratedown:
 	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose down
+
+migrateup1:
+	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose up 1
+	
+#down
+migratedown1:
+	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose down 1
 
 #Sqlc
 sqlc:
@@ -46,4 +53,4 @@ server:
 	go run main.go
 
 
-.PHONY: postgres dropPsql dbStart createDB dropDB migrateup migratedown sqlc server test
+.PHONY: postgres dropPsql dbStart createDB dropDB migrateup migratedown migrateup1 migratedown1 sqlc server test
