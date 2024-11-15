@@ -25,6 +25,7 @@ func main() {
 	if err != nil {
 		log.Info().Msg("cannot connect to db")
 	}
+
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     config.RedisAddress,
 		Password: "",

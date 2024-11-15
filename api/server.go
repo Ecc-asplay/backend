@@ -32,8 +32,8 @@ func SetupRouter(config *util.Config, store db.Querier, rdb *redis.Client) (*Ser
 		tokenMaker: tokenMaker,
 	}
 
-	// Set Log
 	server.GinRequest()
+
 	return server, nil
 }
 
