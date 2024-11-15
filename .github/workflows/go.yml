@@ -41,7 +41,6 @@ jobs:
     - name: Install golang-migrate
       run: |
         curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.darwin-arm64.tar.gz | tar xvz
-        sudo mv migrate. darwin-arm64 /usr/bin/migrate
         which migrate
 
     - name: Run migrations
