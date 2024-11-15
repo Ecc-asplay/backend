@@ -2,16 +2,12 @@ DBName = asplay
 
 # PSQL　ダウンロード　と　作成
 postgres:
-	docker run --name psql -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:latest
+	docker run --name psql -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:17-alpine
 
 # コンテナ 削除
 dropPsql:
 	docker stop psql || true
 	docker rm psql || true
-
-# Psql Start
-dbStart:
-	docker start 69ee5d5b45500a5cc7b1d60eeddb1df99e58854b5322287bf9f007909fb64d99
 
 # DB 作成
 createDB:
@@ -40,6 +36,16 @@ migrateup1:
 migratedown1:
 	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose down 1
 
+
+# reset docker db
+resetDB:
+	make dropPsql
+	make postgres
+	sleep 3
+	make createDB
+	make migrateup
+	make test
+
 #Sqlc
 sqlc:
 	sqlc generate
@@ -53,4 +59,4 @@ server:
 	go run main.go
 
 
-.PHONY: postgres dropPsql dbStart createDB dropDB migrateup migratedown migrateup1 migratedown1 sqlc server test
+.PHONY: postgres dropPsql createDB dropDB migrateup migratedown migrateup1 migratedown1 resetDB sqlc server test
