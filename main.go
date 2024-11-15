@@ -2,24 +2,28 @@ package main
 
 import (
 	"context"
-	"log"
+	"os"
 
 	"github.com/Ecc-asplay/backend/api"
 	db "github.com/Ecc-asplay/backend/db/sqlc"
 	"github.com/Ecc-asplay/backend/util"
 	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+
 	config, err := util.LoadConfig("./")
 	if err != nil {
-		log.Println("app.env cannot find")
+		log.Info().Msg("app.env cannot find")
 	}
 
 	conn, err := pgxpool.New(context.Background(), config.DBSource)
 	if err != nil {
-		log.Fatal("cannot connect to db")
+		log.Info().Msg("cannot connect to db")
 	}
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     config.RedisAddress,
@@ -30,15 +34,13 @@ func main() {
 	store := db.NewStore(conn)
 	server, err := api.SetupRouter(config, store, rdb)
 	if err != nil {
-		log.Fatal("cannot create server:", err)
+		log.Error().Err(err).Msg("cannot create server")
 	}
 
+	log.Info().Msgf("Connecting to Gin Server at %s", config.HTTPServerAddress)
 	err = server.Start(config.HTTPServerAddress)
 	if err != nil {
-		log.Fatal("cannot start server:", err)
+		log.Error().Err(err).Msg("cannot start server")
 	}
-}
-
-func initRedis(address string) {
 
 }

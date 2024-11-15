@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"io"
 
 	db "github.com/Ecc-asplay/backend/db/sqlc"
 	"github.com/Ecc-asplay/backend/token"
@@ -30,7 +31,12 @@ func SetupRouter(config *util.Config, store db.Querier, rdb *redis.Client) (*Ser
 		config:     *config,
 		tokenMaker: tokenMaker,
 	}
+
+	// Set Log
+	gin.SetMode(gin.ReleaseMode)
+	gin.DefaultWriter = io.Discard
 	r := gin.Default()
+	r.Use(GinLogger())
 
 	r.GET("/", server.Createuser)
 
