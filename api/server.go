@@ -37,7 +37,7 @@ func SetupRouter(config *util.Config, store db.Querier, rdb *redis.Client) (*Ser
 	return server, nil
 }
 
-func (s *Server) GinRequest() {
+func (server *Server) GinRequest() {
 
 	// Log file cancel
 	gin.SetMode(gin.ReleaseMode)
@@ -47,9 +47,17 @@ func (s *Server) GinRequest() {
 	r := gin.Default()
 	r.Use(GinLogger())
 
-	r.GET("/", s.Createuser)
-
-	s.router = r
+	// メモ：命名が気になるCreateuser→CreateUser
+	// ユーザー関連のルート定義
+	r.POST("/users", server.Createuser)
+	// r.DELETE("/users/:id", server.Deleteuser)
+	// r.GET("/users/:id", server.GetUserData)
+	// r.PUT("/users/:id/password", server.ResetPassword)
+	// r.PUT("/users/:id/disease-condition", server.UpdateDiseaseAndCondition)
+	// r.PUT("/users/:id/email", server.UpdateEmail)
+	// r.PUT("/users/:id/privacy", server.UpdateIsPrivacy)
+	// r.PUT("/users/:id/name", server.UpdateName)
+	// r.POST("/login", server.LoginUser)
 }
 
 func (s *Server) Start(address string) error {
