@@ -40,14 +40,7 @@ jobs:
 
     - name: Install golang-migrate
       run: |
-        ARCH=$(uname -m)
-        if [ "$ARCH" = "x86_64" ]; then
-          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.linux-amd64.tar.gz | tar xvz
-        elif [ "$ARCH" = "aarch64" ]; then
-          curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.linux-arm64.tar.gz | tar xvz
-        else
-          echo "Unsupported architecture: $ARCH" && exit 1
-        fi
+        curl -L https://github.com/golang-migrate/migrate/releases/download/v4.18.1/migrate.darwin-arm64.tar.gz | tar xvz
         chmod +x migrate
         sudo mv migrate /usr/local/bin/
         which migrate
