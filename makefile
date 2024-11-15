@@ -39,7 +39,7 @@ migratedown1:
 
 # Redis　ダウンロードと作成
 redis:
-	docker run --name redis -d -p 6379:6379 redis:7-alpine
+	docker run --name redis -d -p 6379:6379 redis:7.4.1-alpine
 
 # redis コンテナ 削除
 dropRedis:
