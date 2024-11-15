@@ -33,17 +33,23 @@ func SetupRouter(config *util.Config, store db.Querier, rdb *redis.Client) (*Ser
 	}
 
 	// Set Log
+	server.GinRequest()
+	return server, nil
+}
+
+func (s *Server) GinRequest() {
+
+	// Log file cancel
 	gin.SetMode(gin.ReleaseMode)
 	gin.DefaultWriter = io.Discard
+
+	// Gin Start
 	r := gin.Default()
 	r.Use(GinLogger())
 
-	r.GET("/", server.Createuser)
+	r.GET("/", s.Createuser)
 
-	server.router = r
-
-	return server, nil
-
+	s.router = r
 }
 
 func (s *Server) Start(address string) error {

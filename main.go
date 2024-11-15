@@ -42,5 +42,4 @@ func main() {
 	if err != nil {
 		log.Error().Err(err).Msg("cannot start server")
 	}
-
 }
