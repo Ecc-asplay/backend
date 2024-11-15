@@ -15,6 +15,7 @@ type Querier interface {
 	CreateBlock(ctx context.Context, arg CreateBlockParams) (Blockuser, error)
 	CreateBookmarks(ctx context.Context, arg CreateBookmarksParams) (Bookmark, error)
 	CreateComments(ctx context.Context, arg CreateCommentsParams) (Comment, error)
+	CreateNotification(ctx context.Context, arg CreateNotificationParams) (Notification, error)
 	CreatePost(ctx context.Context, arg CreatePostParams) (Post, error)
 	CreateSearchedRecord(ctx context.Context, arg CreateSearchedRecordParams) (Searchrecord, error)
 	CreateTag(ctx context.Context, arg CreateTagParams) (Tag, error)
@@ -29,6 +30,7 @@ type Querier interface {
 	GetAllBookmarks(ctx context.Context, userID uuid.UUID) ([]Bookmark, error)
 	GetBlockUserlist(ctx context.Context, userID uuid.UUID) ([]Blockuser, error)
 	GetCommentsList(ctx context.Context, postID uuid.UUID) ([]Comment, error)
+	GetNotification(ctx context.Context, userID uuid.UUID) ([]Notification, error)
 	GetPasswordToAdminLogin(ctx context.Context, email string) (string, error)
 	GetPasswordToUserLogin(ctx context.Context, email string) (string, error)
 	GetPostOfKeywords(ctx context.Context, dollar_1 string) ([]Post, error)
@@ -45,6 +47,7 @@ type Querier interface {
 	UpdateEmail(ctx context.Context, arg UpdateEmailParams) error
 	UpdateIsPrivacy(ctx context.Context, arg UpdateIsPrivacyParams) error
 	UpdateName(ctx context.Context, arg UpdateNameParams) (User, error)
+	UpdateNotification(ctx context.Context, userID uuid.UUID) ([]Notification, error)
 	UpdatePosts(ctx context.Context, arg UpdatePostsParams) (Post, error)
 }
 
