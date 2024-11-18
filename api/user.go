@@ -20,7 +20,7 @@ func (server *Server) Createuser(ctx *gin.Context) {
 
 }
 
-func (server *Server) CreateUser2(ctx *gin.Context) {
+func (server *Server) CreateUserTTTT(ctx *gin.Context) {
 	var req Test
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
