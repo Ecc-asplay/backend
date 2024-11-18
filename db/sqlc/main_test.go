@@ -7,13 +7,14 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Ecc-asplay/backend/util"
 	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	"github.com/Ecc-asplay/backend/util"
 )
 
 var (
-	testQueries Querier
+	testQueries Store
 	testDB      *sql.DB
 )
 
