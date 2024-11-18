@@ -6,6 +6,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis/v8"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 
 	db "github.com/Ecc-asplay/backend/db/sqlc"
 	"github.com/Ecc-asplay/backend/token"
@@ -13,14 +15,14 @@ import (
 )
 
 type Server struct {
-	store      db.Querier
+	store      db.Store
 	redis      *redis.Client
 	router     *gin.Engine
 	config     util.Config
 	tokenMaker token.Maker
 }
 
-func SetupRouter(config *util.Config, store db.Querier, rdb *redis.Client) (*Server, error) {
+func SetupRouter(config *util.Config, store db.Store, rdb *redis.Client) (*Server, error) {
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
@@ -49,7 +51,8 @@ func (server *Server) GinRequest() {
 	r.Use(GinLogger())
 
 	r.GET("/", server.Createuser)
-	r.POST("/users", server.CreateUser2)
+	r.POST("/ttt", server.CreateUserTTTT)
+	// r.POST("/users", server.CreateUser)
 	// r.DELETE("/users/:id", server.Deleteuser)
 	// r.GET("/users/:id", server.GetUserData)
 	// r.PUT("/users/:id/password", server.ResetPassword)
