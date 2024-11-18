@@ -4,7 +4,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/go-redis/redis"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
@@ -32,16 +32,15 @@ func main() {
 
 	// migration 実行
 	initMigration(config.MigrationURL, config.DBSource)
+	// DB 起動
+	store := db.NewStore(conn)
 
-	// redis 接続
+	// redis Options settings
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     config.RedisAddress,
 		Password: "",
 		DB:       1,
 	})
-
-	// DB 起動
-	store := db.NewStore(conn)
 
 	// Server 設置
 	server, err := api.SetupRouter(config, store, rdb)

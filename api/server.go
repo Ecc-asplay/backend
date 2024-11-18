@@ -5,7 +5,7 @@ import (
 	"io"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis/v8"
+	"github.com/go-redis/redis"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 
@@ -16,13 +16,13 @@ import (
 
 type Server struct {
 	store      db.Store
-	redis      *redis.Client
 	router     *gin.Engine
+	redis      *redis.Client
 	config     util.Config
 	tokenMaker token.Maker
 }
 
-func SetupRouter(config *util.Config, store db.Store, rdb *redis.Client) (*Server, error) {
+func SetupRouter(config *util.Config, store db.Store, redis *redis.Client) (*Server, error) {
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
@@ -30,8 +30,8 @@ func SetupRouter(config *util.Config, store db.Store, rdb *redis.Client) (*Serve
 
 	server := &Server{
 		store:      store,
-		redis:      rdb,
 		config:     *config,
+		redis:      redis,
 		tokenMaker: tokenMaker,
 	}
 
