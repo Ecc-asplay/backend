@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
+
 	db "github.com/Ecc-asplay/backend/db/sqlc"
 	"github.com/Ecc-asplay/backend/token"
 	"github.com/Ecc-asplay/backend/util"
-	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis/v8"
 )
 
 type Server struct {
@@ -47,9 +48,7 @@ func (server *Server) GinRequest() {
 	r := gin.Default()
 	r.Use(GinLogger())
 
-	// メモ：命名が気になるCreateuser→CreateUser
-	// ユーザー関連のルート定義
-	r.POST("/users", server.Createuser)
+	r.POST("/users", server.CreateUser)
 	// r.DELETE("/users/:id", server.Deleteuser)
 	// r.GET("/users/:id", server.GetUserData)
 	// r.PUT("/users/:id/password", server.ResetPassword)
@@ -58,6 +57,7 @@ func (server *Server) GinRequest() {
 	// r.PUT("/users/:id/privacy", server.UpdateIsPrivacy)
 	// r.PUT("/users/:id/name", server.UpdateName)
 	// r.POST("/login", server.LoginUser)
+
 	server.router = r
 }
 
