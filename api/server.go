@@ -48,7 +48,8 @@ func (server *Server) GinRequest() {
 	r := gin.Default()
 	r.Use(GinLogger())
 
-	r.POST("/users", server.CreateUser)
+	r.GET("/", server.Createuser)
+	r.POST("/users", server.CreateUser2)
 	// r.DELETE("/users/:id", server.Deleteuser)
 	// r.GET("/users/:id", server.GetUserData)
 	// r.PUT("/users/:id/password", server.ResetPassword)
@@ -61,8 +62,8 @@ func (server *Server) GinRequest() {
 	server.router = r
 }
 
-func (s *Server) Start(address string) error {
-	return s.router.Run(address)
+func (server *Server) Start(address string) error {
+	return server.router.Run(address)
 }
 
 func errorResponse(err error) gin.H {
