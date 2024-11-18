@@ -8,9 +8,7 @@ import (
 )
 
 func (s *Server) Createuser(ctx *gin.Context) {
-	// 確認用記述(後で消す)
 	var req db.CreateUserParams
-	// ↑使わないほうが良い(ハッシュパスワードなどまだない情報があり、エラーがおこるかも？)
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
