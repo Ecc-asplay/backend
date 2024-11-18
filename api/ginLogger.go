@@ -17,7 +17,7 @@ func GinLogger() gin.HandlerFunc {
 		duration := time.Since(startTime)
 		statusCode := c.Writer.Status()
 		method := c.Request.Method
-		path := c.FullPath()
+		path := c.Request.URL.String()
 
 		logger := log.Info()
 		if statusCode >= http.StatusBadRequest {
