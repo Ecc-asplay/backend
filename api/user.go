@@ -2,6 +2,7 @@ package api
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -13,7 +14,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-// isprivacyは必要ない？
+// CREATEとDELETEの処理は触らない
 type User struct {
 	Username string      `json:"username" binding:"required"`
 	Email    string      `json:"email" binding:"required"`
@@ -56,7 +57,6 @@ func (s *Server) CreateUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, user)
 }
 
-// ユーザー削除
 func (s *Server) DeleteUser(ctx *gin.Context) {
 	userID, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
@@ -64,12 +64,12 @@ func (s *Server) DeleteUser(ctx *gin.Context) {
 		return
 	}
 
+	// URLから取得したidでEmailを取得する(GetUserData使用)
+
 	data := db.DeleteUserParams{
 		UserID: userID,
 		Email:  ctx.Query("email"), // パラムなのでURLに記述しないと取得できない
 	}
-
-	// 処理がうまく動作していない
 
 	err = s.store.DeleteUser(ctx, data)
 	if err != nil {
@@ -89,7 +89,7 @@ func (s *Server) GetUserData(ctx *gin.Context) {
 
 	user, err := s.store.GetUserData(ctx, userID)
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user not found")))
 			return
 		}
@@ -136,8 +136,45 @@ func (s *Server) ResetPassword(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "password reset successful"})
 }
 
-func (s *Server) UpdateDiseaseAndCondition(ctx *gin.Context) {}
-func (s *Server) UpdateEmail(ctx *gin.Context)               {}
-func (s *Server) UpdateIsPrivacy(ctx *gin.Context)           {}
-func (s *Server) UpdateName(ctx *gin.Context)                {}
-func (s *Server) LoginUser(ctx *gin.Context)                 {}
+func (s *Server) UpdateDiseaseAndCondition(ctx *gin.Context) {
+	userID, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+	var req struct {
+		Disease   string `json:"disease" binding:"required"`
+		Condition string `json:"condition" binding:"required"`
+	}
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	arg := db.UpdateDiseaseAndConditionParams{
+		UserID:    userID,
+		Disease:   req.Disease,
+		Condition: req.Condition,
+	}
+
+	err = s.store.UpdateDiseaseAndCondition(ctx, arg)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user not found")))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "disease and condition updated successfully"})
+}
+
+func (s *Server) UpdateEmail(ctx *gin.Context) {
+
+}
+
+func (s *Server) UpdateIsPrivacy(ctx *gin.Context) {}
+func (s *Server) UpdateName(ctx *gin.Context)      {}
+func (s *Server) LoginUser(ctx *gin.Context)       {}
