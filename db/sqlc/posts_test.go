@@ -2,24 +2,135 @@ package db
 
 import (
 	"context"
+	"encoding/json"
+	"log"
 	"testing"
 
-	"github.com/Ecc-asplay/backend/util"
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/exp/rand"
+
+	"github.com/Ecc-asplay/backend/util"
 )
 
 func CreateRandomPost(t *testing.T, user User) Post {
+	var Wsize []int
+	for i := 0; i < 12; i++ {
+		size := util.RandomInt(24) + 16
+		Wsize = append(Wsize, size)
+	}
+
+	data := []map[string]interface{}{
+		{
+			"type": "paragraph",
+			"children": []map[string]interface{}{
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"fontsize": Wsize[0],
+					"text":     "頭",
+				},
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"fontsize": Wsize[1],
+					"text":     "が痛",
+				},
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"fontsize": Wsize[2],
+					"text":     "い",
+				},
+			},
+		},
+		{
+			"type": "paragraph",
+			"children": []map[string]interface{}{
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"italic":   util.RandomBool(),
+					"fontsize": Wsize[3],
+					"text":     "頭痛が",
+				},
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"italic":   util.RandomBool(),
+					"fontsize": Wsize[3],
+					"text":     "痛い",
+				},
+			},
+		},
+		{
+			"type": "paragraph",
+			"children": []map[string]interface{}{
+				{
+					"color":     gofakeit.Color(),
+					"underline": util.RandomBool(),
+					"fontsize":  Wsize[4],
+					"text":      "偏頭痛が痛い",
+				},
+			},
+		},
+		{
+			"type": "paragraph",
+			"children": []map[string]interface{}{
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"strike":   util.RandomBool(),
+					"fontsize": Wsize[5],
+					"text":     "四十",
+				},
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"strike":   util.RandomBool(),
+					"fontsize": Wsize[6],
+					"text":     "肩",
+				},
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"strike":   util.RandomBool(),
+					"fontsize": Wsize[7],
+					"text":     "がつらい",
+				},
+			},
+		},
+		{
+			"type": "paragraph",
+			"children": []map[string]interface{}{
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"fontsize": Wsize[8],
+					"text":     "深爪",
+				},
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"fontsize": Wsize[9],
+					"text":     "が深い",
+				},
+			},
+		},
+	}
+	jsonData, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	newPost := CreatePostParams{
 		PostID:      util.CreateUUID(),
 		UserID:      user.UserID,
 		ShowID:      util.RandomString(10),
 		Title:       gofakeit.BookTitle(),
 		Feel:        util.RandomMood(),
-		Content:     gofakeit.Sentence(30),
+		Content:     jsonData,
 		Reaction:    rand.Int31(),
-		Image:       gofakeit.ImagePng(200, 200),
 		IsSensitive: util.RandomBool(),
 		Status:      util.RandomStatus(),
 	}
@@ -32,9 +143,7 @@ func CreateRandomPost(t *testing.T, user User) Post {
 	require.Equal(t, newPost.ShowID, post.ShowID)
 	require.Equal(t, newPost.Title, post.Title)
 	require.Equal(t, newPost.Feel, post.Feel)
-	require.Equal(t, newPost.Content, post.Content)
 	require.Equal(t, newPost.Reaction, post.Reaction)
-	require.Equal(t, newPost.Image, post.Image)
 	require.Equal(t, newPost.IsSensitive, post.IsSensitive)
 	require.Equal(t, newPost.Status, post.Status)
 	require.NotEmpty(t, post.CreatedAt.Time)
@@ -62,15 +171,123 @@ func TestDeletePost(t *testing.T) {
 
 func TestGetPostOfKeywords(t *testing.T) {
 	user := CreateRandomUser(t)
+	var Wsize []int
+	for i := 0; i < 12; i++ {
+		size := util.RandomInt(24) + 16
+		Wsize = append(Wsize, size)
+	}
+
+	data := []map[string]interface{}{
+		{
+			"type": "paragraph",
+			"children": []map[string]interface{}{
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"fontsize": Wsize[0],
+					"text":     "頭",
+				},
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"fontsize": Wsize[1],
+					"text":     "が痛",
+				},
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"fontsize": Wsize[2],
+					"text":     "い",
+				},
+			},
+		},
+		{
+			"type": "paragraph",
+			"children": []map[string]interface{}{
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"italic":   util.RandomBool(),
+					"fontsize": Wsize[3],
+					"text":     "頭痛が",
+				},
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"italic":   util.RandomBool(),
+					"fontsize": Wsize[3],
+					"text":     "痛い",
+				},
+			},
+		},
+		{
+			"type": "paragraph",
+			"children": []map[string]interface{}{
+				{
+					"color":     gofakeit.Color(),
+					"underline": util.RandomBool(),
+					"fontsize":  Wsize[4],
+					"text":      "偏頭痛が痛い",
+				},
+			},
+		},
+		{
+			"type": "paragraph",
+			"children": []map[string]interface{}{
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"strike":   util.RandomBool(),
+					"fontsize": Wsize[5],
+					"text":     "四十",
+				},
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"strike":   util.RandomBool(),
+					"fontsize": Wsize[6],
+					"text":     "肩",
+				},
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"strike":   util.RandomBool(),
+					"fontsize": Wsize[7],
+					"text":     "がつらい",
+				},
+			},
+		},
+		{
+			"type": "paragraph",
+			"children": []map[string]interface{}{
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"fontsize": Wsize[8],
+					"text":     "深爪",
+				},
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"fontsize": Wsize[9],
+					"text":     "が深い",
+				},
+			},
+		},
+	}
+	jsonData, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	newPost := CreatePostParams{
 		PostID:      util.CreateUUID(),
 		UserID:      user.UserID,
 		ShowID:      util.RandomString(10),
 		Title:       "aaaaaaaaaaaaaaaaaaaa",
 		Feel:        util.RandomMood(),
-		Content:     "asdhavsjhsavdjah",
+		Content:     jsonData,
 		Reaction:    rand.Int31(),
-		Image:       gofakeit.ImagePng(200, 200),
 		IsSensitive: util.RandomBool(),
 		Status:      util.RandomStatus(),
 	}
@@ -115,15 +332,123 @@ func TestUpdatePosts(t *testing.T) {
 	user := CreateRandomUser(t)
 	post := CreateRandomPost(t, user)
 
+	var Wsize []int
+	for i := 0; i < 12; i++ {
+		size := util.RandomInt(24) + 16
+		Wsize = append(Wsize, size)
+	}
+
+	data := []map[string]interface{}{
+		{
+			"type": "paragraph",
+			"children": []map[string]interface{}{
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"fontsize": Wsize[0],
+					"text":     "頭",
+				},
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"fontsize": Wsize[1],
+					"text":     "が痛",
+				},
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"fontsize": Wsize[2],
+					"text":     "い",
+				},
+			},
+		},
+		{
+			"type": "paragraph",
+			"children": []map[string]interface{}{
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"italic":   util.RandomBool(),
+					"fontsize": Wsize[3],
+					"text":     "頭痛が",
+				},
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"italic":   util.RandomBool(),
+					"fontsize": Wsize[3],
+					"text":     "痛い",
+				},
+			},
+		},
+		{
+			"type": "paragraph",
+			"children": []map[string]interface{}{
+				{
+					"color":     gofakeit.Color(),
+					"underline": util.RandomBool(),
+					"fontsize":  Wsize[4],
+					"text":      "偏頭痛が痛い",
+				},
+			},
+		},
+		{
+			"type": "paragraph",
+			"children": []map[string]interface{}{
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"strike":   util.RandomBool(),
+					"fontsize": Wsize[5],
+					"text":     "四十",
+				},
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"strike":   util.RandomBool(),
+					"fontsize": Wsize[6],
+					"text":     "肩",
+				},
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"strike":   util.RandomBool(),
+					"fontsize": Wsize[7],
+					"text":     "がつらい",
+				},
+			},
+		},
+		{
+			"type": "paragraph",
+			"children": []map[string]interface{}{
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"fontsize": Wsize[8],
+					"text":     "深爪",
+				},
+				{
+					"bold":     util.RandomBool(),
+					"color":    gofakeit.Color(),
+					"fontsize": Wsize[9],
+					"text":     "が深い",
+				},
+			},
+		},
+	}
+	jsonData, err := json.MarshalIndent(data, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	updateData := UpdatePostsParams{
 		UserID:      user.UserID,
 		PostID:      post.PostID,
 		ShowID:      util.RandomString(10),
 		Title:       gofakeit.BookTitle(),
 		Feel:        util.RandomMood(),
-		Content:     gofakeit.Sentence(30),
+		Content:     jsonData,
 		Reaction:    rand.Int31(),
-		Image:       gofakeit.ImagePng(300, 200),
 		IsSensitive: util.RandomBool(),
 	}
 

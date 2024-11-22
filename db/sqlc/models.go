@@ -59,9 +59,8 @@ type Post struct {
 	ShowID      string           `json:"show_id"`
 	Title       string           `json:"title"`
 	Feel        string           `json:"feel"`
-	Content     string           `json:"content"`
+	Content     []byte           `json:"content"`
 	Reaction    int32            `json:"reaction"`
-	Image       []byte           `json:"image"`
 	IsSensitive bool             `json:"is_sensitive"`
 	Status      string           `json:"status"`
 	CreatedAt   pgtype.Timestamp `json:"created_at"`

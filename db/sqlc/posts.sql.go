@@ -20,7 +20,6 @@ INSERT INTO POSTS (
     FEEL,
     CONTENT,
     REACTION,
-    IMAGE,
     IS_SENSITIVE,
     STATUS
 ) VALUES (
@@ -32,9 +31,8 @@ INSERT INTO POSTS (
     $6,
     $7,
     $8,
-    $9,
-    $10
-) RETURNING user_id, post_id, show_id, title, feel, content, reaction, image, is_sensitive, status, created_at, updated_at
+    $9
+) RETURNING user_id, post_id, show_id, title, feel, content, reaction, is_sensitive, status, created_at, updated_at
 `
 
 type CreatePostParams struct {
@@ -43,9 +41,8 @@ type CreatePostParams struct {
 	ShowID      string    `json:"show_id"`
 	Title       string    `json:"title"`
 	Feel        string    `json:"feel"`
-	Content     string    `json:"content"`
+	Content     []byte    `json:"content"`
 	Reaction    int32     `json:"reaction"`
-	Image       []byte    `json:"image"`
 	IsSensitive bool      `json:"is_sensitive"`
 	Status      string    `json:"status"`
 }
@@ -59,7 +56,6 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, e
 		arg.Feel,
 		arg.Content,
 		arg.Reaction,
-		arg.Image,
 		arg.IsSensitive,
 		arg.Status,
 	)
@@ -72,7 +68,6 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, e
 		&i.Feel,
 		&i.Content,
 		&i.Reaction,
-		&i.Image,
 		&i.IsSensitive,
 		&i.Status,
 		&i.CreatedAt,
@@ -85,7 +80,7 @@ const deletePost = `-- name: DeletePost :exec
 DELETE FROM POSTS
 WHERE
     USER_ID = $1
-    AND POST_ID = $2 RETURNING user_id, post_id, show_id, title, feel, content, reaction, image, is_sensitive, status, created_at, updated_at
+    AND POST_ID = $2 RETURNING user_id, post_id, show_id, title, feel, content, reaction, is_sensitive, status, created_at, updated_at
 `
 
 type DeletePostParams struct {
@@ -100,16 +95,24 @@ func (q *Queries) DeletePost(ctx context.Context, arg DeletePostParams) error {
 
 const getPostOfKeywords = `-- name: GetPostOfKeywords :many
 SELECT
-    user_id, post_id, show_id, title, feel, content, reaction, image, is_sensitive, status, created_at, updated_at
+    user_id, post_id, show_id, title, feel, content, reaction, is_sensitive, status, created_at, updated_at
 FROM
     POSTS
 WHERE
     TITLE LIKE '%'
                || CAST($1 AS TEXT)
                || '%'
-    OR CONTENT LIKE '%'
-                    || CAST($1 AS TEXT)
-                    || '%'
+    OR EXISTS (
+        SELECT
+            1
+        FROM
+            JSONB_ARRAY_ELEMENTS(CONTENT) AS ELEM,
+            JSONB_ARRAY_ELEMENTS(ELEM->'children') AS CHILD
+        WHERE
+            CHILD->>'text' LIKE '%'
+                                || CAST($1 AS TEXT)
+                                || '%'
+    )
 `
 
 func (q *Queries) GetPostOfKeywords(ctx context.Context, dollar_1 string) ([]Post, error) {
@@ -129,7 +132,6 @@ func (q *Queries) GetPostOfKeywords(ctx context.Context, dollar_1 string) ([]Pos
 			&i.Feel,
 			&i.Content,
 			&i.Reaction,
-			&i.Image,
 			&i.IsSensitive,
 			&i.Status,
 			&i.CreatedAt,
@@ -147,7 +149,7 @@ func (q *Queries) GetPostOfKeywords(ctx context.Context, dollar_1 string) ([]Pos
 
 const getPostsList = `-- name: GetPostsList :many
 SELECT
-    user_id, post_id, show_id, title, feel, content, reaction, image, is_sensitive, status, created_at, updated_at
+    user_id, post_id, show_id, title, feel, content, reaction, is_sensitive, status, created_at, updated_at
 FROM
     POSTS
 ORDER BY
@@ -171,7 +173,6 @@ func (q *Queries) GetPostsList(ctx context.Context) ([]Post, error) {
 			&i.Feel,
 			&i.Content,
 			&i.Reaction,
-			&i.Image,
 			&i.IsSensitive,
 			&i.Status,
 			&i.CreatedAt,
@@ -189,7 +190,7 @@ func (q *Queries) GetPostsList(ctx context.Context) ([]Post, error) {
 
 const getUserAllPosts = `-- name: GetUserAllPosts :many
 SELECT
-    user_id, post_id, show_id, title, feel, content, reaction, image, is_sensitive, status, created_at, updated_at
+    user_id, post_id, show_id, title, feel, content, reaction, is_sensitive, status, created_at, updated_at
 FROM
     POSTS
 WHERE
@@ -213,7 +214,6 @@ func (q *Queries) GetUserAllPosts(ctx context.Context, userID uuid.UUID) ([]Post
 			&i.Feel,
 			&i.Content,
 			&i.Reaction,
-			&i.Image,
 			&i.IsSensitive,
 			&i.Status,
 			&i.CreatedAt,
@@ -237,13 +237,12 @@ SET
     FEEL = $5,
     CONTENT = $6,
     REACTION = $7,
-    IMAGE = $8,
-    IS_SENSITIVE = $9,
+    IS_SENSITIVE = $8,
     UPDATED_AT = NOW(
     )
 WHERE
     USER_ID = $1
-    AND POST_ID = $2 RETURNING user_id, post_id, show_id, title, feel, content, reaction, image, is_sensitive, status, created_at, updated_at
+    AND POST_ID = $2 RETURNING user_id, post_id, show_id, title, feel, content, reaction, is_sensitive, status, created_at, updated_at
 `
 
 type UpdatePostsParams struct {
@@ -252,9 +251,8 @@ type UpdatePostsParams struct {
 	ShowID      string    `json:"show_id"`
 	Title       string    `json:"title"`
 	Feel        string    `json:"feel"`
-	Content     string    `json:"content"`
+	Content     []byte    `json:"content"`
 	Reaction    int32     `json:"reaction"`
-	Image       []byte    `json:"image"`
 	IsSensitive bool      `json:"is_sensitive"`
 }
 
@@ -267,7 +265,6 @@ func (q *Queries) UpdatePosts(ctx context.Context, arg UpdatePostsParams) (Post,
 		arg.Feel,
 		arg.Content,
 		arg.Reaction,
-		arg.Image,
 		arg.IsSensitive,
 	)
 	var i Post
@@ -279,7 +276,6 @@ func (q *Queries) UpdatePosts(ctx context.Context, arg UpdatePostsParams) (Post,
 		&i.Feel,
 		&i.Content,
 		&i.Reaction,
-		&i.Image,
 		&i.IsSensitive,
 		&i.Status,
 		&i.CreatedAt,

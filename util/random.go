@@ -1,6 +1,8 @@
 package util
 
 import (
+	"log"
+	"math"
 	"math/rand"
 	"strings"
 	"time"
@@ -11,14 +13,23 @@ import (
 const alphabet = "abcdefghijklmnopqrstuvwxyz"
 const charset = alphabet + "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
-var seededRand *rand.Rand = rand.New(rand.NewSource(time.Now().UnixNano()))
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
+func RandomInt(max int) int {
+	if max <= 0 {
+		log.Fatal("Invalid max value: must be greater than 0")
+	}
+	return rand.Intn(max)
+}
 
 func RandomString(n int) string {
 	var sb strings.Builder
 	k := len(alphabet)
 	for i := 0; i < n; i++ {
-		c := alphabet[seededRand.Intn(k)]
-		sb.WriteByte(c)
+		c := RandomInt(k)
+		sb.WriteByte(alphabet[c])
 	}
 	return sb.String()
 }
@@ -29,13 +40,15 @@ func RandomPassword(len int) string {
 }
 
 func RandomEra() int32 {
-	return (seededRand.Int31n(9) + 1) * 10
+	num := RandomInt(9)
+	return int32((num + 1) * 10)
 }
 
 func RandomCheckCode() string {
 	b := make([]byte, 8)
 	for i := range b {
-		b[i] = charset[seededRand.Intn(len(charset))]
+		idx := RandomInt(len(charset))
+		b[i] = charset[idx]
 	}
 	return string(b)
 }
@@ -46,49 +59,56 @@ func SwitchAge(Y, M, D int) int32 {
 	currentMonth := int(currentDate.Month())
 	currentDay := currentDate.Day()
 
-	age := int32(currentYear - Y)
+	age := int64(currentYear - Y)
+	if age < 0 || age > math.MaxInt32 {
+		log.Fatal("Invalid age calculation: overflow or negative age")
+	}
 
 	if currentMonth < M || (currentMonth == M && currentDay < D) {
 		age--
 	}
 
-	return age
+	return int32(age)
 }
 
 func RandomBool() bool {
 	bo := []bool{true, false}
-	return bo[rand.Intn(len(bo))]
+	idx := RandomInt(len(bo))
+	return bo[idx]
 }
 
 func RandomRole() string {
 	bo := []string{"user", "admin"}
-	return bo[rand.Intn(len(bo))]
+	idx := RandomInt(len(bo))
+	return bo[idx]
 }
 
 func RandomGender() string {
 	gender := []string{"男性", "女性", "その他"}
-	return gender[rand.Intn(len(gender))]
+	idx := RandomInt(len(gender))
+	return gender[idx]
 }
 
 func RandomDate() time.Time {
-	rand.Seed(time.Now().UnixNano())
-	year := rand.Intn(25) + 2000
-	month := time.Month(rand.Intn(12) + 1)
+	year := RandomInt(25) + 2000 // Random year between 2000 and 2024
+	month := RandomInt(12) + 1   // Random month between 1 and 12
 
 	var day int
 	if month == 2 {
 		if (year%4 == 0 && year%100 != 0) || (year%400 == 0) {
-			day = rand.Intn(29) + 1
+			day = RandomInt(29)
 		} else {
-			day = rand.Intn(28) + 1
+			day = RandomInt(28)
 		}
 	} else if month == 4 || month == 6 || month == 9 || month == 11 {
-		day = rand.Intn(30) + 1
+		day = RandomInt(30)
 	} else {
-		day = rand.Intn(31) + 1
+		day = RandomInt(31)
 	}
 
-	return time.Date(year, month, day, 0, 0, 0, 0, time.UTC)
+	day += 1
+
+	return time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
 }
 
 func RandomDisease() string {
@@ -105,8 +125,8 @@ func RandomDisease() string {
 		"うつ病",
 	}
 
-	rand.Seed(time.Now().UnixNano())
-	return diseases[rand.Intn(len(diseases))]
+	idx := RandomInt(len(diseases))
+	return diseases[idx]
 }
 
 func RandomCondition() string {
@@ -118,8 +138,8 @@ func RandomCondition() string {
 		"危険な状態",
 	}
 
-	rand.Seed(time.Now().UnixNano())
-	return conditions[rand.Intn(len(conditions))]
+	idx := RandomInt(len(conditions))
+	return conditions[idx]
 }
 
 func RandomStatus() string {
@@ -129,9 +149,8 @@ func RandomStatus() string {
 		"封鎖却下",
 	}
 
-	rand.Seed(time.Now().UnixNano())
-
-	return statuses[rand.Intn(len(statuses))]
+	idx := RandomInt(len(statuses))
+	return statuses[idx]
 }
 
 func RandomMood() string {
@@ -148,6 +167,6 @@ func RandomMood() string {
 		"混乱",
 	}
 
-	rand.Seed(time.Now().UnixNano())
-	return moods[rand.Intn(len(moods))]
+	idx := RandomInt(len(moods))
+	return moods[idx]
 }
