@@ -5,10 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Ecc-asplay/backend/token"
-	"github.com/Ecc-asplay/backend/util"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/require"
+
+	"github.com/Ecc-asplay/backend/token"
+	"github.com/Ecc-asplay/backend/util"
 )
 
 func CreateRandomToken(t *testing.T) Token {

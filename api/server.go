@@ -12,27 +12,30 @@ import (
 	db "github.com/Ecc-asplay/backend/db/sqlc"
 	"github.com/Ecc-asplay/backend/token"
 	"github.com/Ecc-asplay/backend/util"
+	"github.com/Ecc-asplay/backend/worker"
 )
 
 type Server struct {
-	store      db.Store
-	router     *gin.Engine
-	redis      *redis.Client
-	config     util.Config
-	tokenMaker token.Maker
+	store           db.Store
+	router          *gin.Engine
+	redis           *redis.Client
+	config          util.Config
+	tokenMaker      token.Maker
+	taskDistributor worker.TaskDistributor
 }
 
-func SetupRouter(config *util.Config, store db.Store, redis *redis.Client) (*Server, error) {
+func SetupRouter(config *util.Config, store db.Store, redis *redis.Client, taskDistributor worker.TaskDistributor) (*Server, error) {
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
 	}
 
 	server := &Server{
-		store:      store,
-		config:     *config,
-		redis:      redis,
-		tokenMaker: tokenMaker,
+		store:           store,
+		config:          *config,
+		redis:           redis,
+		tokenMaker:      tokenMaker,
+		taskDistributor: taskDistributor,
 	}
 
 	server.GinRequest()
