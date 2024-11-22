@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"log"
 	"os"
 	"testing"
@@ -15,7 +14,6 @@ import (
 
 var (
 	testQueries Store
-	testDB      *sql.DB
 )
 
 func TestMain(m *testing.M) {

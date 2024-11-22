@@ -13,12 +13,12 @@ import (
 const (
 	QueueCritical = "critical"
 	QueueDefault  = "default"
+	QueueLow      = "low"
 )
 
 type TaskProcessor interface {
 	Start() error
-	Shutdown()
-	ProcessTaskSendVerifyEmail(ctx context.Context, task *asynq.Task) error
+	ProcessTask(ctx context.Context, task *asynq.Task) error
 }
 
 type RedisTaskProcessor struct {
@@ -33,9 +33,11 @@ func NewRedisTaskProcessor(redisOpt asynq.RedisClientOpt, store db.Store) TaskPr
 	server := asynq.NewServer(
 		redisOpt,
 		asynq.Config{
+			Concurrency: 10,
 			Queues: map[string]int{
 				QueueCritical: 10,
-				QueueDefault:  5,
+				QueueDefault:  7,
+				QueueLow:      5,
 			},
 			ErrorHandler: asynq.ErrorHandlerFunc(func(ctx context.Context, task *asynq.Task, err error) {
 				log.Error().Err(err).Str("type", task.Type()).
@@ -54,11 +56,7 @@ func NewRedisTaskProcessor(redisOpt asynq.RedisClientOpt, store db.Store) TaskPr
 func (processor *RedisTaskProcessor) Start() error {
 	mux := asynq.NewServeMux()
 
-	mux.HandleFunc(TaskSendVerifyEmail, processor.ProcessTaskSendVerifyEmail)
+	mux.HandleFunc("CreateUser", processor.ProcessTask)
 
 	return processor.server.Start(mux)
-}
-
-func (processor *RedisTaskProcessor) Shutdown() {
-	processor.server.Shutdown()
 }
