@@ -7,7 +7,6 @@ INSERT INTO POSTS (
     FEEL,
     CONTENT,
     REACTION,
-    IMAGE,
     IS_SENSITIVE,
     STATUS
 ) VALUES (
@@ -19,8 +18,7 @@ INSERT INTO POSTS (
     $6,
     $7,
     $8,
-    $9,
-    $10
+    $9
 ) RETURNING *;
 
 -- name: GetUserAllPosts :many
@@ -48,9 +46,17 @@ WHERE
     TITLE LIKE '%'
                || CAST($1 AS TEXT)
                || '%'
-    OR CONTENT LIKE '%'
-                    || CAST($1 AS TEXT)
-                    || '%';
+    OR EXISTS (
+        SELECT
+            1
+        FROM
+            JSONB_ARRAY_ELEMENTS(CONTENT) AS ELEM,
+            JSONB_ARRAY_ELEMENTS(ELEM->'children') AS CHILD
+        WHERE
+            CHILD->>'text' LIKE '%'
+                                || CAST($1 AS TEXT)
+                                || '%'
+    );
 
 -- name: UpdatePosts :one
 UPDATE POSTS
@@ -60,8 +66,7 @@ SET
     FEEL = $5,
     CONTENT = $6,
     REACTION = $7,
-    IMAGE = $8,
-    IS_SENSITIVE = $9,
+    IS_SENSITIVE = $8,
     UPDATED_AT = NOW(
     )
 WHERE

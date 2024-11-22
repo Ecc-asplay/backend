@@ -4,8 +4,9 @@ import (
 	"context"
 	"os"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/go-redis/redis"
 	"github.com/golang-migrate/migrate/v4"
+	"github.com/hibiken/asynq"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -13,6 +14,7 @@ import (
 	"github.com/Ecc-asplay/backend/api"
 	db "github.com/Ecc-asplay/backend/db/sqlc"
 	"github.com/Ecc-asplay/backend/util"
+	"github.com/Ecc-asplay/backend/worker"
 )
 
 func main() {
@@ -32,7 +34,14 @@ func main() {
 
 	// migration 実行
 	initMigration(config.MigrationURL, config.DBSource)
+	// DB 起動
+	store := db.NewStore(conn)
 
+	// redis Options settings
+	redisOpt := asynq.RedisClientOpt{
+		Addr: config.RedisAddress,
+		DB:   1,
+	}
 	// redis 接続
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     config.RedisAddress,
@@ -40,11 +49,12 @@ func main() {
 		DB:       1,
 	})
 
-	// DB 起動
-	store := db.NewStore(conn)
+	// Processer
+	taskDistributor := worker.NewRedisTaskDistributor(redisOpt)
+	runTaskProcessor(redisOpt, store)
 
 	// Server 設置
-	server, err := api.SetupRouter(config, store, rdb)
+	server, err := api.SetupRouter(config, store, rdb, taskDistributor)
 	if err != nil {
 		log.Error().Err(err).Msg("cannot create server")
 	}
@@ -68,4 +78,13 @@ func initMigration(migrationURL string, dbSource string) {
 	}
 
 	log.Info().Msg("db migrated successfully")
+}
+
+func runTaskProcessor(redisOpt asynq.RedisClientOpt, store db.Store) {
+	taskProcessor := worker.NewRedisTaskProcessor(redisOpt, store)
+	log.Info().Msg("start task processor")
+	err := taskProcessor.Start()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to start task processor")
+	}
 }

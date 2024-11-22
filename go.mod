@@ -7,6 +7,7 @@ require (
 	github.com/alexedwards/argon2id v1.0.0
 	github.com/brianvoe/gofakeit/v7 v7.1.2
 	github.com/gin-gonic/gin v1.10.0
+	github.com/go-redis/redis v6.15.9+incompatible
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/golang-migrate/migrate/v4 v4.18.1
 	github.com/google/uuid v1.6.0

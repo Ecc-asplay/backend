@@ -9,41 +9,36 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const TaskSendVerifyEmail = "task:send_verify_email"
-
 type PayloadSendVerifyEmail struct {
 	Username string `json:"username"`
 }
 
-func (distributor *RedisTaskDistributor) DistributeTaskSendVerifyEmail(ctx context.Context, payload *PayloadSendVerifyEmail, opts ...asynq.Option) error {
+func (distributor *RedisTaskDistributor) DistributeTask(ctx context.Context, payload *PayloadSendVerifyEmail, taskname string, opts ...asynq.Option) error {
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
 		return fmt.Errorf("failed to marshal task payload: %w", err)
 	}
 
-	task := asynq.NewTask(TaskSendVerifyEmail, jsonPayload, opts...)
+	task := asynq.NewTask(taskname, jsonPayload, opts...)
 	info, err := distributor.client.EnqueueContext(ctx, task)
 	if err != nil {
 		return fmt.Errorf("failed to enqueue task: %w", err)
 	}
 
-	log.Info().Str("type", task.Type()).Bytes("payload", task.Payload()).
-		Str("queue", info.Queue).Int("max_retry", info.MaxRetry).Msg("enqueued task")
+	log.Info().Str("task", task.Type()).Bytes("payload", task.Payload()).
+		Str("queue", info.Queue).Int("max_retry", info.MaxRetry).Int("round", info.Retried).Msg("enqueued task")
 	return nil
 }
 
-func (processor *RedisTaskProcessor) ProcessTaskSendVerifyEmail(ctx context.Context, task *asynq.Task) error {
+func (processor *RedisTaskProcessor) ProcessTask(ctx context.Context, task *asynq.Task) error {
 	var payload PayloadSendVerifyEmail
 	if err := json.Unmarshal(task.Payload(), &payload); err != nil {
 		return fmt.Errorf("failed to unmarshal payload: %w", asynq.SkipRetry)
 	}
 
-	// user, err := processor.store.GetUser(ctx, payload.Username)
-	// if err != nil {
-	// 	return fmt.Errorf("failed to get user: %w", err)
-	// }
+	// TODO
 
-	// log.Info().Str("type", task.Type()).Bytes("payload", task.Payload()).
-	// 	Str("email", user.Email).Msg("processed task")
+	log.Info().Str("type", task.Type()).Bytes("payload", task.Payload()).
+		Str("email", "#").Msg("processed task")
 	return nil
 }
