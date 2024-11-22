@@ -274,12 +274,74 @@ func (s *Server) UpdateIsPrivacy(ctx *gin.Context) {
 // 	ctx.JSON(http.StatusOK, gin.H{"status": "username updated successfully"})
 // }
 
+// func (s *Server) LoginUser(ctx *gin.Context) {
+// 	var req struct {
+// 		Email    string `json:"email" binding:"required,email"`
+// 		Password string `json:"password" binding:"required"`
+// 	}
+
+// 	if err := ctx.ShouldBindJSON(&req); err != nil {
+// 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+// 		return
+// 	}
+
+// 	// ハッシュパスワードを取得
+// 	hashedPassword, err := s.store.GetPasswordToUserLogin(ctx, req.Email)
+// 	if err != nil {
+// 		if errors.Is(err, sql.ErrNoRows) {
+// 			ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("invalid email or password")))
+// 			return
+// 		}
+// 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+// 		return
+// 	}
+
+// 	// パスワードを検証
+// 	isValid, err := util.CheckPassword(req.Password, hashedPassword)
+// 	if err != nil {
+// 		ctx.JSON(http.StatusInternalServerError, errorResponse(fmt.Errorf("failed to verify password")))
+// 		return
+// 	}
+// 	if !isValid {
+// 		ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("invalid email or password")))
+// 		return
+// 	}
+
+// 	// ユーザー情報を取得
+// 	user, err := s.store.GetUserData(ctx, uuid.MustParse(ctx.Param("id")))
+// 	if err != nil {
+// 		if errors.Is(err, sql.ErrNoRows) {
+// 			ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user not found")))
+// 			return
+// 		}
+// 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+// 		return
+// 	}
+
+// 	ctx.JSON(http.StatusOK, gin.H{
+// 		"user": gin.H{
+// 			"id":         user.UserID,
+// 			"username":   user.Username,
+// 			"email":      user.Email,
+// 			"birth":      user.Birth,
+// 			"gender":     user.Gender,
+// 			"is_privacy": user.IsPrivacy,
+// 			"disease":    user.Disease,
+// 			"condition":  user.Condition,
+// 		},
+// 	})
+// }
+
+// ログインの処理確認用コード
+// idを意図的に追加して、User情報を取得している
 func (s *Server) LoginUser(ctx *gin.Context) {
 	var req struct {
+		ID       string `json:"id" binding:"required,uuid"` // ID をリクエストボディで受け取る
 		Email    string `json:"email" binding:"required,email"`
 		Password string `json:"password" binding:"required"`
 	}
 
+	// リクエストのバインド
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -308,7 +370,7 @@ func (s *Server) LoginUser(ctx *gin.Context) {
 	}
 
 	// ユーザー情報を取得
-	user, err := s.store.GetUserData(ctx, uuid.MustParse(ctx.Param("id")))
+	user, err := s.store.GetUserData(ctx, uuid.MustParse(req.ID)) // リクエストボディのIDを使用
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user not found")))
@@ -318,6 +380,7 @@ func (s *Server) LoginUser(ctx *gin.Context) {
 		return
 	}
 
+	// レスポンス
 	ctx.JSON(http.StatusOK, gin.H{
 		"user": gin.H{
 			"id":         user.UserID,
