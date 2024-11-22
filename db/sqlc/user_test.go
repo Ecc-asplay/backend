@@ -94,11 +94,11 @@ func TestGetPasswordToUserLogin(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, user)
 
-	takeHash, err := testQueries.GetPasswordToUserLogin(context.Background(), user.Email)
+	takeHash, err := testQueries.GetLogin(context.Background(), user.Email)
 	require.NoError(t, err)
 	require.NotEmpty(t, takeHash)
 
-	checked, err := util.CheckPassword(pw, takeHash)
+	checked, err := util.CheckPassword(pw, takeHash.Hashpassword)
 	require.NoError(t, err)
 	require.True(t, checked)
 }

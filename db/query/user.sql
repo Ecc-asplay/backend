@@ -27,9 +27,9 @@ FROM
 WHERE
     USER_ID = $1 LIMIT 1;
 
--- name: GetPasswordToUserLogin :one
+-- name: GetLogin :one
 SELECT
-    HASHPASSWORD
+    *
 FROM
     USERS
 WHERE
