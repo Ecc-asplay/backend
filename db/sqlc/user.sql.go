@@ -92,20 +92,34 @@ func (q *Queries) DeleteUser(ctx context.Context, arg DeleteUserParams) error {
 	return err
 }
 
-const getPasswordToUserLogin = `-- name: GetPasswordToUserLogin :one
+const getLogin = `-- name: GetLogin :one
 SELECT
-    HASHPASSWORD
+    user_id, username, email, birth, gender, is_privacy, disease, condition, hashpassword, certification, reset_password_at, created_at, updated_at
 FROM
     USERS
 WHERE
     EMAIL = $1 LIMIT 1
 `
 
-func (q *Queries) GetPasswordToUserLogin(ctx context.Context, email string) (string, error) {
-	row := q.db.QueryRow(ctx, getPasswordToUserLogin, email)
-	var hashpassword string
-	err := row.Scan(&hashpassword)
-	return hashpassword, err
+func (q *Queries) GetLogin(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRow(ctx, getLogin, email)
+	var i User
+	err := row.Scan(
+		&i.UserID,
+		&i.Username,
+		&i.Email,
+		&i.Birth,
+		&i.Gender,
+		&i.IsPrivacy,
+		&i.Disease,
+		&i.Condition,
+		&i.Hashpassword,
+		&i.Certification,
+		&i.ResetPasswordAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
 }
 
 const getUserData = `-- name: GetUserData :one

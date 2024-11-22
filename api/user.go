@@ -7,11 +7,12 @@ import (
 	"net/http"
 	"time"
 
-	db "github.com/Ecc-asplay/backend/db/sqlc"
-	"github.com/Ecc-asplay/backend/util"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+
+	db "github.com/Ecc-asplay/backend/db/sqlc"
+	"github.com/Ecc-asplay/backend/util"
 )
 
 // CREATEとDELETEの処理は触らない
@@ -82,13 +83,13 @@ func (s *Server) DeleteUser(ctx *gin.Context) {
 }
 
 func (s *Server) GetUserData(ctx *gin.Context) {
-	userID, err := uuid.Parse(ctx.Param("id"))
+	userid, err := uuid.Parse(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
-	user, err := s.store.GetUserData(ctx, userID)
+	user, err := s.store.GetUserData(ctx, userid)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user not found")))
@@ -348,7 +349,7 @@ func (s *Server) LoginUser(ctx *gin.Context) {
 	}
 
 	// ハッシュパスワードを取得
-	hashedPassword, err := s.store.GetPasswordToUserLogin(ctx, req.Email)
+	hashedPassword, err := s.store.GetLogin(ctx, req.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("invalid email or password")))
@@ -359,7 +360,7 @@ func (s *Server) LoginUser(ctx *gin.Context) {
 	}
 
 	// パスワードを検証
-	isValid, err := util.CheckPassword(req.Password, hashedPassword)
+	isValid, err := util.CheckPassword(req.Password, hashedPassword.Hashpassword)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(fmt.Errorf("failed to verify password")))
 		return
@@ -370,7 +371,7 @@ func (s *Server) LoginUser(ctx *gin.Context) {
 	}
 
 	// ユーザー情報を取得
-	user, err := s.store.GetUserData(ctx, uuid.MustParse(req.ID)) // リクエストボディのIDを使用
+	user, err := s.store.GetUserData(ctx, hashedPassword.UserID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user not found")))
