@@ -15,6 +15,7 @@ import (
 )
 
 // CREATEとDELETEの処理は触らない
+// 冗長なコードは後で直す
 type User struct {
 	Username string      `json:"username" binding:"required"`
 	Email    string      `json:"email" binding:"required"`
@@ -172,9 +173,140 @@ func (s *Server) UpdateDiseaseAndCondition(ctx *gin.Context) {
 }
 
 func (s *Server) UpdateEmail(ctx *gin.Context) {
+	userID, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+	var req struct {
+		NewEmail string `json:"new_email" binding:"required,email"`
+	}
 
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	arg := db.UpdateEmailParams{
+		UserID: userID,
+		Email:  req.NewEmail,
+	}
+
+	err = s.store.UpdateEmail(ctx, arg)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user not found")))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "email updated successfully"})
 }
 
-func (s *Server) UpdateIsPrivacy(ctx *gin.Context) {}
-func (s *Server) UpdateName(ctx *gin.Context)      {}
-func (s *Server) LoginUser(ctx *gin.Context)       {}
+func (s *Server) UpdateIsPrivacy(ctx *gin.Context) {
+	userID, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	var req struct {
+		IsPrivacy bool `json:"is_privacy" binding:"required"`
+	}
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	arg := db.UpdateIsPrivacyParams{
+		UserID:    userID,
+		IsPrivacy: req.IsPrivacy,
+	}
+
+	err = s.store.UpdateIsPrivacy(ctx, arg)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user not found")))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "privacy setting updated successfully"})
+}
+
+// エラーがでているのでいったん無視する
+// func (s *Server) UpdateName(ctx *gin.Context) {
+// 	userID, err := uuid.Parse(ctx.Param("id"))
+// 	if err != nil {
+// 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+// 		return
+// 	}
+
+// 	var req struct {
+// 		NewUsername string `json:"new_username" binding:"required"`
+// 	}
+
+// 	if err := ctx.ShouldBindJSON(&req); err != nil {
+// 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+// 		return
+// 	}
+
+// 	arg := db.UpdateNameParams{
+// 		UserID:   userID,
+// 		Username: req.NewUsername,
+// 	}
+
+// 	err = s.store.UpdateName(ctx, arg)
+// 	if err != nil {
+// 		if errors.Is(err, sql.ErrNoRows) {
+// 			ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user not found")))
+// 			return
+// 		}
+// 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+// 		return
+// 	}
+
+// 	ctx.JSON(http.StatusOK, gin.H{"status": "username updated successfully"})
+// }
+
+func (s *Server) LoginUser(ctx *gin.Context) {
+	var req struct {
+		Email    string `json:"email" binding:"required,email"`
+		Password string `json:"password" binding:"required"`
+	}
+
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	// ユーザーを取得
+	user, err := s.store.LoginUser(ctx, req.Email)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("invalid email or password")))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	// パスワードを検証
+	isValid, err := util.CheckPassword(req.Password, user.Hashpassword)
+	if err != nil || !isValid {
+		ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("invalid email or password")))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"user": gin.H{
+			"id":       user.UserID,
+			"username": user.Username,
+		},
+	})
+}
