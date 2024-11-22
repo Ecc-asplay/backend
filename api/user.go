@@ -285,8 +285,8 @@ func (s *Server) LoginUser(ctx *gin.Context) {
 		return
 	}
 
-	// ユーザーを取得
-	user, err := s.store.LoginUser(ctx, req.Email)
+	// ハッシュパスワードを取得
+	hashedPassword, err := s.store.GetPasswordToUserLogin(ctx, req.Email)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("invalid email or password")))
@@ -297,16 +297,37 @@ func (s *Server) LoginUser(ctx *gin.Context) {
 	}
 
 	// パスワードを検証
-	isValid, err := util.CheckPassword(req.Password, user.Hashpassword)
-	if err != nil || !isValid {
+	isValid, err := util.CheckPassword(req.Password, hashedPassword)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(fmt.Errorf("failed to verify password")))
+		return
+	}
+	if !isValid {
 		ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("invalid email or password")))
+		return
+	}
+
+	// ユーザー情報を取得
+	user, err := s.store.GetUserData(ctx, uuid.MustParse(ctx.Param("id")))
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user not found")))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"user": gin.H{
-			"id":       user.UserID,
-			"username": user.Username,
+			"id":         user.UserID,
+			"username":   user.Username,
+			"email":      user.Email,
+			"birth":      user.Birth,
+			"gender":     user.Gender,
+			"is_privacy": user.IsPrivacy,
+			"disease":    user.Disease,
+			"condition":  user.Condition,
 		},
 	})
 }
