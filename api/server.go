@@ -53,8 +53,6 @@ func (server *Server) GinRequest() {
 	r := gin.Default()
 	r.Use(GinLogger())
 
-	r.GET("/", server.Createuser)
-	r.POST("/ttt", server.CreateUserTTTT)
 	// r.POST("/users", server.CreateUser)
 	// r.DELETE("/users/:id", server.Deleteuser)
 	// r.GET("/users/:id", server.GetUserData)
@@ -64,6 +62,10 @@ func (server *Server) GinRequest() {
 	// r.PUT("/users/:id/privacy", server.UpdateIsPrivacy)
 	// r.PUT("/users/:id/name", server.UpdateName)
 	// r.POST("/login", server.LoginUser)
+
+	r.GET("/getposts", server.GetAllPost)
+	r.POST("/createpost", server.CreatePost)
+	r.DELETE("/delpost", server.DeletePost)
 
 	server.router = r
 }
