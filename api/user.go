@@ -17,6 +17,7 @@ import (
 
 // CREATEとDELETEの処理は触らない
 // 冗長なコードは後で直す
+// uuid.Parseを乱用しているため、良くない
 type User struct {
 	Username string      `json:"username" binding:"required"`
 	Email    string      `json:"email" binding:"required"`
@@ -70,7 +71,7 @@ func (s *Server) DeleteUser(ctx *gin.Context) {
 
 	data := db.DeleteUserParams{
 		UserID: userID,
-		Email:  ctx.Query("email"), // パラムなのでURLに記述しないと取得できない
+		Email:  ctx.Query("email"),
 	}
 
 	err = s.store.DeleteUser(ctx, data)
@@ -240,109 +241,46 @@ func (s *Server) UpdateIsPrivacy(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "privacy setting updated successfully"})
 }
 
-// エラーがでているのでいったん無視する
-// func (s *Server) UpdateName(ctx *gin.Context) {
-// 	userID, err := uuid.Parse(ctx.Param("id"))
-// 	if err != nil {
-// 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-// 		return
-// 	}
+func (s *Server) UpdateName(ctx *gin.Context) {
+	userID, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
 
-// 	var req struct {
-// 		NewUsername string `json:"new_username" binding:"required"`
-// 	}
+	var req struct {
+		NewUsername string `json:"new_username" binding:"required"`
+	}
 
-// 	if err := ctx.ShouldBindJSON(&req); err != nil {
-// 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-// 		return
-// 	}
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
 
-// 	arg := db.UpdateNameParams{
-// 		UserID:   userID,
-// 		Username: req.NewUsername,
-// 	}
+	arg := db.UpdateNameParams{
+		UserID:   userID,
+		Username: req.NewUsername,
+	}
 
-// 	err = s.store.UpdateName(ctx, arg)
-// 	if err != nil {
-// 		if errors.Is(err, sql.ErrNoRows) {
-// 			ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user not found")))
-// 			return
-// 		}
-// 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-// 		return
-// 	}
+	_, err = s.store.UpdateName(ctx, arg)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user not found")))
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
 
-// 	ctx.JSON(http.StatusOK, gin.H{"status": "username updated successfully"})
-// }
+	ctx.JSON(http.StatusOK, gin.H{"status": "username updated successfully"})
+}
 
-// func (s *Server) LoginUser(ctx *gin.Context) {
-// 	var req struct {
-// 		Email    string `json:"email" binding:"required,email"`
-// 		Password string `json:"password" binding:"required"`
-// 	}
-
-// 	if err := ctx.ShouldBindJSON(&req); err != nil {
-// 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-// 		return
-// 	}
-
-// 	// ハッシュパスワードを取得
-// 	hashedPassword, err := s.store.GetPasswordToUserLogin(ctx, req.Email)
-// 	if err != nil {
-// 		if errors.Is(err, sql.ErrNoRows) {
-// 			ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("invalid email or password")))
-// 			return
-// 		}
-// 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-// 		return
-// 	}
-
-// 	// パスワードを検証
-// 	isValid, err := util.CheckPassword(req.Password, hashedPassword)
-// 	if err != nil {
-// 		ctx.JSON(http.StatusInternalServerError, errorResponse(fmt.Errorf("failed to verify password")))
-// 		return
-// 	}
-// 	if !isValid {
-// 		ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("invalid email or password")))
-// 		return
-// 	}
-
-// 	// ユーザー情報を取得
-// 	user, err := s.store.GetUserData(ctx, uuid.MustParse(ctx.Param("id")))
-// 	if err != nil {
-// 		if errors.Is(err, sql.ErrNoRows) {
-// 			ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user not found")))
-// 			return
-// 		}
-// 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-// 		return
-// 	}
-
-// 	ctx.JSON(http.StatusOK, gin.H{
-// 		"user": gin.H{
-// 			"id":         user.UserID,
-// 			"username":   user.Username,
-// 			"email":      user.Email,
-// 			"birth":      user.Birth,
-// 			"gender":     user.Gender,
-// 			"is_privacy": user.IsPrivacy,
-// 			"disease":    user.Disease,
-// 			"condition":  user.Condition,
-// 		},
-// 	})
-// }
-
-// ログインの処理確認用コード
-// idを意図的に追加して、User情報を取得している
 func (s *Server) LoginUser(ctx *gin.Context) {
 	var req struct {
-		ID       string `json:"id" binding:"required,uuid"` // ID をリクエストボディで受け取る
 		Email    string `json:"email" binding:"required,email"`
 		Password string `json:"password" binding:"required"`
 	}
 
-	// リクエストのバインド
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -381,7 +319,6 @@ func (s *Server) LoginUser(ctx *gin.Context) {
 		return
 	}
 
-	// レスポンス
 	ctx.JSON(http.StatusOK, gin.H{
 		"user": gin.H{
 			"id":         user.UserID,

@@ -60,7 +60,7 @@ func (server *Server) GinRequest() {
 	r.PUT("/users/:id/disease-condition", server.UpdateDiseaseAndCondition)
 	r.PUT("/users/:id/email", server.UpdateEmail)
 	r.PUT("/users/:id/privacy", server.UpdateIsPrivacy)
-	// r.PUT("/users/:id/name", server.UpdateName)
+	r.PUT("/users/:id/name", server.UpdateName)
 	r.GET("/login", server.LoginUser)
 
 	r.GET("/getposts", server.GetAllPost)
