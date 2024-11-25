@@ -105,7 +105,6 @@ func TestGetPasswordToUserLogin(t *testing.T) {
 
 func TestGetUserData(t *testing.T) {
 	user := CreateRandomUser(t)
-
 	data, err := testQueries.GetUserData(context.Background(), user.UserID)
 	require.NoError(t, err)
 	require.NotEmpty(t, data)

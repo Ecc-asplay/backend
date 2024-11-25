@@ -276,11 +276,11 @@ func (s *Server) UpdateName(ctx *gin.Context) {
 }
 
 func (s *Server) LoginUser(ctx *gin.Context) {
+
 	var req struct {
 		Email    string `json:"email" binding:"required,email"`
 		Password string `json:"password" binding:"required"`
 	}
-
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -319,16 +319,26 @@ func (s *Server) LoginUser(ctx *gin.Context) {
 		return
 	}
 
+	accessToken, payload, err := s.tokenMaker.CreateToken(user.UserID, "user", s.config.AccessTokenDuration)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(fmt.Errorf("failed to create token")))
+		return
+	}
+
+	tokenData := db.CreateTokenParams{
+		ID:          util.CreateUUID(),
+		UserID:      payload.UserID,
+		AccessToken: accessToken,
+		Roles:       payload.Role,
+		Status:      "Login",
+		ExpiresAt:   pgtype.Timestamp{Time: payload.ExpiredAt, Valid: true},
+	}
+
+	Token, err := s.store.CreateToken(ctx, tokenData)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+	}
 	ctx.JSON(http.StatusOK, gin.H{
-		"user": gin.H{
-			"id":         user.UserID,
-			"username":   user.Username,
-			"email":      user.Email,
-			"birth":      user.Birth,
-			"gender":     user.Gender,
-			"is_privacy": user.IsPrivacy,
-			"disease":    user.Disease,
-			"condition":  user.Condition,
-		},
+		"token": Token.ID,
 	})
 }
