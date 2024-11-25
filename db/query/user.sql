@@ -29,7 +29,8 @@ WHERE
 
 -- name: GetLogin :one
 SELECT
-    *
+    USER_ID,
+    HASHPASSWORD
 FROM
     USERS
 WHERE

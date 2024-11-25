@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
@@ -52,6 +53,7 @@ func (server *Server) GinRequest() {
 	// Gin Start
 	r := gin.Default()
 	r.Use(GinLogger())
+	r.Use(cors.Default())
 
 	r.POST("/users", server.CreateUser)
 	r.DELETE("/users/:id", server.DeleteUser)
