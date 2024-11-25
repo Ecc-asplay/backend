@@ -94,31 +94,23 @@ func (q *Queries) DeleteUser(ctx context.Context, arg DeleteUserParams) error {
 
 const getLogin = `-- name: GetLogin :one
 SELECT
-    user_id, username, email, birth, gender, is_privacy, disease, condition, hashpassword, certification, reset_password_at, created_at, updated_at
+    USER_ID,
+    HASHPASSWORD
 FROM
     USERS
 WHERE
     EMAIL = $1 LIMIT 1
 `
 
-func (q *Queries) GetLogin(ctx context.Context, email string) (User, error) {
+type GetLoginRow struct {
+	UserID       uuid.UUID `json:"user_id"`
+	Hashpassword string    `json:"hashpassword"`
+}
+
+func (q *Queries) GetLogin(ctx context.Context, email string) (GetLoginRow, error) {
 	row := q.db.QueryRow(ctx, getLogin, email)
-	var i User
-	err := row.Scan(
-		&i.UserID,
-		&i.Username,
-		&i.Email,
-		&i.Birth,
-		&i.Gender,
-		&i.IsPrivacy,
-		&i.Disease,
-		&i.Condition,
-		&i.Hashpassword,
-		&i.Certification,
-		&i.ResetPasswordAt,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
+	var i GetLoginRow
+	err := row.Scan(&i.UserID, &i.Hashpassword)
 	return i, err
 }
 
