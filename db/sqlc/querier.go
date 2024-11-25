@@ -30,7 +30,7 @@ type Querier interface {
 	GetAllBookmarks(ctx context.Context, userID uuid.UUID) ([]Bookmark, error)
 	GetBlockUserlist(ctx context.Context, userID uuid.UUID) ([]Blockuser, error)
 	GetCommentsList(ctx context.Context, postID uuid.UUID) ([]Comment, error)
-	GetLogin(ctx context.Context, email string) (User, error)
+	GetLogin(ctx context.Context, email string) (GetLoginRow, error)
 	GetNotification(ctx context.Context, userID uuid.UUID) ([]Notification, error)
 	GetPasswordToAdminLogin(ctx context.Context, email string) (string, error)
 	GetPostOfKeywords(ctx context.Context, dollar_1 string) ([]Post, error)
