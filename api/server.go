@@ -55,6 +55,7 @@ func (server *Server) GinRequest() {
 	r.Use(GinLogger())
 	r.Use(cors.Default())
 
+	// User
 	r.POST("/users", server.CreateUser)
 	r.DELETE("/users/:id", server.DeleteUser)
 	r.GET("/users/:id", server.GetUserData)
@@ -65,9 +66,12 @@ func (server *Server) GinRequest() {
 	r.PUT("/users/:id/name", server.UpdateName)
 	r.GET("/login", server.LoginUser)
 
+	// post
 	r.GET("/getposts", server.GetAllPost)
 	r.POST("/createpost", server.CreatePost)
 	r.DELETE("/delpost", server.DeletePost)
+
+	// comment
 
 	server.router = r
 }
