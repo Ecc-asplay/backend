@@ -20,7 +20,7 @@ func CreateRandomPost(t *testing.T, user User) Post {
 		Wsize = append(Wsize, size)
 	}
 
-	data := []map[string]interface{}{
+	contentData := []map[string]interface{}{
 		{
 			"type": "paragraph",
 			"children": []map[string]interface{}{
@@ -118,7 +118,49 @@ func CreateRandomPost(t *testing.T, user User) Post {
 			},
 		},
 	}
-	jsonData, err := json.MarshalIndent(data, "", "  ")
+	contentJson, err := json.MarshalIndent(contentData, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	img := [][]byte{
+		gofakeit.ImageJpeg(100, 100),
+		gofakeit.ImageJpeg(100, 100),
+		gofakeit.ImageJpeg(100, 100),
+		gofakeit.ImageJpeg(100, 100),
+		gofakeit.ImageJpeg(100, 100),
+	}
+
+	// imageData 數據結構
+	imageData := []map[string]interface{}{
+		{
+			"page":   1,
+			"image1": img[0],
+			"image2": img[1],
+			"image3": img[2],
+			"image4": img[3],
+			"image5": img[4],
+		},
+		{
+			"page":   2,
+			"image1": img[0],
+			"image2": img[1],
+			"image3": img[2],
+			"image4": img[3],
+			"image5": img[4],
+		},
+		{
+			"page":   3,
+			"image1": img[0],
+			"image2": img[1],
+			"image3": img[2],
+			"image4": img[3],
+			"image5": img[4],
+		},
+	}
+
+	// 將 imageData 序列化為 JSON 格式
+	imageJson, err := json.MarshalIndent(imageData, "", "  ")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -129,7 +171,8 @@ func CreateRandomPost(t *testing.T, user User) Post {
 		ShowID:      util.RandomString(10),
 		Title:       gofakeit.BookTitle(),
 		Feel:        util.RandomMood(),
-		Content:     jsonData,
+		Content:     contentJson,
+		Images:      imageJson,
 		Reaction:    rand.Int31(),
 		IsSensitive: util.RandomBool(),
 		Status:      util.RandomStatus(),
@@ -177,7 +220,7 @@ func TestGetPostOfKeywords(t *testing.T) {
 		Wsize = append(Wsize, size)
 	}
 
-	data := []map[string]interface{}{
+	contentData := []map[string]interface{}{
 		{
 			"type": "paragraph",
 			"children": []map[string]interface{}{
@@ -275,7 +318,39 @@ func TestGetPostOfKeywords(t *testing.T) {
 			},
 		},
 	}
-	jsonData, err := json.MarshalIndent(data, "", "  ")
+	contentJson, err := json.MarshalIndent(contentData, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	img := [][]byte{gofakeit.ImageJpeg(200, 200), gofakeit.ImageJpeg(200, 200), gofakeit.ImageJpeg(200, 200), gofakeit.ImageJpeg(200, 200), gofakeit.ImageJpeg(200, 200)}
+	imageData := []map[string]interface{}{
+		{
+			"page":   1,
+			"image1": img[0],
+			"image2": img[1],
+			"image3": img[2],
+			"image4": img[3],
+			"image5": img[4],
+		},
+		{
+			"page":   2,
+			"image1": img[0],
+			"image2": img[1],
+			"image3": img[2],
+			"image4": img[3],
+			"image5": img[4],
+		},
+		{
+			"page":   3,
+			"image1": img[0],
+			"image2": img[1],
+			"image3": img[2],
+			"image4": img[3],
+			"image5": img[4],
+		},
+	}
+	imageJson, err := json.MarshalIndent(imageData, "", "  ")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -286,7 +361,8 @@ func TestGetPostOfKeywords(t *testing.T) {
 		ShowID:      util.RandomString(10),
 		Title:       "aaaaaaaaaaaaaaaaaaaa",
 		Feel:        util.RandomMood(),
-		Content:     jsonData,
+		Content:     contentJson,
+		Images:      imageJson,
 		Reaction:    rand.Int31(),
 		IsSensitive: util.RandomBool(),
 		Status:      util.RandomStatus(),
@@ -338,7 +414,7 @@ func TestUpdatePosts(t *testing.T) {
 		Wsize = append(Wsize, size)
 	}
 
-	data := []map[string]interface{}{
+	contentData := []map[string]interface{}{
 		{
 			"type": "paragraph",
 			"children": []map[string]interface{}{
@@ -436,7 +512,38 @@ func TestUpdatePosts(t *testing.T) {
 			},
 		},
 	}
-	jsonData, err := json.MarshalIndent(data, "", "  ")
+	contentJson, err := json.MarshalIndent(contentData, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+	img := [][]byte{gofakeit.ImageJpeg(200, 200), gofakeit.ImageJpeg(200, 200), gofakeit.ImageJpeg(200, 200), gofakeit.ImageJpeg(200, 200), gofakeit.ImageJpeg(200, 200)}
+	imageData := []map[string]interface{}{
+		{
+			"page":   1,
+			"image1": img[0],
+			"image2": img[1],
+			"image3": img[2],
+			"image4": img[3],
+			"image5": img[4],
+		},
+		{
+			"page":   2,
+			"image1": img[0],
+			"image2": img[1],
+			"image3": img[2],
+			"image4": img[3],
+			"image5": img[4],
+		},
+		{
+			"page":   3,
+			"image1": img[0],
+			"image2": img[1],
+			"image3": img[2],
+			"image4": img[3],
+			"image5": img[4],
+		},
+	}
+	imageJson, err := json.MarshalIndent(imageData, "", "  ")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -447,7 +554,8 @@ func TestUpdatePosts(t *testing.T) {
 		ShowID:      util.RandomString(10),
 		Title:       gofakeit.BookTitle(),
 		Feel:        util.RandomMood(),
-		Content:     jsonData,
+		Content:     contentJson,
+		Images:      imageJson,
 		Reaction:    rand.Int31(),
 		IsSensitive: util.RandomBool(),
 	}

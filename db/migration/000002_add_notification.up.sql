@@ -3,5 +3,5 @@ CREATE TABLE "notification" (
     "content" VARCHAR NOT NULL,
     "icon" BYTEA NOT NULL,
     "is_read" BOOL NOT NULL DEFAULT FALSE,
-    "created_at" TIMESTAMP NOT NULL DEFAULT (NOW())
+    "created_at" TIMESTAMP(0) NOT NULL DEFAULT NOW()
 );
