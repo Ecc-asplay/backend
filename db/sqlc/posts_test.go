@@ -167,6 +167,12 @@ func TestDeletePost(t *testing.T) {
 
 	err := testQueries.DeletePost(context.Background(), delete)
 	require.NoError(t, err)
+
+	img, err := testQueries.GetImage(context.Background(), post.PostID)
+	if img != nil {
+		err = testQueries.DeleteImage(context.Background(), post.PostID)
+		require.NoError(t, err)
+	}
 }
 
 func TestGetPostOfKeywords(t *testing.T) {

@@ -127,15 +127,15 @@ func (q *Queries) GetCommentsList(ctx context.Context, postID uuid.UUID) ([]Comm
 const updateComments = `-- name: UpdateComments :one
 UPDATE COMMENTS
 SET
-    STATUS = $2,
-    IS_PUBLIC = $3,
-    COMMENTS = $4,
-    REACTION = $5,
-    IS_CENSORED = $6,
-    UPDATED_AT = NOW(
-    )
+    STATUS = COALESCE($2, STATUS),
+    IS_PUBLIC = COALESCE($3, IS_PUBLIC),
+    COMMENTS = COALESCE($4, COMMENTS),
+    REACTION = COALESCE($5, REACTION),
+    IS_CENSORED = COALESCE($6, IS_CENSORED),
+    UPDATED_AT = NOW()
 WHERE
-    COMMENT_ID = $1 RETURNING comment_id, user_id, post_id, status, is_public, comments, reaction, is_censored, created_at, updated_at
+    COMMENT_ID = $1
+RETURNING comment_id, user_id, post_id, status, is_public, comments, reaction, is_censored, created_at, updated_at
 `
 
 type UpdateCommentsParams struct {
