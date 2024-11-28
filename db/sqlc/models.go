@@ -60,6 +60,7 @@ type Post struct {
 	Title       string           `json:"title"`
 	Feel        string           `json:"feel"`
 	Content     []byte           `json:"content"`
+	Images      []byte           `json:"images"`
 	Reaction    int32            `json:"reaction"`
 	IsSensitive bool             `json:"is_sensitive"`
 	Status      string           `json:"status"`
