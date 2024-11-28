@@ -1,7 +1,6 @@
 package api
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -92,9 +91,9 @@ func (s *Server) GetAllPost(ctx *gin.Context) {
 	// 		img[pageIndex][4] = image5
 	// 	}
 	// }
-	log.Println(post[1].CreatedAt)
+	// log.Println(post[1].CreatedAt)
 
-	ctx.JSON(http.StatusOK, gin.H{})
+	ctx.JSON(http.StatusOK, post)
 }
 
 func (s *Server) GetPostOfKeywords(ctx *gin.Context) {
