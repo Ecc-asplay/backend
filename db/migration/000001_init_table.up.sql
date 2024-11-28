@@ -21,7 +21,6 @@ CREATE TABLE "posts" (
     "title" VARCHAR NOT NULL,
     "feel" VARCHAR NOT NULL,
     "content" JSONB NOT NULL,
-    "images" JSONB,
     "reaction" INT NOT NULL,
     "is_sensitive" BOOLEAN NOT NULL DEFAULT FALSE,
     "status" VARCHAR NOT NULL,

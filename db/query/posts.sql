@@ -6,7 +6,6 @@ INSERT INTO POSTS (
     TITLE,
     FEEL,
     CONTENT,
-    IMAGES,
     REACTION,
     IS_SENSITIVE,
     STATUS
@@ -19,8 +18,7 @@ INSERT INTO POSTS (
     $6,
     $7,
     $8,
-    $9,
-    $10
+    $9
 ) RETURNING *;
 
 -- name: GetUserAllPosts :many
@@ -67,9 +65,8 @@ SET
     TITLE = $4,
     FEEL = $5,
     CONTENT = $6,
-    IMAGES = $7,
-    REACTION = $8,
-    IS_SENSITIVE = $9,
+    REACTION = $7,
+    IS_SENSITIVE = $8,
     UPDATED_AT = NOW(
     )
 WHERE
