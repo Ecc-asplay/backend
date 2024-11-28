@@ -15,14 +15,25 @@ import (
 	"github.com/Ecc-asplay/backend/util"
 )
 
-// CREATEとDELETEの処理は触らない
-// 冗長なコードは後で直す
 type User struct {
 	Username string      `json:"username" binding:"required"`
 	Email    string      `json:"email" binding:"required"`
 	Birth    pgtype.Date `json:"birth" binding:"required"`
 	Gender   string      `json:"gender"`
 	Password string      `json:"password" binding:"required"`
+}
+
+func getUserID(ctx *gin.Context) (uuid.UUID, error) {
+	userIDStr := ctx.Param("id")
+	return uuid.Parse(userIDStr)
+}
+
+func handleDBError(ctx *gin.Context, err error) {
+	if errors.Is(err, sql.ErrNoRows) {
+		ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user not found")))
+	} else {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+	}
 }
 
 func (s *Server) CreateUser(ctx *gin.Context) {
@@ -60,17 +71,25 @@ func (s *Server) CreateUser(ctx *gin.Context) {
 }
 
 func (s *Server) DeleteUser(ctx *gin.Context) {
-	userID, err := uuid.Parse(ctx.Param("id"))
+	userID, err := getUserID(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
-	// URLから取得したidでEmailを取得する(GetUserData使用)
+	user, err := s.store.GetUserData(ctx, userID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
+		} else {
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		}
+		return
+	}
 
 	data := db.DeleteUserParams{
 		UserID: userID,
-		Email:  ctx.Query("email"), // パラムなのでURLに記述しないと取得できない
+		Email:  user.Email,
 	}
 
 	err = s.store.DeleteUser(ctx, data)
@@ -83,26 +102,22 @@ func (s *Server) DeleteUser(ctx *gin.Context) {
 }
 
 func (s *Server) GetUserData(ctx *gin.Context) {
-	userid, err := uuid.Parse(ctx.Param("id"))
+	userID, err := getUserID(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
-	user, err := s.store.GetUserData(ctx, userid)
+	user, err := s.store.GetUserData(ctx, userID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user not found")))
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 	ctx.JSON(http.StatusOK, user)
 }
 
 func (s *Server) ResetPassword(ctx *gin.Context) {
-	userID, err := uuid.Parse(ctx.Param("id"))
+	userID, err := getUserID(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -131,7 +146,7 @@ func (s *Server) ResetPassword(ctx *gin.Context) {
 
 	err = s.store.ResetPassword(ctx, arg)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -139,7 +154,7 @@ func (s *Server) ResetPassword(ctx *gin.Context) {
 }
 
 func (s *Server) UpdateDiseaseAndCondition(ctx *gin.Context) {
-	userID, err := uuid.Parse(ctx.Param("id"))
+	userID, err := getUserID(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -162,11 +177,7 @@ func (s *Server) UpdateDiseaseAndCondition(ctx *gin.Context) {
 
 	err = s.store.UpdateDiseaseAndCondition(ctx, arg)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user not found")))
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -174,7 +185,7 @@ func (s *Server) UpdateDiseaseAndCondition(ctx *gin.Context) {
 }
 
 func (s *Server) UpdateEmail(ctx *gin.Context) {
-	userID, err := uuid.Parse(ctx.Param("id"))
+	userID, err := getUserID(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -195,11 +206,7 @@ func (s *Server) UpdateEmail(ctx *gin.Context) {
 
 	err = s.store.UpdateEmail(ctx, arg)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user not found")))
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -207,7 +214,7 @@ func (s *Server) UpdateEmail(ctx *gin.Context) {
 }
 
 func (s *Server) UpdateIsPrivacy(ctx *gin.Context) {
-	userID, err := uuid.Parse(ctx.Param("id"))
+	userID, err := getUserID(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -229,51 +236,42 @@ func (s *Server) UpdateIsPrivacy(ctx *gin.Context) {
 
 	err = s.store.UpdateIsPrivacy(ctx, arg)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user not found")))
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "privacy setting updated successfully"})
 }
 
-// エラーがでているのでいったん無視する
-// func (s *Server) UpdateName(ctx *gin.Context) {
-// 	userID, err := uuid.Parse(ctx.Param("id"))
-// 	if err != nil {
-// 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-// 		return
-// 	}
+func (s *Server) UpdateName(ctx *gin.Context) {
+	userID, err := getUserID(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
 
-// 	var req struct {
-// 		NewUsername string `json:"new_username" binding:"required"`
-// 	}
+	var req struct {
+		NewUsername string `json:"new_username" binding:"required"`
+	}
 
-// 	if err := ctx.ShouldBindJSON(&req); err != nil {
-// 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-// 		return
-// 	}
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
 
-// 	arg := db.UpdateNameParams{
-// 		UserID:   userID,
-// 		Username: req.NewUsername,
-// 	}
+	arg := db.UpdateNameParams{
+		UserID:   userID,
+		Username: req.NewUsername,
+	}
 
-// 	err = s.store.UpdateName(ctx, arg)
-// 	if err != nil {
-// 		if errors.Is(err, sql.ErrNoRows) {
-// 			ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user not found")))
-// 			return
-// 		}
-// 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-// 		return
-// 	}
+	_, err = s.store.UpdateName(ctx, arg)
+	if err != nil {
+		handleDBError(ctx, err)
+		return
+	}
 
-// 	ctx.JSON(http.StatusOK, gin.H{"status": "username updated successfully"})
-// }
+	ctx.JSON(http.StatusOK, gin.H{"status": "username updated successfully"})
+}
 
 func (s *Server) LoginUser(ctx *gin.Context) {
 
@@ -311,11 +309,7 @@ func (s *Server) LoginUser(ctx *gin.Context) {
 	// ユーザー情報を取得
 	user, err := s.store.GetUserData(ctx, hashedPassword.UserID)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user not found")))
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -337,6 +331,7 @@ func (s *Server) LoginUser(ctx *gin.Context) {
 	Token, err := s.store.CreateToken(ctx, tokenData)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{
 		"token":    Token.ID,
