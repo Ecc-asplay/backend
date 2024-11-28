@@ -339,6 +339,7 @@ func (s *Server) LoginUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 	}
 	ctx.JSON(http.StatusOK, gin.H{
-		"token": Token.ID,
+		"token":    Token.ID,
+		"login_at": Token.TakeAt,
 	})
 }
