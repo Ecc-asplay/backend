@@ -123,48 +123,6 @@ func CreateRandomPost(t *testing.T, user User) Post {
 		log.Fatal(err)
 	}
 
-	img := [][]byte{
-		gofakeit.ImageJpeg(100, 100),
-		gofakeit.ImageJpeg(100, 100),
-		gofakeit.ImageJpeg(100, 100),
-		gofakeit.ImageJpeg(100, 100),
-		gofakeit.ImageJpeg(100, 100),
-	}
-
-	// imageData 數據結構
-	imageData := []map[string]interface{}{
-		{
-			"page":   1,
-			"image1": img[0],
-			"image2": img[1],
-			"image3": img[2],
-			"image4": img[3],
-			"image5": img[4],
-		},
-		{
-			"page":   2,
-			"image1": img[0],
-			"image2": img[1],
-			"image3": img[2],
-			"image4": img[3],
-			"image5": img[4],
-		},
-		{
-			"page":   3,
-			"image1": img[0],
-			"image2": img[1],
-			"image3": img[2],
-			"image4": img[3],
-			"image5": img[4],
-		},
-	}
-
-	// 將 imageData 序列化為 JSON 格式
-	imageJson, err := json.MarshalIndent(imageData, "", "  ")
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	newPost := CreatePostParams{
 		PostID:      util.CreateUUID(),
 		UserID:      user.UserID,
@@ -172,7 +130,6 @@ func CreateRandomPost(t *testing.T, user User) Post {
 		Title:       gofakeit.BookTitle(),
 		Feel:        util.RandomMood(),
 		Content:     contentJson,
-		Images:      imageJson,
 		Reaction:    rand.Int31(),
 		IsSensitive: util.RandomBool(),
 		Status:      util.RandomStatus(),
@@ -323,38 +280,6 @@ func TestGetPostOfKeywords(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	img := [][]byte{gofakeit.ImageJpeg(200, 200), gofakeit.ImageJpeg(200, 200), gofakeit.ImageJpeg(200, 200), gofakeit.ImageJpeg(200, 200), gofakeit.ImageJpeg(200, 200)}
-	imageData := []map[string]interface{}{
-		{
-			"page":   1,
-			"image1": img[0],
-			"image2": img[1],
-			"image3": img[2],
-			"image4": img[3],
-			"image5": img[4],
-		},
-		{
-			"page":   2,
-			"image1": img[0],
-			"image2": img[1],
-			"image3": img[2],
-			"image4": img[3],
-			"image5": img[4],
-		},
-		{
-			"page":   3,
-			"image1": img[0],
-			"image2": img[1],
-			"image3": img[2],
-			"image4": img[3],
-			"image5": img[4],
-		},
-	}
-	imageJson, err := json.MarshalIndent(imageData, "", "  ")
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	newPost := CreatePostParams{
 		PostID:      util.CreateUUID(),
 		UserID:      user.UserID,
@@ -362,7 +287,6 @@ func TestGetPostOfKeywords(t *testing.T) {
 		Title:       "aaaaaaaaaaaaaaaaaaaa",
 		Feel:        util.RandomMood(),
 		Content:     contentJson,
-		Images:      imageJson,
 		Reaction:    rand.Int31(),
 		IsSensitive: util.RandomBool(),
 		Status:      util.RandomStatus(),
@@ -516,37 +440,6 @@ func TestUpdatePosts(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	img := [][]byte{gofakeit.ImageJpeg(200, 200), gofakeit.ImageJpeg(200, 200), gofakeit.ImageJpeg(200, 200), gofakeit.ImageJpeg(200, 200), gofakeit.ImageJpeg(200, 200)}
-	imageData := []map[string]interface{}{
-		{
-			"page":   1,
-			"image1": img[0],
-			"image2": img[1],
-			"image3": img[2],
-			"image4": img[3],
-			"image5": img[4],
-		},
-		{
-			"page":   2,
-			"image1": img[0],
-			"image2": img[1],
-			"image3": img[2],
-			"image4": img[3],
-			"image5": img[4],
-		},
-		{
-			"page":   3,
-			"image1": img[0],
-			"image2": img[1],
-			"image3": img[2],
-			"image4": img[3],
-			"image5": img[4],
-		},
-	}
-	imageJson, err := json.MarshalIndent(imageData, "", "  ")
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	updateData := UpdatePostsParams{
 		UserID:      user.UserID,
@@ -555,7 +448,6 @@ func TestUpdatePosts(t *testing.T) {
 		Title:       gofakeit.BookTitle(),
 		Feel:        util.RandomMood(),
 		Content:     contentJson,
-		Images:      imageJson,
 		Reaction:    rand.Int31(),
 		IsSensitive: util.RandomBool(),
 	}
