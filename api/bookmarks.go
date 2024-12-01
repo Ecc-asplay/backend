@@ -7,7 +7,6 @@ import (
 	"github.com/google/uuid"
 
 	db "github.com/Ecc-asplay/backend/db/sqlc"
-	"github.com/Ecc-asplay/backend/token"
 )
 
 type createBookmarkRequest struct {
@@ -21,11 +20,11 @@ func (s *Server) CreateBookmark(ctx *gin.Context) {
 		return
 	}
 
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	// authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
 	data := db.CreateBookmarksParams{
 		PostID: req.PostID,
-		UserID: authPayload.UserID,
+		// UserID: authPayload.UserID,
 	}
 
 	bookmark, err := s.store.CreateBookmarks(ctx, data)
