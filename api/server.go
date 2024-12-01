@@ -67,13 +67,16 @@ func (server *Server) GinRequest() {
 	r.POST("/login", server.LoginUser)
 
 	// Posts
-	r.GET("/getposts", server.GetAllPost)
-	r.POST("/createpost", server.CreatePost)
-	r.DELETE("/delpost", server.DeletePost)
+	r.GET("/post/getall", server.GetAllPost)
+	r.POST("/post/crete", server.CreatePost)
+	r.DELETE("/post/del", server.DeletePost)
 
 	// Tag
-	r.POST("/addtag", server.CreateTag)
-	r.POST("/gettag", server.GetTag)
+	r.POST("/tag/add", server.CreateTag)
+	r.POST("/tag/get", server.GetTag)
+
+	// Bookmarks
+	r.POST("/bookmark/create", server.)
 
 	server.router = r
 }
