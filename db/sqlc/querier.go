@@ -28,6 +28,7 @@ type Querier interface {
 	DeleteImage(ctx context.Context, postID uuid.UUID) error
 	DeletePost(ctx context.Context, arg DeletePostParams) error
 	DeleteUser(ctx context.Context, arg DeleteUserParams) error
+	GetAdminLogin(ctx context.Context, email string) (string, error)
 	GetAllBlockUsersList(ctx context.Context) ([]Blockuser, error)
 	GetAllBookmarks(ctx context.Context, userID uuid.UUID) ([]Bookmark, error)
 	GetBlockUserlist(ctx context.Context, userID uuid.UUID) ([]Blockuser, error)
@@ -35,7 +36,6 @@ type Querier interface {
 	GetImage(ctx context.Context, postID uuid.UUID) ([]Image, error)
 	GetLogin(ctx context.Context, email string) (GetLoginRow, error)
 	GetNotification(ctx context.Context, userID uuid.UUID) ([]Notification, error)
-	GetPasswordToAdminLogin(ctx context.Context, email string) (string, error)
 	GetPostOfKeywords(ctx context.Context, dollar_1 string) ([]Post, error)
 	GetPostsList(ctx context.Context) ([]Post, error)
 	GetSearchedRecordList(ctx context.Context) ([]Searchrecord, error)

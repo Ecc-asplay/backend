@@ -4,8 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/Ecc-asplay/backend/util"
 	"github.com/stretchr/testify/require"
+
+	"github.com/Ecc-asplay/backend/util"
 )
 
 func CreateRandomTag(t *testing.T, user User, post Post) Tag {
@@ -36,15 +37,17 @@ func TestGetTag(t *testing.T) {
 
 	tagData := CreateTagParams{
 		PostID:      post.PostID,
-		TagComments: "aaaaaaaabbbbbbbbbccccccc",
+		TagComments: "yyyy",
 	}
+
 	newtag, err := testQueries.CreateTag(context.Background(), tagData)
 	require.NoError(t, err)
 	require.NotEmpty(t, newtag)
 	require.Equal(t, newtag.PostID, post.PostID)
 	require.Equal(t, newtag.TagComments, tagData.TagComments)
 
-	foundTag, err := testQueries.GetTag(context.Background(), "a")
+	foundTag, err := testQueries.GetTag(context.Background(), "y")
 	require.NoError(t, err)
 	require.NotEmpty(t, foundTag)
+	require.Greater(t, len(foundTag), 0)
 }

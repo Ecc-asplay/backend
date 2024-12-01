@@ -11,7 +11,7 @@ INSERT INTO ADMINUSER (
     $4
 ) RETURNING *;
 
--- name: GetPasswordToAdminLogin :one
+-- name: GetAdminLogin :one
 SELECT
     HASHPASSWORD
 FROM

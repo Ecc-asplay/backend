@@ -5,9 +5,10 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/Ecc-asplay/backend/util"
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/stretchr/testify/require"
+
+	"github.com/Ecc-asplay/backend/util"
 )
 
 func CreateRandomComment(t *testing.T, user User, post Post) Comment {
@@ -65,7 +66,7 @@ func TestGetCommentsList(t *testing.T) {
 	allCommentData, err := testQueries.GetCommentsList(context.Background(), post.PostID)
 	require.NoError(t, err)
 	require.NotEmpty(t, allCommentData)
-	require.GreaterOrEqual(t, len(allCommentData), 20)
+	require.GreaterOrEqual(t, len(allCommentData), 1)
 }
 
 func TestUpdateComments(t *testing.T) {

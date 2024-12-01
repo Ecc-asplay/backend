@@ -56,4 +56,5 @@ func TestGetAllBookmarks(t *testing.T) {
 	allBm, err := testQueries.GetAllBookmarks(context.Background(), user1.UserID)
 	require.NoError(t, err)
 	require.NotEmpty(t, allBm)
+	require.GreaterOrEqual(t, len(allBm), 1)
 }
