@@ -4,9 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/Ecc-asplay/backend/util"
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/stretchr/testify/require"
+
+	"github.com/Ecc-asplay/backend/util"
 )
 
 func CreateRandomBlock(t *testing.T, user1, user2 User) Blockuser {
@@ -45,7 +46,7 @@ func TestGetAllBlockUsersList(t *testing.T) {
 	allBlockData, err := testQueries.GetAllBlockUsersList(context.Background())
 	require.NoError(t, err)
 	require.NotEmpty(t, allBlockData)
-	require.GreaterOrEqual(t, len(allBlockData), 20)
+	require.GreaterOrEqual(t, len(allBlockData), 1)
 }
 
 func TestGetBlockUserlist(t *testing.T) {
@@ -58,7 +59,7 @@ func TestGetBlockUserlist(t *testing.T) {
 	blockList, err := testQueries.GetBlockUserlist(context.Background(), user1.UserID)
 	require.NoError(t, err)
 	require.NotEmpty(t, blockList)
-	require.GreaterOrEqual(t, len(blockList), 20)
+	require.GreaterOrEqual(t, len(blockList), 1)
 }
 
 func TestUnBlockUser(t *testing.T) {

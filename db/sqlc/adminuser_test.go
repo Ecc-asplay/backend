@@ -5,9 +5,10 @@ import (
 	"log"
 	"testing"
 
-	"github.com/Ecc-asplay/backend/util"
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/stretchr/testify/require"
+
+	"github.com/Ecc-asplay/backend/util"
 )
 
 func CreateRandomAdminUser() CreateAdminUserParams {
@@ -37,14 +38,14 @@ func TestCreateAdminUser(t *testing.T) {
 	require.Equal(t, data.Department, admin.Department)
 }
 
-func TestGetPasswordToAdminLogin(t *testing.T) {
+func TestGetAdminLogin(t *testing.T) {
 	data := CreateRandomAdminUser()
 	_, err := testQueries.CreateAdminUser(context.Background(), data)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	Login, err := testQueries.GetPasswordToAdminLogin(context.Background(), data.Email)
+	Login, err := testQueries.GetAdminLogin(context.Background(), data.Email)
 	require.NoError(t, err)
 	require.Equal(t, data.Hashpassword, Login)
 }

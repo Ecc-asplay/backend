@@ -54,45 +54,6 @@ func (s *Server) GetAllPost(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-
-	// var imageData2 []map[string]interface{}
-	// err1 := json.Unmarshal(post[0].Images, &imageData2)
-	// if err1 != nil {
-	// 	log.Fatalf("Error decoding JSON: %v", err1)
-	// }
-
-	// var img [][][]byte // [] <= page , [] <= img number , []byte
-
-	// for _, pageData := range imageData2 {
-	// 	page := pageData["page"].(string)
-	// 	image1 := pageData["image1"].([]byte)
-	// 	image2 := pageData["image2"].([]byte)
-	// 	image3 := pageData["image3"].([]byte)
-	// 	image4 := pageData["image4"].([]byte)
-	// 	image5 := pageData["image5"].([]byte)
-
-	// 	pageIndex := -1
-	// 	switch page {
-	// 	case "1":
-	// 		pageIndex = 0
-	// 	case "2":
-	// 		pageIndex = 1
-	// 	case "3":
-	// 		pageIndex = 2
-	// 	}
-	// 	if pageIndex >= 0 {
-	// 		if len(img) <= pageIndex {
-	// 			img = append(img, make([][]byte, 5))
-	// 		}
-	// 		img[pageIndex][0] = image1
-	// 		img[pageIndex][1] = image2
-	// 		img[pageIndex][2] = image3
-	// 		img[pageIndex][3] = image4
-	// 		img[pageIndex][4] = image5
-	// 	}
-	// }
-	// log.Println(post[1].CreatedAt)
-
 	ctx.JSON(http.StatusOK, post)
 }
 
@@ -113,7 +74,6 @@ func (s *Server) GetPostOfKeywords(ctx *gin.Context) {
 }
 
 // Delete
-
 type DeletePostRequest struct {
 	UserID uuid.UUID `json:"user_id"`
 	PostID uuid.UUID `json:"post_id"`

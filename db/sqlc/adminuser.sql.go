@@ -59,7 +59,7 @@ func (q *Queries) DeleteAdminUser(ctx context.Context, email string) error {
 	return err
 }
 
-const getPasswordToAdminLogin = `-- name: GetPasswordToAdminLogin :one
+const getAdminLogin = `-- name: GetAdminLogin :one
 SELECT
     HASHPASSWORD
 FROM
@@ -68,8 +68,8 @@ WHERE
     EMAIL = $1 LIMIT 1
 `
 
-func (q *Queries) GetPasswordToAdminLogin(ctx context.Context, email string) (string, error) {
-	row := q.db.QueryRow(ctx, getPasswordToAdminLogin, email)
+func (q *Queries) GetAdminLogin(ctx context.Context, email string) (string, error) {
+	row := q.db.QueryRow(ctx, getAdminLogin, email)
 	var hashpassword string
 	err := row.Scan(&hashpassword)
 	return hashpassword, err

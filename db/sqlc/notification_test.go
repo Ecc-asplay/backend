@@ -42,6 +42,7 @@ func TestGetNotification(t *testing.T) {
 	allNotif, err := testQueries.GetNotification(context.Background(), user.UserID)
 	require.NoError(t, err)
 	require.NotEmpty(t, allNotif)
+	require.GreaterOrEqual(t, len(allNotif), 1)
 }
 
 func TestUpdateNotification(t *testing.T) {

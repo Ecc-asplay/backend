@@ -305,6 +305,7 @@ func TestGetPostOfKeywords(t *testing.T) {
 	foundPost, err := testQueries.GetPostOfKeywords(context.Background(), "a")
 	require.NoError(t, err)
 	require.NotEmpty(t, foundPost)
+	require.GreaterOrEqual(t, len(foundPost), 1)
 }
 
 func TestGetPostsList(t *testing.T) {
