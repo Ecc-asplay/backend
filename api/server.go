@@ -59,7 +59,7 @@ func (server *Server) GinRequest() {
 	r.POST("/login", server.LoginUser)
 	r.GET("/getposts", server.GetAllPost)
 
-	authRoutes := r.Group("/").Use(authMiddleware(server.tokenMaker))
+	// authRoutes := r.Group("/").Use(authMiddleware(server.tokenMaker))
 
 	// User
 	r.DELETE("/users/:id", server.DeleteUser)
@@ -79,7 +79,7 @@ func (server *Server) GinRequest() {
 	r.POST("/gettag", server.GetTag)
 
 	// bookmark
-	authRoutes.POST("createbookmark", server.CreateBookmark)
+	r.POST("createbookmark", server.CreateBookmark)
 
 	server.router = r
 }
