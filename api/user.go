@@ -13,7 +13,6 @@ import (
 
 	db "github.com/Ecc-asplay/backend/db/sqlc"
 	"github.com/Ecc-asplay/backend/util"
-
 )
 
 type User struct {
@@ -335,7 +334,8 @@ func (s *Server) LoginUser(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{
-		"token":    Token.ID,
-		"login_at": Token.TakeAt,
+		"token":        Token.ID,
+		"access_token": accessToken,
+		"login_at":     Token.TakeAt,
 	})
 }

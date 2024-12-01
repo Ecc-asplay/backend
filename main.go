@@ -22,7 +22,7 @@ func main() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
 	// env Data 取る
-	config, err := util.LoadConfig("./")
+	config, err := util.LoadConfig("app.env")
 	if err != nil {
 		log.Info().Msg("app.env cannot find")
 	}
@@ -34,6 +34,7 @@ func main() {
 
 	// migration 実行
 	initMigration(config.MigrationURL, config.DBSource)
+
 	// DB 起動
 	store := db.NewStore(conn)
 
