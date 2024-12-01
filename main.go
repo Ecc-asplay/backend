@@ -22,10 +22,11 @@ func main() {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
 	// env Data 取る
-	config, err := util.LoadConfig("app.env")
+	config, err := util.LoadConfig("./")
 	if err != nil {
 		log.Info().Msg("app.env cannot find")
 	}
+
 	// psql 接続
 	conn, err := pgxpool.New(context.Background(), config.DBSource)
 	if err != nil {
