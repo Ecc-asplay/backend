@@ -72,6 +72,10 @@ func (server *Server) GinRequest() {
 	r.DELETE("/delpost", server.DeletePost)
 
 	// comment
+	r.GET("/getcommentlist", server.GetCommentsList)
+	r.POST("/createcomment", server.CreateComment)
+	r.PUT("/updatecomment", server.UpdateComments)
+	r.PUT("/deletecomment/:comment_id", server.DeleteComments)
 
 	server.router = r
 }
