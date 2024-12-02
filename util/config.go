@@ -10,6 +10,8 @@ type Config struct {
 	Environment         string        `mapstructure:"ENVIRONMENT"`
 	DBDriver            string        `mapstructure:"DB_DRIVER"`
 	DBSource            string        `mapstructure:"DB_SOURCE"`
+	FrontAddress        []string      `mapstructure:"FRONT_ADDRESS"`
+	AllowHeaders        []string      `mapstructure:"ALLOW_HEADERS"`
 	RedisAddress        string        `mapstructure:"REDIS_ADDRESS"`
 	RedisPassword       string        `mapstructure:"REDIS_PASSWORD"`
 	MigrationURL        string        `mapstructure:"MIGRATION_URL"`
