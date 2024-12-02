@@ -46,7 +46,7 @@ func TestGetTag(t *testing.T) {
 	require.Equal(t, newtag.PostID, post.PostID)
 	require.Equal(t, newtag.TagComments, tagData.TagComments)
 
-	foundTag, err := testQueries.GetTag(context.Background(), "y")
+	foundTag, err := testQueries.FindTag(context.Background(), "y")
 	require.NoError(t, err)
 	require.NotEmpty(t, foundTag)
 	require.Greater(t, len(foundTag), 0)

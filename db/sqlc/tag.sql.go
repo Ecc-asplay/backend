@@ -33,7 +33,7 @@ func (q *Queries) CreateTag(ctx context.Context, arg CreateTagParams) (Tag, erro
 	return i, err
 }
 
-const getTag = `-- name: GetTag :many
+const findTag = `-- name: FindTag :many
 SELECT
     TAG_COMMENTS
 FROM
@@ -44,8 +44,8 @@ WHERE
                       || '%'
 `
 
-func (q *Queries) GetTag(ctx context.Context, dollar_1 string) ([]string, error) {
-	rows, err := q.db.Query(ctx, getTag, dollar_1)
+func (q *Queries) FindTag(ctx context.Context, dollar_1 string) ([]string, error) {
+	rows, err := q.db.Query(ctx, findTag, dollar_1)
 	if err != nil {
 		return nil, err
 	}

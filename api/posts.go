@@ -1,10 +1,14 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 
 	db "github.com/Ecc-asplay/backend/db/sqlc"
 )
@@ -49,15 +53,46 @@ func (s *Server) CreatePost(ctx *gin.Context) {
 
 // Get
 func (s *Server) GetAllPost(ctx *gin.Context) {
-	post, err := s.store.GetPostsList(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+	allPosts, err := s.redis.Get("AllPosts").Result()
+	if err != nil && err != redis.Nil {
+		handleDBError(ctx, err)
 		return
 	}
-	ctx.JSON(http.StatusOK, post)
+
+	if allPosts != "" {
+		var posts []db.Post
+		err := json.Unmarshal([]byte(allPosts), &posts)
+		if err != nil {
+			handleDBError(ctx, err)
+			return
+		}
+		ctx.JSON(http.StatusOK, posts)
+	} else {
+		post, err := s.store.GetPostsList(ctx)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+			return
+		}
+
+		postJSON, err := json.Marshal(post)
+		if err != nil {
+			handleDBError(ctx, err)
+			return
+		}
+
+		err = s.redis.Set("AllPosts", postJSON, 30*time.Second).Err()
+		if err != nil {
+			handleDBError(ctx, err)
+			return
+		}
+
+		log.Info().Msg("all posts added in Redis")
+
+		ctx.JSON(http.StatusOK, post)
+	}
 }
 
-func (s *Server) GetPostOfKeywords(ctx *gin.Context) {
+func (s *Server) FindPost(ctx *gin.Context) {
 	var req string
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
