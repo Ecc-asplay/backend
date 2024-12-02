@@ -75,8 +75,11 @@ func (server *Server) GinRequest() {
 	r.DELETE("/delpost", server.DeletePost)
 
 	// Tag
-	r.POST("/addtag", server.CreateTag)
-	r.POST("/gettag", server.GetTag)
+	r.POST("/tag/add", server.CreateTag)
+	r.POST("/tag/get", server.GetTag)
+
+	// Bookmarks
+	// r.POST("/bookmark/create", server.)
 
 	// bookmark
 	r.POST("createbookmark", server.CreateBookmark)
