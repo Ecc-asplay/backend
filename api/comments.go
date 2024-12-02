@@ -10,7 +10,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// ?Status項目は必要か?
 // 以下は仮の値
 // "active": コメントが有効で、ユーザーに表示可能な状態。
 // "flagged": コメントが不適切な内容としてフラグされた状態。
@@ -24,7 +23,6 @@ type CreateCommentRequest struct {
 	IsCensored bool      `json:"is_censored"`
 }
 
-// 動作確認済み
 func (s *Server) CreateComment(ctx *gin.Context) {
 	var req CreateCommentRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -52,7 +50,6 @@ func (s *Server) CreateComment(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, comment)
 }
 
-// 未完成
 func (s *Server) GetCommentsList(ctx *gin.Context) {
 	postIDStr := ctx.Param("post_id")
 	postID, err := uuid.Parse(postIDStr)
@@ -77,7 +74,6 @@ type UpdateCommentRequest struct {
 	Reaction  int32     `json:"reaction"`
 }
 
-// 動作確認済み
 func (s *Server) UpdateComments(ctx *gin.Context) {
 	var req UpdateCommentRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
