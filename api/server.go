@@ -78,11 +78,10 @@ func (server *Server) GinRequest() {
 	r.POST("/tag/add", server.CreateTag)
 	r.POST("/tag/get", server.GetTag)
 
-	// Bookmarks
-	// r.POST("/bookmark/create", server.)
-
 	// bookmark
 	r.POST("createbookmark", server.CreateBookmark)
+	r.POST("deletebookmark", server.CreateBookmark)
+	r.POST("getbookmark", server.CreateBookmark)
 
 	server.router = r
 }
