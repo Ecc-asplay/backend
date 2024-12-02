@@ -16,6 +16,7 @@ type CreateTagRequest struct {
 }
 
 func (s *Server) CreateTag(ctx *gin.Context) {
+
 	var req CreateTagRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))

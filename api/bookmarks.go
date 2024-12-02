@@ -7,14 +7,15 @@ import (
 	"github.com/google/uuid"
 
 	db "github.com/Ecc-asplay/backend/db/sqlc"
+	"github.com/Ecc-asplay/backend/token"
 )
 
 type bookmarkRequest struct {
 	PostID uuid.UUID `json:"post_id"`
-	USERID uuid.UUID `json:"user_id"`
 }
 
 func (s *Server) CreateBookmark(ctx *gin.Context) {
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
 	var req bookmarkRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -24,7 +25,7 @@ func (s *Server) CreateBookmark(ctx *gin.Context) {
 
 	data := db.CreateBookmarksParams{
 		PostID: req.PostID,
-		UserID: req.USERID,
+		UserID: authPayload.UserID,
 	}
 
 	createBookmark, err := s.store.CreateBookmarks(ctx, data)
@@ -36,15 +37,17 @@ func (s *Server) CreateBookmark(ctx *gin.Context) {
 }
 
 func (s *Server) DeleteBookmark(ctx *gin.Context) {
+
 	var req bookmarkRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
 	data := db.DeleteBookmarksParams{
 		PostID: req.PostID,
-		UserID: req.USERID,
+		UserID: authPayload.UserID,
 	}
 
 	err := s.store.DeleteBookmarks(ctx, data)
@@ -56,13 +59,15 @@ func (s *Server) DeleteBookmark(ctx *gin.Context) {
 }
 
 func (s *Server) GetBookmark(ctx *gin.Context) {
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
 	var req bookmarkRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
-	bookmark, err := s.store.GetAllBookmarks(ctx, req.USERID)
+	bookmark, err := s.store.GetAllBookmarks(ctx, authPayload.UserID)
 	if err != nil {
 		handleDBError(ctx, err)
 	}
