@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	db "github.com/Ecc-asplay/backend/db/sqlc"
+	"github.com/Ecc-asplay/backend/token"
 	"github.com/Ecc-asplay/backend/util"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -15,7 +16,7 @@ import (
 // "flagged": コメントが不適切な内容としてフラグされた状態。
 
 type CreateCommentRequest struct {
-	UserID     uuid.UUID `json:"user_id" binding:"required"`
+	//UserID     uuid.UUID `json:"user_id" binding:"required"`
 	PostID     uuid.UUID `json:"post_id" binding:"required"`
 	Comments   string    `json:"comments" binding:"required"`
 	IsPublic   bool      `json:"is_public"`
@@ -29,10 +30,11 @@ func (s *Server) CreateComment(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
 	arg := db.CreateCommentsParams{
 		CommentID:  util.CreateUUID(),
-		UserID:     req.UserID,
+		UserID:     authPayload.UserID,
 		PostID:     req.PostID,
 		Status:     "active",
 		IsPublic:   false,
@@ -47,7 +49,7 @@ func (s *Server) CreateComment(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, comment)
+	ctx.JSON(http.StatusCreated, comment)
 }
 
 func (s *Server) GetCommentsList(ctx *gin.Context) {
