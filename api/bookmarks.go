@@ -43,6 +43,7 @@ func (s *Server) DeleteBookmark(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
 	data := db.DeleteBookmarksParams{
