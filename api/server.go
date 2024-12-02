@@ -54,8 +54,8 @@ func (server *Server) GinRequest(config util.Config) {
 	r.Use(GinLogger())
 	corsConfig := cors.Config{
 		AllowOrigins:     config.FrontAddress,
-		AllowMethods:     config.AllowHeaders,
-		AllowHeaders:     []string{"Authorization", "TokenID", "Content-Type"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:     config.AllowHeaders,
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		MaxAge:           config.AccessTokenDuration,
