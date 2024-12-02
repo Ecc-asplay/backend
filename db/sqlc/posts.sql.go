@@ -232,17 +232,17 @@ func (q *Queries) GetUserAllPosts(ctx context.Context, userID uuid.UUID) ([]Post
 const updatePosts = `-- name: UpdatePosts :one
 UPDATE POSTS
 SET
-    SHOW_ID = $3,
-    TITLE = $4,
-    FEEL = $5,
-    CONTENT = $6,
-    REACTION = $7,
-    IS_SENSITIVE = $8,
-    UPDATED_AT = NOW(
-    )
+    SHOW_ID = COALESCE($3, SHOW_ID),
+    TITLE = COALESCE($4, TITLE),
+    FEEL = COALESCE($5, FEEL),
+    CONTENT = COALESCE($6, CONTENT),
+    REACTION = COALESCE($7, REACTION),
+    IS_SENSITIVE = COALESCE($8, IS_SENSITIVE),
+    UPDATED_AT = NOW()
 WHERE
     USER_ID = $1
-    AND POST_ID = $2 RETURNING user_id, post_id, show_id, title, feel, content, reaction, is_sensitive, status, created_at, updated_at
+    AND POST_ID = $2
+RETURNING user_id, post_id, show_id, title, feel, content, reaction, is_sensitive, status, created_at, updated_at
 `
 
 type UpdatePostsParams struct {

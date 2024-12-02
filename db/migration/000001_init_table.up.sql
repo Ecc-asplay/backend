@@ -9,9 +9,9 @@ CREATE TABLE "users" (
     "condition" VARCHAR NOT NULL,
     "hashpassword" VARCHAR NOT NULL,
     "certification" BOOLEAN NOT NULL DEFAULT FALSE,
-    "reset_password_at" TIMESTAMP,
-    "created_at" TIMESTAMP NOT NULL DEFAULT (NOW()),
-    "updated_at" TIMESTAMP
+    "reset_password_at" TIMESTAMP(0),
+    "created_at" TIMESTAMP(0) NOT NULL DEFAULT NOW(),
+    "updated_at" TIMESTAMP(0)
 );
 
 CREATE TABLE "posts" (
@@ -24,8 +24,8 @@ CREATE TABLE "posts" (
     "reaction" INT NOT NULL,
     "is_sensitive" BOOLEAN NOT NULL DEFAULT FALSE,
     "status" VARCHAR NOT NULL,
-    "created_at" TIMESTAMP NOT NULL DEFAULT (NOW()),
-    "updated_at" TIMESTAMP
+    "created_at" TIMESTAMP(0) NOT NULL DEFAULT NOW(),
+    "updated_at" TIMESTAMP(0)
 );
 
 CREATE TABLE "comments" (
@@ -37,20 +37,20 @@ CREATE TABLE "comments" (
     "comments" VARCHAR NOT NULL,
     "reaction" INT NOT NULL,
     "is_censored" BOOLEAN NOT NULL DEFAULT FALSE,
-    "created_at" TIMESTAMP NOT NULL DEFAULT (NOW()),
-    "updated_at" TIMESTAMP
+    "created_at" TIMESTAMP(0) NOT NULL DEFAULT NOW(),
+    "updated_at" TIMESTAMP(0)
 );
 
 CREATE TABLE "bookmarks" (
     "user_id" UUID NOT NULL,
     "post_id" UUID NOT NULL,
-    "created_at" TIMESTAMP NOT NULL DEFAULT (NOW())
+    "created_at" TIMESTAMP(0) NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE "searchrecord" (
     "search_content" VARCHAR NOT NULL,
     "is_user" BOOLEAN NOT NULL DEFAULT FALSE,
-    "searched_at" TIMESTAMP NOT NULL DEFAULT (NOW())
+    "searched_at" TIMESTAMP(0) NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE "blockuser" (
@@ -58,8 +58,8 @@ CREATE TABLE "blockuser" (
     "blockuser_id" UUID NOT NULL,
     "reason" VARCHAR NOT NULL,
     "status" VARCHAR NOT NULL,
-    "block_at" TIMESTAMP NOT NULL DEFAULT (NOW()),
-    "unblock_at" TIMESTAMP
+    "block_at" TIMESTAMP(0) NOT NULL DEFAULT NOW(),
+    "unblock_at" TIMESTAMP(0)
 );
 
 CREATE TABLE "adminuser" (
@@ -67,7 +67,7 @@ CREATE TABLE "adminuser" (
     "hashpassword" VARCHAR NOT NULL,
     "staff_name" VARCHAR NOT NULL,
     "department" VARCHAR NOT NULL,
-    "joined_at" TIMESTAMP NOT NULL DEFAULT (NOW())
+    "joined_at" TIMESTAMP(0) NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE "tag" (
@@ -81,8 +81,8 @@ CREATE TABLE "token" (
     "access_token" VARCHAR UNIQUE NOT NULL,
     "roles" VARCHAR NOT NULL,
     "status" VARCHAR NOT NULL,
-    "take_at" TIMESTAMP NOT NULL DEFAULT (NOW()),
-    "expires_at" TIMESTAMP NOT NULL
+    "take_at" TIMESTAMP(0) NOT NULL DEFAULT NOW(),
+    "expires_at" TIMESTAMP(0) NOT NULL
 );
 
 ALTER TABLE "posts"

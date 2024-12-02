@@ -24,17 +24,18 @@ dropDB:
 #up
 migrateup:
 	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose up
-	
+migrateup1:
+	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose up 1
+migrateup2:
+	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose up 2
+
 #down
 migratedown:
 	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose down
-
-migrateup1:
-	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose up 1
-	
-#down
 migratedown1:
 	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose down 1
+migratedown2:
+	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose down 2
 
 
 # Redis　ダウンロードと作成
@@ -68,7 +69,7 @@ server:
 	go run main.go
 
 
-.PHONY: postgres dropPsql createDB dropDB migrateup migratedown migrateup1 migratedown1 sqlc 
+.PHONY: postgres dropPsql createDB dropDB migrateup migratedown migrateup1 migratedown1 migrateup2 migratedown2 sqlc 
 		redis dropRedis
 		resetDB
 		test server

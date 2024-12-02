@@ -6,10 +6,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Ecc-asplay/backend/util"
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/require"
+
+	"github.com/Ecc-asplay/backend/util"
 )
 
 func CreateRandomUser(t *testing.T) User {
@@ -66,7 +67,7 @@ func TestDeleteUser(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestGetPasswordToUserLogin(t *testing.T) {
+func TestGetUserLogin(t *testing.T) {
 	pgDate := pgtype.Date{
 		Time:  util.RandomDate(),
 		Valid: true,
