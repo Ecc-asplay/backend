@@ -7,7 +7,7 @@ INSERT INTO TAG (
     $2
 ) RETURNING *;
 
--- name: GetTag :many
+-- name: FindTag :many
 SELECT
     TAG_COMMENTS
 FROM
