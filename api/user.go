@@ -279,6 +279,7 @@ func (s *Server) LoginUser(ctx *gin.Context) {
 		Email    string `json:"email" binding:"required,email"`
 		Password string `json:"password" binding:"required"`
 	}
+
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
@@ -333,8 +334,8 @@ func (s *Server) LoginUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
+
 	ctx.JSON(http.StatusOK, gin.H{
-		"token":        Token.ID,
 		"access_token": accessToken,
 		"login_at":     Token.TakeAt,
 	})

@@ -39,13 +39,12 @@ func SetupRouter(config util.Config, store db.Store, redis *redis.Client, taskDi
 		taskDistributor: taskDistributor,
 	}
 
-	server.GinRequest()
+	server.GinRequest(config)
 
 	return server, nil
 }
 
-func (server *Server) GinRequest() {
-
+func (server *Server) GinRequest(config util.Config) {
 	// Log file cancel
 	gin.SetMode(gin.ReleaseMode)
 	gin.DefaultWriter = io.Discard
@@ -53,14 +52,23 @@ func (server *Server) GinRequest() {
 	// Gin Start
 	r := gin.Default()
 	r.Use(GinLogger())
-	r.Use(cors.Default())
+	corsConfig := cors.Config{
+		AllowOrigins:     config.FrontAddress,
+		AllowMethods:     config.AllowHeaders,
+		AllowHeaders:     []string{"Authorization", "TokenID", "Content-Type"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           config.AccessTokenDuration,
+	}
+
+	r.Use(cors.New(corsConfig))
 
 	// User
 	r.POST("/users", server.CreateUser)
 	r.POST("/login", server.LoginUser)
 	r.GET("/getposts", server.GetAllPost)
 
-	// authRoutes := r.Group("/").Use(authMiddleware(server.tokenMaker))
+	authRoutes := r.Group("/").Use(authMiddleware(server.tokenMaker))
 
 	// User
 	r.DELETE("/users/:id", server.DeleteUser)
@@ -80,9 +88,9 @@ func (server *Server) GinRequest() {
 	r.POST("/tag/get", server.GetTag)
 
 	// Bookmark
-	r.POST("createbookmark", server.CreateBookmark)
-	r.POST("deletebookmark", server.CreateBookmark)
-	r.POST("getbookmark", server.CreateBookmark)
+	authRoutes.POST("createbookmark", server.CreateBookmark)
+	authRoutes.DELETE("deletebookmark", server.DeleteBookmark)
+	r.GET("getbookmark", server.GetBookmark)
 
 	// Comment
 	r.GET("/getcommentlist/:post_id", server.GetCommentsList)
