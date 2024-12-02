@@ -147,8 +147,8 @@ func (q *Queries) GetUserData(ctx context.Context, userID uuid.UUID) (User, erro
 const resetPassword = `-- name: ResetPassword :exec
 UPDATE USERS
 SET
-    HASHPASSWORD = $2,
-    RESET_PASSWORD_AT = $3
+    HASHPASSWORD = COALESCE($2, HASHPASSWORD),
+    RESET_PASSWORD_AT = COALESCE($3, RESET_PASSWORD_AT)
 WHERE
     USER_ID = $1 RETURNING user_id, username, email, birth, gender, is_privacy, disease, condition, hashpassword, certification, reset_password_at, created_at, updated_at
 `
@@ -167,10 +167,9 @@ func (q *Queries) ResetPassword(ctx context.Context, arg ResetPasswordParams) er
 const updateDiseaseAndCondition = `-- name: UpdateDiseaseAndCondition :exec
 UPDATE USERS
 SET
-    DISEASE = $2,
-    CONDITION = $3,
-    UPDATED_AT = NOW(
-    )
+    DISEASE = COALESCE($2, DISEASE),
+    CONDITION = COALESCE($3, CONDITION),
+    UPDATED_AT = NOW()
 WHERE
     USER_ID = $1 RETURNING user_id, username, email, birth, gender, is_privacy, disease, condition, hashpassword, certification, reset_password_at, created_at, updated_at
 `
@@ -189,9 +188,8 @@ func (q *Queries) UpdateDiseaseAndCondition(ctx context.Context, arg UpdateDisea
 const updateEmail = `-- name: UpdateEmail :exec
 UPDATE USERS
 SET
-    EMAIL = $2,
-    UPDATED_AT = NOW(
-    )
+    EMAIL = COALESCE($2, EMAIL),
+    UPDATED_AT = NOW()
 WHERE
     USER_ID = $1 RETURNING user_id, username, email, birth, gender, is_privacy, disease, condition, hashpassword, certification, reset_password_at, created_at, updated_at
 `
@@ -209,9 +207,8 @@ func (q *Queries) UpdateEmail(ctx context.Context, arg UpdateEmailParams) error 
 const updateIsPrivacy = `-- name: UpdateIsPrivacy :exec
 UPDATE USERS
 SET
-    IS_PRIVACY = $2,
-    UPDATED_AT = NOW(
-    )
+    IS_PRIVACY = COALESCE($2, IS_PRIVACY),
+    UPDATED_AT = NOW()
 WHERE
     USER_ID = $1 RETURNING user_id, username, email, birth, gender, is_privacy, disease, condition, hashpassword, certification, reset_password_at, created_at, updated_at
 `
@@ -229,9 +226,8 @@ func (q *Queries) UpdateIsPrivacy(ctx context.Context, arg UpdateIsPrivacyParams
 const updateName = `-- name: UpdateName :one
 UPDATE USERS
 SET
-    USERNAME = $2,
-    UPDATED_AT = NOW(
-    )
+    USERNAME = COALESCE($2, USERNAME),
+    UPDATED_AT = NOW()
 WHERE
     USER_ID = $1 RETURNING user_id, username, email, birth, gender, is_privacy, disease, condition, hashpassword, certification, reset_password_at, created_at, updated_at
 `

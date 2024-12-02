@@ -334,6 +334,8 @@ func (s *Server) LoginUser(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, gin.H{
-		"token": Token.ID,
+		"token":        Token.ID,
+		"access_token": accessToken,
+		"login_at":     Token.TakeAt,
 	})
 }

@@ -24,16 +24,20 @@ func main() {
 	// env Data 取る
 	config, err := util.LoadConfig("./")
 	if err != nil {
-		log.Info().Msg("app.env cannot find")
+		log.Error().Err(err).Msg("app.env cannot find")
+		os.Exit(1)
 	}
+
 	// psql 接続
 	conn, err := pgxpool.New(context.Background(), config.DBSource)
 	if err != nil {
 		log.Info().Msg("cannot connect to db")
+		os.Exit(1)
 	}
 
 	// migration 実行
 	initMigration(config.MigrationURL, config.DBSource)
+
 	// DB 起動
 	store := db.NewStore(conn)
 
@@ -57,6 +61,7 @@ func main() {
 	server, err := api.SetupRouter(config, store, rdb, taskDistributor)
 	if err != nil {
 		log.Error().Err(err).Msg("cannot create server")
+		os.Exit(1)
 	}
 
 	// server 起動
@@ -64,6 +69,7 @@ func main() {
 	err = server.Start(config.HTTPServerAddress)
 	if err != nil {
 		log.Error().Err(err).Msg("cannot start server")
+		os.Exit(1)
 	}
 }
 
@@ -71,10 +77,12 @@ func initMigration(migrationURL string, dbSource string) {
 	migration, err := migrate.New(migrationURL, dbSource)
 	if err != nil {
 		log.Fatal().Err(err).Msg("cannot create new migrate instance")
+		os.Exit(1)
 	}
 
 	if err = migration.Up(); err != nil && err != migrate.ErrNoChange {
 		log.Fatal().Err(err).Msg("failed to run migrate up")
+		os.Exit(1)
 	}
 
 	log.Info().Msg("db migrated successfully")

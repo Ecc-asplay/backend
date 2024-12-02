@@ -45,6 +45,18 @@ type Comment struct {
 	UpdatedAt  pgtype.Timestamp `json:"updated_at"`
 }
 
+type Image struct {
+	PostID    uuid.UUID        `json:"post_id"`
+	Page      int32            `json:"page"`
+	Img1      []byte           `json:"img1"`
+	Img2      []byte           `json:"img2"`
+	Img3      []byte           `json:"img3"`
+	Img4      []byte           `json:"img4"`
+	Img5      []byte           `json:"img5"`
+	CreatedAt pgtype.Timestamp `json:"created_at"`
+	UpdatedAt pgtype.Timestamp `json:"updated_at"`
+}
+
 type Notification struct {
 	UserID    uuid.UUID        `json:"user_id"`
 	Content   string           `json:"content"`

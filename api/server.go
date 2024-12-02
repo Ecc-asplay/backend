@@ -25,7 +25,7 @@ type Server struct {
 	taskDistributor worker.TaskDistributor
 }
 
-func SetupRouter(config *util.Config, store db.Store, redis *redis.Client, taskDistributor worker.TaskDistributor) (*Server, error) {
+func SetupRouter(config util.Config, store db.Store, redis *redis.Client, taskDistributor worker.TaskDistributor) (*Server, error) {
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("cannot create token maker: %w", err)
@@ -33,7 +33,7 @@ func SetupRouter(config *util.Config, store db.Store, redis *redis.Client, taskD
 
 	server := &Server{
 		store:           store,
-		config:          *config,
+		config:          config,
 		redis:           redis,
 		tokenMaker:      tokenMaker,
 		taskDistributor: taskDistributor,
@@ -57,6 +57,12 @@ func (server *Server) GinRequest() {
 
 	// User
 	r.POST("/users", server.CreateUser)
+	r.POST("/login", server.LoginUser)
+	r.GET("/getposts", server.GetAllPost)
+
+	// authRoutes := r.Group("/").Use(authMiddleware(server.tokenMaker))
+
+	// User
 	r.DELETE("/users/:id", server.DeleteUser)
 	r.GET("/users/:id", server.GetUserData)
 	r.PUT("/users/:id/password", server.ResetPassword)
@@ -64,12 +70,19 @@ func (server *Server) GinRequest() {
 	r.PUT("/users/:id/email", server.UpdateEmail)
 	r.PUT("/users/:id/privacy", server.UpdateIsPrivacy)
 	r.PUT("/users/:id/name", server.UpdateName)
-	r.GET("/login", server.LoginUser)
 
-	// post
-	r.GET("/getposts", server.GetAllPost)
+	// Posts
 	r.POST("/createpost", server.CreatePost)
 	r.DELETE("/delpost", server.DeletePost)
+
+	// Tag
+	r.POST("/tag/add", server.CreateTag)
+	r.POST("/tag/get", server.GetTag)
+
+	// bookmark
+	r.POST("createbookmark", server.CreateBookmark)
+	r.POST("deletebookmark", server.CreateBookmark)
+	r.POST("getbookmark", server.CreateBookmark)
 
 	// comment
 	r.GET("/getcommentlist/:post_id", server.GetCommentsList)

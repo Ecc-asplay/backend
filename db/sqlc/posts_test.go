@@ -20,7 +20,7 @@ func CreateRandomPost(t *testing.T, user User) Post {
 		Wsize = append(Wsize, size)
 	}
 
-	data := []map[string]interface{}{
+	contentData := []map[string]interface{}{
 		{
 			"type": "paragraph",
 			"children": []map[string]interface{}{
@@ -118,7 +118,7 @@ func CreateRandomPost(t *testing.T, user User) Post {
 			},
 		},
 	}
-	jsonData, err := json.MarshalIndent(data, "", "  ")
+	contentJson, err := json.MarshalIndent(contentData, "", "  ")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -129,7 +129,7 @@ func CreateRandomPost(t *testing.T, user User) Post {
 		ShowID:      util.RandomString(10),
 		Title:       gofakeit.BookTitle(),
 		Feel:        util.RandomMood(),
-		Content:     jsonData,
+		Content:     contentJson,
 		Reaction:    rand.Int31(),
 		IsSensitive: util.RandomBool(),
 		Status:      util.RandomStatus(),
@@ -167,6 +167,12 @@ func TestDeletePost(t *testing.T) {
 
 	err := testQueries.DeletePost(context.Background(), delete)
 	require.NoError(t, err)
+
+	img, err := testQueries.GetImage(context.Background(), post.PostID)
+	if img != nil {
+		err = testQueries.DeleteImage(context.Background(), post.PostID)
+		require.NoError(t, err)
+	}
 }
 
 func TestGetPostOfKeywords(t *testing.T) {
@@ -177,7 +183,7 @@ func TestGetPostOfKeywords(t *testing.T) {
 		Wsize = append(Wsize, size)
 	}
 
-	data := []map[string]interface{}{
+	contentData := []map[string]interface{}{
 		{
 			"type": "paragraph",
 			"children": []map[string]interface{}{
@@ -275,7 +281,7 @@ func TestGetPostOfKeywords(t *testing.T) {
 			},
 		},
 	}
-	jsonData, err := json.MarshalIndent(data, "", "  ")
+	contentJson, err := json.MarshalIndent(contentData, "", "  ")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -286,7 +292,7 @@ func TestGetPostOfKeywords(t *testing.T) {
 		ShowID:      util.RandomString(10),
 		Title:       "aaaaaaaaaaaaaaaaaaaa",
 		Feel:        util.RandomMood(),
-		Content:     jsonData,
+		Content:     contentJson,
 		Reaction:    rand.Int31(),
 		IsSensitive: util.RandomBool(),
 		Status:      util.RandomStatus(),
@@ -299,6 +305,7 @@ func TestGetPostOfKeywords(t *testing.T) {
 	foundPost, err := testQueries.GetPostOfKeywords(context.Background(), "a")
 	require.NoError(t, err)
 	require.NotEmpty(t, foundPost)
+	require.GreaterOrEqual(t, len(foundPost), 1)
 }
 
 func TestGetPostsList(t *testing.T) {
@@ -338,7 +345,7 @@ func TestUpdatePosts(t *testing.T) {
 		Wsize = append(Wsize, size)
 	}
 
-	data := []map[string]interface{}{
+	contentData := []map[string]interface{}{
 		{
 			"type": "paragraph",
 			"children": []map[string]interface{}{
@@ -436,7 +443,7 @@ func TestUpdatePosts(t *testing.T) {
 			},
 		},
 	}
-	jsonData, err := json.MarshalIndent(data, "", "  ")
+	contentJson, err := json.MarshalIndent(contentData, "", "  ")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -447,7 +454,7 @@ func TestUpdatePosts(t *testing.T) {
 		ShowID:      util.RandomString(10),
 		Title:       gofakeit.BookTitle(),
 		Feel:        util.RandomMood(),
-		Content:     jsonData,
+		Content:     contentJson,
 		Reaction:    rand.Int31(),
 		IsSensitive: util.RandomBool(),
 	}

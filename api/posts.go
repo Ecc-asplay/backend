@@ -1,7 +1,6 @@
 package api
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -49,16 +48,12 @@ func (s *Server) CreatePost(ctx *gin.Context) {
 }
 
 // Get
-
 func (s *Server) GetAllPost(ctx *gin.Context) {
 	post, err := s.store.GetPostsList(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
 		return
 	}
-
-	log.Println(string(post[0].Content))
-
 	ctx.JSON(http.StatusOK, post)
 }
 
@@ -79,7 +74,6 @@ func (s *Server) GetPostOfKeywords(ctx *gin.Context) {
 }
 
 // Delete
-
 type DeletePostRequest struct {
 	UserID uuid.UUID `json:"user_id"`
 	PostID uuid.UUID `json:"post_id"`

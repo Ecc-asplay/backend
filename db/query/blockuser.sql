@@ -32,7 +32,7 @@ ORDER BY
 -- name: UnBlockUser :one
 UPDATE BLOCKUSER
 SET
-    STATUS = $3,
+    STATUS = COALESCE($3, STATUS),
     UNBLOCK_AT = NOW(
     )
 WHERE
