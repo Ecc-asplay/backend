@@ -94,7 +94,7 @@ func (server *Server) GinRequest(config util.Config) {
 
 	// Comment
 	r.GET("/getcommentlist/:post_id", server.GetCommentsList)
-	r.POST("/createcomment", server.CreateComment)
+	authRoutes.POST("/createcomment", server.CreateComment)
 	r.PUT("/updatecomment", server.UpdateComments)
 	r.DELETE("/deletecomment/:comment_id", server.DeleteComments)
 

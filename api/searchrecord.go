@@ -30,5 +30,15 @@ func (s *Server) CreateSearchRecord(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, record)
+	ctx.JSON(http.StatusCreated, record)
+}
+
+func (s *Server) GetSearchedRecordList(ctx *gin.Context) {
+	records, err := s.store.GetSearchedRecordList(ctx)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch search records"})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, records)
 }
