@@ -88,15 +88,22 @@ func (server *Server) GinRequest(config util.Config) {
 	r.POST("/tag/get", server.FindTag)
 
 	// Bookmark
-	authRoutes.POST("createbookmark", server.CreateBookmark)
-	authRoutes.DELETE("deletebookmark", server.DeleteBookmark)
-	r.GET("getbookmark", server.GetBookmark)
+	authRoutes.POST("/bookmark/create", server.CreateBookmark)
+	authRoutes.DELETE("/bookmark/delete", server.DeleteBookmark)
+	r.GET("/bookmark/get", server.GetBookmark)
 
 	// Comment
-	r.GET("/getcommentlist/:post_id", server.GetCommentsList)
-	authRoutes.POST("/createcomment", server.CreateComment)
-	r.PUT("/updatecomment", server.UpdateComments)
-	r.DELETE("/deletecomment/:comment_id", server.DeleteComments)
+	r.GET("/comment/getlist/:post_id", server.GetCommentsList)
+	authRoutes.POST("/comment/create", server.CreateComment)
+	r.PUT("/comment/update", server.UpdateComments)
+	r.DELETE("/comment/delete/:comment_id", server.DeleteComments)
+
+	// Searchrecord
+	r.POST("/searchrecord/getlist", server.GetSearchedRecordList)
+	r.POST("/searchrecord/create", server.CreateSearchRecord)
+
+	// 確認用
+	r.POST("/notification/create", server.CreateNotification)
 
 	server.router = r
 }
