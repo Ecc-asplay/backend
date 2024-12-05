@@ -17,7 +17,7 @@ type bookmarkRequest struct {
 func (s *Server) CreateBookmark(ctx *gin.Context) {
 	var req bookmarkRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -38,7 +38,7 @@ func (s *Server) CreateBookmark(ctx *gin.Context) {
 func (s *Server) DeleteBookmark(ctx *gin.Context) {
 	var req bookmarkRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 

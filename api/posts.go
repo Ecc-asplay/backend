@@ -30,7 +30,7 @@ func (s *Server) CreatePost(ctx *gin.Context) {
 
 	var req CreatePostRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -103,8 +103,7 @@ func (s *Server) GetAllPost(ctx *gin.Context) {
 			return
 		}
 
-		log.Info().Msg("all posts added in Redis")
-
+		log.Info().Msg("すべての投稿がRedisに追加されました")
 		ctx.JSON(http.StatusOK, post)
 	}
 }
@@ -113,7 +112,7 @@ func (s *Server) GetAllPost(ctx *gin.Context) {
 func (s *Server) SearchPost(ctx *gin.Context) {
 	var req string
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -136,7 +135,7 @@ func (s *Server) DeletePost(ctx *gin.Context) {
 
 	var req DeletePostRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -169,7 +168,7 @@ func (s *Server) UpdatePost(ctx *gin.Context) {
 
 	var req UpdatePostsRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 	newPostData := db.UpdatePostsParams{
