@@ -31,7 +31,7 @@ func main() {
 	// psql 接続
 	conn, err := pgxpool.New(context.Background(), config.DBSource)
 	if err != nil {
-		log.Info().Msg("cannot connect to db")
+		log.Error().Err(err).Msg("cannot connect to db")
 		os.Exit(1)
 	}
 
@@ -44,9 +44,9 @@ func main() {
 	// redis Options settings
 	redisOpt := asynq.RedisClientOpt{
 		Addr: config.RedisAddress,
-		DB:   1,
+		DB:   0,
 	}
-	// redis 接続
+	// redis キャッシュ 接続
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     config.RedisAddress,
 		Password: "",

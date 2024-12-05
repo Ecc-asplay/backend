@@ -85,7 +85,7 @@ func (server *Server) GinRequest(config util.Config) {
 
 	// Tag
 	r.POST("/tag/add", server.CreateTag)
-	r.POST("/tag/get", server.GetTag)
+	r.POST("/tag/get", server.FindTag)
 
 	// Bookmark
 	authRoutes.POST("createbookmark", server.CreateBookmark)
