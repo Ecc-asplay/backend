@@ -15,27 +15,6 @@ import (
 	"github.com/Ecc-asplay/backend/util"
 )
 
-var (
-	ErrInvalidInput     = errors.New("invalid input")
-	ErrPermissionDenied = errors.New("permission denied")
-	ErrConflict         = errors.New("conflict")
-)
-
-func handleDBError(ctx *gin.Context, err error) {
-	switch {
-	case errors.Is(err, sql.ErrNoRows):
-		ctx.JSON(http.StatusNotFound, errorResponse(err))
-	case errors.Is(err, ErrInvalidInput):
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-	case errors.Is(err, ErrPermissionDenied):
-		ctx.JSON(http.StatusForbidden, errorResponse(err))
-	case errors.Is(err, ErrConflict):
-		ctx.JSON(http.StatusConflict, errorResponse(err))
-	default:
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-	}
-}
-
 type User struct {
 	Username string      `json:"username" binding:"required"`
 	Email    string      `json:"email" binding:"required"`
