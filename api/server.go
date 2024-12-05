@@ -1,8 +1,11 @@
 package api
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"io"
+	"net/http"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -110,4 +113,19 @@ func (server *Server) Start(address string) error {
 
 func errorResponse(err error) gin.H {
 	return gin.H{"error": err.Error()}
+}
+
+func handleDBError(ctx *gin.Context, err error) {
+	switch {
+	case errors.Is(err, sql.ErrNoRows):
+		ctx.JSON(http.StatusNotFound, errorResponse(err))
+	case errors.Is(err, ErrInvalidInput):
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+	case errors.Is(err, ErrPermissionDenied):
+		ctx.JSON(http.StatusForbidden, errorResponse(err))
+	case errors.Is(err, ErrConflict):
+		ctx.JSON(http.StatusConflict, errorResponse(err))
+	default:
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+	}
 }

@@ -11,10 +11,30 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 
 	db "github.com/Ecc-asplay/backend/db/sqlc"
-	"github.com/Ecc-asplay/backend/errors"
 	"github.com/Ecc-asplay/backend/token"
 	"github.com/Ecc-asplay/backend/util"
 )
+
+var (
+	ErrInvalidInput     = errors.New("invalid input")
+	ErrPermissionDenied = errors.New("permission denied")
+	ErrConflict         = errors.New("conflict")
+)
+
+func handleDBError(ctx *gin.Context, err error) {
+	switch {
+	case errors.Is(err, sql.ErrNoRows):
+		ctx.JSON(http.StatusNotFound, errorResponse(err))
+	case errors.Is(err, ErrInvalidInput):
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+	case errors.Is(err, ErrPermissionDenied):
+		ctx.JSON(http.StatusForbidden, errorResponse(err))
+	case errors.Is(err, ErrConflict):
+		ctx.JSON(http.StatusConflict, errorResponse(err))
+	default:
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+	}
+}
 
 type User struct {
 	Username string      `json:"username" binding:"required"`
@@ -28,7 +48,7 @@ func (s *Server) CreateUser(ctx *gin.Context) {
 	var req User
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		errors.HandleDBError(ctx, err)
+		handleDBError(ctx, err)
 		return
 	}
 
