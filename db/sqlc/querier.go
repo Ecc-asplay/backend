@@ -37,13 +37,13 @@ type Querier interface {
 	GetImage(ctx context.Context, postID uuid.UUID) ([]Image, error)
 	GetLogin(ctx context.Context, email string) (GetLoginRow, error)
 	GetNotification(ctx context.Context, userID uuid.UUID) ([]Notification, error)
-	GetPostOfKeywords(ctx context.Context, dollar_1 string) ([]Post, error)
 	GetPostsList(ctx context.Context) ([]Post, error)
 	GetSearchedRecordList(ctx context.Context) ([]Searchrecord, error)
 	GetSession(ctx context.Context, id uuid.UUID) (Token, error)
 	GetUserAllPosts(ctx context.Context, userID uuid.UUID) ([]Post, error)
 	GetUserData(ctx context.Context, userID uuid.UUID) (User, error)
 	ResetPassword(ctx context.Context, arg ResetPasswordParams) error
+	SearchPost(ctx context.Context, dollar_1 string) ([]Post, error)
 	UnBlockUser(ctx context.Context, arg UnBlockUserParams) (Blockuser, error)
 	UpdateComments(ctx context.Context, arg UpdateCommentsParams) (Comment, error)
 	UpdateDiseaseAndCondition(ctx context.Context, arg UpdateDiseaseAndConditionParams) error

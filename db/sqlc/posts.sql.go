@@ -93,60 +93,6 @@ func (q *Queries) DeletePost(ctx context.Context, arg DeletePostParams) error {
 	return err
 }
 
-const getPostOfKeywords = `-- name: GetPostOfKeywords :many
-SELECT
-    user_id, post_id, show_id, title, feel, content, reaction, is_sensitive, status, created_at, updated_at
-FROM
-    POSTS
-WHERE
-    TITLE LIKE '%'
-               || CAST($1 AS TEXT)
-               || '%'
-    OR EXISTS (
-        SELECT
-            1
-        FROM
-            JSONB_ARRAY_ELEMENTS(CONTENT) AS ELEM,
-            JSONB_ARRAY_ELEMENTS(ELEM->'children') AS CHILD
-        WHERE
-            CHILD->>'text' LIKE '%'
-                                || CAST($1 AS TEXT)
-                                || '%'
-    )
-`
-
-func (q *Queries) GetPostOfKeywords(ctx context.Context, dollar_1 string) ([]Post, error) {
-	rows, err := q.db.Query(ctx, getPostOfKeywords, dollar_1)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	items := []Post{}
-	for rows.Next() {
-		var i Post
-		if err := rows.Scan(
-			&i.UserID,
-			&i.PostID,
-			&i.ShowID,
-			&i.Title,
-			&i.Feel,
-			&i.Content,
-			&i.Reaction,
-			&i.IsSensitive,
-			&i.Status,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getPostsList = `-- name: GetPostsList :many
 SELECT
     user_id, post_id, show_id, title, feel, content, reaction, is_sensitive, status, created_at, updated_at
@@ -199,6 +145,60 @@ WHERE
 
 func (q *Queries) GetUserAllPosts(ctx context.Context, userID uuid.UUID) ([]Post, error) {
 	rows, err := q.db.Query(ctx, getUserAllPosts, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Post{}
+	for rows.Next() {
+		var i Post
+		if err := rows.Scan(
+			&i.UserID,
+			&i.PostID,
+			&i.ShowID,
+			&i.Title,
+			&i.Feel,
+			&i.Content,
+			&i.Reaction,
+			&i.IsSensitive,
+			&i.Status,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const searchPost = `-- name: SearchPost :many
+SELECT
+    user_id, post_id, show_id, title, feel, content, reaction, is_sensitive, status, created_at, updated_at
+FROM
+    POSTS
+WHERE
+    TITLE LIKE '%'
+               || CAST($1 AS TEXT)
+               || '%'
+    OR EXISTS (
+        SELECT
+            1
+        FROM
+            JSONB_ARRAY_ELEMENTS(CONTENT) AS ELEM,
+            JSONB_ARRAY_ELEMENTS(ELEM->'children') AS CHILD
+        WHERE
+            CHILD->>'text' LIKE '%'
+                                || CAST($1 AS TEXT)
+                                || '%'
+    )
+`
+
+func (q *Queries) SearchPost(ctx context.Context, dollar_1 string) ([]Post, error) {
+	rows, err := q.db.Query(ctx, searchPost, dollar_1)
 	if err != nil {
 		return nil, err
 	}

@@ -8,12 +8,11 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 
 	db "github.com/Ecc-asplay/backend/db/sqlc"
+	"github.com/Ecc-asplay/backend/token"
 	"github.com/Ecc-asplay/backend/util"
-
 )
 
 type User struct {
@@ -24,30 +23,17 @@ type User struct {
 	Password string      `json:"password" binding:"required"`
 }
 
-func getUserID(ctx *gin.Context) (uuid.UUID, error) {
-	userIDStr := ctx.Param("id")
-	return uuid.Parse(userIDStr)
-}
-
-func handleDBError(ctx *gin.Context, err error) {
-	if errors.Is(err, sql.ErrNoRows) {
-		ctx.JSON(http.StatusNotFound, errorResponse(fmt.Errorf("user not found")))
-	} else {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-	}
-}
-
 func (s *Server) CreateUser(ctx *gin.Context) {
 	var req User
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		errors.HandleDBError(ctx, err)
 		return
 	}
 
 	hashedPassword, err := util.Hash(req.Password)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -97,13 +83,9 @@ func (s *Server) CreateUser(ctx *gin.Context) {
 }
 
 func (s *Server) DeleteUser(ctx *gin.Context) {
-	userID, err := getUserID(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
-	user, err := s.store.GetUserData(ctx, userID)
+	user, err := s.store.GetUserData(ctx, authPayload.UserID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
@@ -114,7 +96,7 @@ func (s *Server) DeleteUser(ctx *gin.Context) {
 	}
 
 	data := db.DeleteUserParams{
-		UserID: userID,
+		UserID: authPayload.UserID,
 		Email:  user.Email,
 	}
 
@@ -128,13 +110,9 @@ func (s *Server) DeleteUser(ctx *gin.Context) {
 }
 
 func (s *Server) GetUserData(ctx *gin.Context) {
-	userID, err := getUserID(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
-	user, err := s.store.GetUserData(ctx, userID)
+	user, err := s.store.GetUserData(ctx, authPayload.UserID)
 	if err != nil {
 		handleDBError(ctx, err)
 		return
@@ -143,11 +121,7 @@ func (s *Server) GetUserData(ctx *gin.Context) {
 }
 
 func (s *Server) ResetPassword(ctx *gin.Context) {
-	userID, err := getUserID(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
 	var req struct {
 		NewPassword string `json:"new_password" binding:"required"`
@@ -165,7 +139,7 @@ func (s *Server) ResetPassword(ctx *gin.Context) {
 	}
 
 	arg := db.ResetPasswordParams{
-		UserID:          userID,
+		UserID:          authPayload.UserID,
 		Hashpassword:    hashedPassword,
 		ResetPasswordAt: pgtype.Timestamp{Time: time.Now(), Valid: true},
 	}
@@ -180,11 +154,8 @@ func (s *Server) ResetPassword(ctx *gin.Context) {
 }
 
 func (s *Server) UpdateDiseaseAndCondition(ctx *gin.Context) {
-	userID, err := getUserID(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
 	var req struct {
 		Disease   string `json:"disease" binding:"required"`
 		Condition string `json:"condition" binding:"required"`
@@ -196,12 +167,12 @@ func (s *Server) UpdateDiseaseAndCondition(ctx *gin.Context) {
 	}
 
 	arg := db.UpdateDiseaseAndConditionParams{
-		UserID:    userID,
+		UserID:    authPayload.UserID,
 		Disease:   req.Disease,
 		Condition: req.Condition,
 	}
 
-	err = s.store.UpdateDiseaseAndCondition(ctx, arg)
+	err := s.store.UpdateDiseaseAndCondition(ctx, arg)
 	if err != nil {
 		handleDBError(ctx, err)
 		return
@@ -211,11 +182,8 @@ func (s *Server) UpdateDiseaseAndCondition(ctx *gin.Context) {
 }
 
 func (s *Server) UpdateEmail(ctx *gin.Context) {
-	userID, err := getUserID(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
 	var req struct {
 		NewEmail string `json:"new_email" binding:"required,email"`
 	}
@@ -226,11 +194,11 @@ func (s *Server) UpdateEmail(ctx *gin.Context) {
 	}
 
 	arg := db.UpdateEmailParams{
-		UserID: userID,
+		UserID: authPayload.UserID,
 		Email:  req.NewEmail,
 	}
 
-	err = s.store.UpdateEmail(ctx, arg)
+	err := s.store.UpdateEmail(ctx, arg)
 	if err != nil {
 		handleDBError(ctx, err)
 		return
@@ -240,11 +208,7 @@ func (s *Server) UpdateEmail(ctx *gin.Context) {
 }
 
 func (s *Server) UpdateIsPrivacy(ctx *gin.Context) {
-	userID, err := getUserID(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
 	var req struct {
 		IsPrivacy bool `json:"is_privacy" binding:"required"`
@@ -256,11 +220,11 @@ func (s *Server) UpdateIsPrivacy(ctx *gin.Context) {
 	}
 
 	arg := db.UpdateIsPrivacyParams{
-		UserID:    userID,
+		UserID:    authPayload.UserID,
 		IsPrivacy: req.IsPrivacy,
 	}
 
-	err = s.store.UpdateIsPrivacy(ctx, arg)
+	err := s.store.UpdateIsPrivacy(ctx, arg)
 	if err != nil {
 		handleDBError(ctx, err)
 		return
@@ -270,12 +234,7 @@ func (s *Server) UpdateIsPrivacy(ctx *gin.Context) {
 }
 
 func (s *Server) UpdateName(ctx *gin.Context) {
-	userID, err := getUserID(ctx)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
-
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	var req struct {
 		NewUsername string `json:"new_username" binding:"required"`
 	}
@@ -286,11 +245,11 @@ func (s *Server) UpdateName(ctx *gin.Context) {
 	}
 
 	arg := db.UpdateNameParams{
-		UserID:   userID,
+		UserID:   authPayload.UserID,
 		Username: req.NewUsername,
 	}
 
-	_, err = s.store.UpdateName(ctx, arg)
+	_, err := s.store.UpdateName(ctx, arg)
 	if err != nil {
 		handleDBError(ctx, err)
 		return
