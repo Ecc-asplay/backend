@@ -108,8 +108,10 @@ func (server *Server) GinRequest(config util.Config) {
 	r.POST("/searchrecord/getlist", server.GetSearchedRecordList)
 	r.POST("/searchrecord/create", server.CreateSearchRecord)
 
-	// 確認用
-	r.POST("/notification/create", server.CreateNotification)
+	// Notification
+	authRoutes.POST("/notification/create", server.CreateNotification)
+	authRoutes.GET("/notification/get", server.GetNotificationsByUser)
+	authRoutes.PUT("/notification/read", server.MarkNotificationsAsRead)
 
 	server.router = r
 }
