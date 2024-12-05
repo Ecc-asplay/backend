@@ -302,7 +302,7 @@ func TestGetPostOfKeywords(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, post)
 
-	foundPost, err := testQueries.GetPostOfKeywords(context.Background(), "a")
+	foundPost, err := testQueries.SearchPost(context.Background(), "a")
 	require.NoError(t, err)
 	require.NotEmpty(t, foundPost)
 	require.GreaterOrEqual(t, len(foundPost), 1)

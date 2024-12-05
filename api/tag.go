@@ -35,6 +35,22 @@ func (s *Server) CreateTag(ctx *gin.Context) {
 		return
 	}
 
+	// Redisに追加する
+	go func(tag string) {
+		err := s.redis.SAdd("Tag", tag).Err()
+		if err != nil {
+			log.Warn().Err(err).Msg("Failed to add Tag to Redis")
+			return
+		}
+
+		err = s.redis.Expire("Tag", 1*time.Hour).Err()
+		if err != nil {
+			log.Warn().Err(err).Msg("Failed to set TTL for Tag in Redis")
+			return
+		}
+		log.Info().Msg("Tag successfully updated in Redis")
+	}(tag.TagComments)
+
 	ctx.JSON(http.StatusCreated, tag)
 }
 
@@ -44,51 +60,53 @@ type GetTagRequest struct {
 
 func (s *Server) FindTag(ctx *gin.Context) {
 	var req GetTagRequest
+	var result []string
+
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, errorResponse(err))
 		return
 	}
 
+	// Redisから取る
 	members, err := s.redis.SMembers("Tag").Result()
 	if err != nil {
-		handleDBError(ctx, err)
-		return
+		log.Warn().Err(err).Msg("Redis SMembers failed")
+		members = nil
 	}
-
-	var result []string
 	if len(members) > 0 {
 		for _, member := range members {
 			if strings.Contains(member, req.TagComments) {
 				result = append(result, member)
 			}
 		}
+		if len(result) > 0 {
+			ctx.JSON(http.StatusOK, result)
+			return
+		}
 	}
-	if len(result) > 0 {
-		ctx.JSON(http.StatusOK, result)
-	} else {
-		// Psql
-		tag, err := s.store.FindTag(ctx, req.TagComments)
+
+	// Psql から取る
+	tag, err := s.store.FindTag(ctx, req.TagComments)
+	if err != nil {
+		handleDBError(ctx, err)
+		return
+	}
+
+	// Redis更新
+	go func(tag []string) {
+		err := s.redis.SAdd("Tag", tag).Err()
 		if err != nil {
-			handleDBError(ctx, err)
+			log.Warn().Err(err).Msg("Failed to add Tag to Redis")
 			return
 		}
 
-		// Add to key
-		err = s.redis.SAdd("Tag", tag).Err()
-		if err != nil {
-			handleDBError(ctx, err)
-			return
-		}
-		log.Info().Msg("tag added in Redis")
-
-		// TTL
 		err = s.redis.Expire("Tag", 1*time.Hour).Err()
 		if err != nil {
-			handleDBError(ctx, err)
+			log.Warn().Err(err).Msg("Failed to set TTL for Tag in Redis")
 			return
 		}
+		log.Info().Msg("Tag successfully updated in Redis")
+	}(tag)
 
-		ctx.JSON(http.StatusOK, tag)
-	}
-
+	ctx.JSON(http.StatusOK, tag)
 }

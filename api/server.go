@@ -1,8 +1,11 @@
 package api
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"io"
+	"net/http"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -66,31 +69,34 @@ func (server *Server) GinRequest(config util.Config) {
 	// User
 	r.POST("/users", server.CreateUser)
 	r.POST("/login", server.LoginUser)
-	r.GET("/getposts", server.GetAllPost)
+	r.GET("/post/getall", server.GetAllPost)
+	r.POST("/post/search", server.SearchPost)
 
+	// ログイン後
 	authRoutes := r.Group("/").Use(authMiddleware(server.tokenMaker))
 
-	// User
-	r.DELETE("/users/:id", server.DeleteUser)
-	r.GET("/users/:id", server.GetUserData)
-	r.PUT("/users/:id/password", server.ResetPassword)
-	r.PUT("/users/:id/disease-condition", server.UpdateDiseaseAndCondition)
-	r.PUT("/users/:id/email", server.UpdateEmail)
-	r.PUT("/users/:id/privacy", server.UpdateIsPrivacy)
-	r.PUT("/users/:id/name", server.UpdateName)
+	// ユーザー
+	authRoutes.DELETE("/users/:id", server.DeleteUser)
+	authRoutes.GET("/users/:id", server.GetUserData)
+	authRoutes.PUT("/users/:id/password", server.ResetPassword)
+	authRoutes.PUT("/users/:id/disease-condition", server.UpdateDiseaseAndCondition)
+	authRoutes.PUT("/users/:id/email", server.UpdateEmail)
+	authRoutes.PUT("/users/:id/privacy", server.UpdateIsPrivacy)
+	authRoutes.PUT("/users/:id/name", server.UpdateName)
 
-	// Post
-	r.POST("/createpost", server.CreatePost)
-	r.DELETE("/delpost", server.DeletePost)
+	// 投稿
+	authRoutes.POST("/post/add", server.CreatePost)
+	authRoutes.DELETE("/post/del", server.DeletePost)
+	authRoutes.PUT("/post/update", server.UpdatePost)
 
-	// Tag
+	// タップ
 	r.POST("/tag/add", server.CreateTag)
 	r.POST("/tag/get", server.FindTag)
 
 	// Bookmark
-	authRoutes.POST("/bookmark/create", server.CreateBookmark)
-	authRoutes.DELETE("/bookmark/delete", server.DeleteBookmark)
-	r.GET("/bookmark/get", server.GetBookmark)
+	authRoutes.POST("/bookmark/add", server.CreateBookmark)
+	authRoutes.DELETE("/bookmark/del", server.DeleteBookmark)
+	authRoutes.GET("/bookmark/get", server.GetBookmark)
 
 	// Comment
 	r.GET("/comment/getlist/:post_id", server.GetCommentsList)
@@ -112,6 +118,27 @@ func (server *Server) Start(address string) error {
 	return server.router.Run(address)
 }
 
+var (
+	ErrInvalidInput     = errors.New("invalid input")
+	ErrPermissionDenied = errors.New("permission denied")
+	ErrConflict         = errors.New("conflict")
+)
+
 func errorResponse(err error) gin.H {
 	return gin.H{"error": err.Error()}
+}
+
+func handleDBError(ctx *gin.Context, err error) {
+	switch {
+	case errors.Is(err, sql.ErrNoRows):
+		ctx.JSON(http.StatusNotFound, errorResponse(err))
+	case errors.Is(err, ErrInvalidInput):
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+	case errors.Is(err, ErrPermissionDenied):
+		ctx.JSON(http.StatusForbidden, errorResponse(err))
+	case errors.Is(err, ErrConflict):
+		ctx.JSON(http.StatusConflict, errorResponse(err))
+	default:
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+	}
 }
