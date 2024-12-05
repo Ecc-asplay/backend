@@ -13,6 +13,7 @@ import (
 
 	db "github.com/Ecc-asplay/backend/db/sqlc"
 	"github.com/Ecc-asplay/backend/util"
+
 )
 
 type User struct {
@@ -67,7 +68,32 @@ func (s *Server) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, user)
+	accessToken, payload, err := s.tokenMaker.CreateToken(user.UserID, "user", s.config.AccessTokenDuration)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		return
+	}
+
+	tokenData := db.CreateTokenParams{
+		ID:          util.CreateUUID(),
+		UserID:      payload.UserID,
+		AccessToken: accessToken,
+		Roles:       payload.Role,
+		Status:      "SignUp",
+		ExpiresAt:   pgtype.Timestamp{Time: payload.ExpiredAt, Valid: true},
+	}
+
+	Token, err := s.store.CreateToken(ctx, tokenData)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"Access_Token":     accessToken,
+		"SignUp_At":        Token.TakeAt,
+		"User_Information": user,
+	})
 }
 
 func (s *Server) DeleteUser(ctx *gin.Context) {
@@ -274,7 +300,6 @@ func (s *Server) UpdateName(ctx *gin.Context) {
 }
 
 func (s *Server) LoginUser(ctx *gin.Context) {
-
 	var req struct {
 		Email    string `json:"email" binding:"required,email"`
 		Password string `json:"password" binding:"required"`
