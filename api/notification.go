@@ -4,19 +4,16 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 
 	db "github.com/Ecc-asplay/backend/db/sqlc"
+	"github.com/Ecc-asplay/backend/token"
 )
 
-// CreateNotificationRequest represents the request payload for creating a notification
 type CreateNotificationRequest struct {
-	UserID  uuid.UUID `json:"user_id" binding:"required"`
-	Content string    `json:"content" binding:"required"`
-	Icon    []byte    `json:"icon"`
+	Content string `json:"content" binding:"required"`
+	Icon    []byte `json:"icon"`
 }
 
-// ミドルウェアを使用して、useridを取得する
 func (s *Server) CreateNotification(ctx *gin.Context) {
 	var req CreateNotificationRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -24,32 +21,28 @@ func (s *Server) CreateNotification(ctx *gin.Context) {
 		return
 	}
 
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.CreateNotificationParams{
-		UserID:  req.UserID,
+		UserID:  authPayload.UserID,
 		Content: req.Content,
 		Icon:    req.Icon,
 	}
 
 	notification, err := s.store.CreateNotification(ctx, arg)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, notification)
+	ctx.JSON(http.StatusCreated, notification)
 }
 
 func (s *Server) GetNotificationsByUser(ctx *gin.Context) {
-	userIDStr := ctx.Param("user_id")
-	userID, err := uuid.Parse(userIDStr)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
-	notifications, err := s.store.GetNotification(ctx, userID)
+	notifications, err := s.store.GetNotification(ctx, authPayload.UserID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -57,16 +50,11 @@ func (s *Server) GetNotificationsByUser(ctx *gin.Context) {
 }
 
 func (s *Server) MarkNotificationsAsRead(ctx *gin.Context) {
-	userIDStr := ctx.Param("user_id")
-	userID, err := uuid.Parse(userIDStr)
-	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
-	notifications, err := s.store.UpdateNotification(ctx, userID)
+	notifications, err := s.store.UpdateNotification(ctx, authPayload.UserID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
