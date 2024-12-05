@@ -20,7 +20,7 @@ type CreateTagRequest struct {
 func (s *Server) CreateTag(ctx *gin.Context) {
 	var req CreateTagRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -36,21 +36,19 @@ func (s *Server) CreateTag(ctx *gin.Context) {
 	}
 
 	// Redisに追加する
-	go func(tag string) {
-		err := s.redis.SAdd("Tag", tag).Err()
-		if err != nil {
-			log.Warn().Err(err).Msg("Failed to add Tag to Redis")
-			return
-		}
+	err = s.redis.SAdd("Tag", tag).Err()
+	if err != nil {
+		handleDBError(ctx, err)
+		return
+	}
 
-		err = s.redis.Expire("Tag", 1*time.Hour).Err()
-		if err != nil {
-			log.Warn().Err(err).Msg("Failed to set TTL for Tag in Redis")
-			return
-		}
-		log.Info().Msg("Tag successfully updated in Redis")
-	}(tag.TagComments)
+	err = s.redis.Expire("Tag", 1*time.Hour).Err()
+	if err != nil {
+		handleDBError(ctx, err)
+		return
+	}
 
+	log.Info().Msg("タグがRedisで正常に更新されました")
 	ctx.JSON(http.StatusCreated, tag)
 }
 
@@ -63,14 +61,14 @@ func (s *Server) FindTag(ctx *gin.Context) {
 	var result []string
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
 	// Redisから取る
 	members, err := s.redis.SMembers("Tag").Result()
 	if err != nil {
-		log.Warn().Err(err).Msg("Redis SMembers failed")
+		handleDBError(ctx, err)
 		members = nil
 	}
 	if len(members) > 0 {
@@ -93,20 +91,18 @@ func (s *Server) FindTag(ctx *gin.Context) {
 	}
 
 	// Redis更新
-	go func(tag []string) {
-		err := s.redis.SAdd("Tag", tag).Err()
-		if err != nil {
-			log.Warn().Err(err).Msg("Failed to add Tag to Redis")
-			return
-		}
+	err = s.redis.SAdd("Tag", tag).Err()
+	if err != nil {
+		handleDBError(ctx, err)
+		return
+	}
 
-		err = s.redis.Expire("Tag", 1*time.Hour).Err()
-		if err != nil {
-			log.Warn().Err(err).Msg("Failed to set TTL for Tag in Redis")
-			return
-		}
-		log.Info().Msg("Tag successfully updated in Redis")
-	}(tag)
+	err = s.redis.Expire("Tag", 1*time.Hour).Err()
+	if err != nil {
+		handleDBError(ctx, err)
+		return
+	}
 
+	log.Warn().Err(err).Msg("タグのTTLをRedisに設定できました")
 	ctx.JSON(http.StatusOK, tag)
 }

@@ -1,14 +1,14 @@
 package api
 
 import (
-	"database/sql"
 	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 
 	db "github.com/Ecc-asplay/backend/db/sqlc"
 	"github.com/Ecc-asplay/backend/token"
 	"github.com/Ecc-asplay/backend/util"
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // 以下は仮の値
@@ -27,7 +27,7 @@ type CreateCommentRequest struct {
 func (s *Server) CreateComment(ctx *gin.Context) {
 	var req CreateCommentRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
@@ -56,7 +56,7 @@ func (s *Server) GetCommentsList(ctx *gin.Context) {
 	postIDStr := ctx.Param("post_id")
 	postID, err := uuid.Parse(postIDStr)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -79,7 +79,7 @@ type UpdateCommentRequest struct {
 func (s *Server) UpdateComments(ctx *gin.Context) {
 	var req UpdateCommentRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -104,19 +104,15 @@ func (s *Server) DeleteComments(ctx *gin.Context) {
 	commentIDStr := ctx.Param("comment_id")
 	commentID, err := uuid.Parse(commentIDStr)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
 	err = s.store.DeleteComments(ctx, commentID)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": "comment not found"})
-		} else {
-			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		}
+		handleDBError(ctx, err)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "comment deleted"})
+	ctx.JSON(http.StatusOK, gin.H{"状態": "コメントが削除されました"})
 }

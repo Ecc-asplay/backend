@@ -16,13 +16,13 @@ type PayloadSendVerifyEmail struct {
 func (distributor *RedisTaskDistributor) DistributeTask(ctx context.Context, payload *PayloadSendVerifyEmail, taskname string, opts ...asynq.Option) error {
 	jsonPayload, err := json.Marshal(payload)
 	if err != nil {
-		return fmt.Errorf("failed to marshal task payload: %w", err)
+		return fmt.Errorf("タスクのペイロードのマーシャリングに失敗しました: %w", err)
 	}
 
 	task := asynq.NewTask(taskname, jsonPayload, opts...)
 	info, err := distributor.client.EnqueueContext(ctx, task)
 	if err != nil {
-		return fmt.Errorf("failed to enqueue task: %w", err)
+		return fmt.Errorf("タスクのキューイングに失敗しました: %w", err)
 	}
 
 	log.Info().Str("task", task.Type()).Bytes("payload", task.Payload()).

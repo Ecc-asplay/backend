@@ -1,8 +1,6 @@
 package api
 
 import (
-	"database/sql"
-	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -71,7 +69,7 @@ func (s *Server) CreateUser(ctx *gin.Context) {
 
 	Token, err := s.store.CreateToken(ctx, tokenData)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -87,11 +85,7 @@ func (s *Server) DeleteUser(ctx *gin.Context) {
 
 	user, err := s.store.GetUserData(ctx, authPayload.UserID)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": "user not found"})
-		} else {
-			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		}
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -102,11 +96,11 @@ func (s *Server) DeleteUser(ctx *gin.Context) {
 
 	err = s.store.DeleteUser(ctx, data)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "user deleted"})
+	ctx.JSON(http.StatusOK, gin.H{"状態": "ユーザーが削除されました"})
 }
 
 func (s *Server) GetUserData(ctx *gin.Context) {
@@ -128,7 +122,7 @@ func (s *Server) ResetPassword(ctx *gin.Context) {
 	}
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -150,7 +144,7 @@ func (s *Server) ResetPassword(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "password reset successful"})
+	ctx.JSON(http.StatusOK, gin.H{"状態": "パスワードのリセットが成功しました"})
 }
 
 func (s *Server) UpdateDiseaseAndCondition(ctx *gin.Context) {
@@ -162,7 +156,7 @@ func (s *Server) UpdateDiseaseAndCondition(ctx *gin.Context) {
 	}
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -178,7 +172,7 @@ func (s *Server) UpdateDiseaseAndCondition(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "disease and condition updated successfully"})
+	ctx.JSON(http.StatusOK, gin.H{"状態": "病歴と病状が正常に更新されました"})
 }
 
 func (s *Server) UpdateEmail(ctx *gin.Context) {
@@ -189,7 +183,7 @@ func (s *Server) UpdateEmail(ctx *gin.Context) {
 	}
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -204,7 +198,7 @@ func (s *Server) UpdateEmail(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "email updated successfully"})
+	ctx.JSON(http.StatusOK, gin.H{"状態": "メールアドレスが正常に更新されました"})
 }
 
 func (s *Server) UpdateIsPrivacy(ctx *gin.Context) {
@@ -215,7 +209,7 @@ func (s *Server) UpdateIsPrivacy(ctx *gin.Context) {
 	}
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -230,7 +224,7 @@ func (s *Server) UpdateIsPrivacy(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "privacy setting updated successfully"})
+	ctx.JSON(http.StatusOK, gin.H{"状態": "プライバシー設定が正常に更新されました"})
 }
 
 func (s *Server) UpdateName(ctx *gin.Context) {
@@ -240,7 +234,7 @@ func (s *Server) UpdateName(ctx *gin.Context) {
 	}
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -255,7 +249,7 @@ func (s *Server) UpdateName(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "username updated successfully"})
+	ctx.JSON(http.StatusOK, gin.H{"状態": "ユーザー名が正常に更新されました"})
 }
 
 func (s *Server) LoginUser(ctx *gin.Context) {
@@ -265,29 +259,25 @@ func (s *Server) LoginUser(ctx *gin.Context) {
 	}
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
 	// ハッシュパスワードを取得
 	hashedPassword, err := s.store.GetLogin(ctx, req.Email)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("invalid email or password")))
-			return
-		}
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
 	// パスワードを検証
 	isValid, err := util.CheckPassword(req.Password, hashedPassword.Hashpassword)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(fmt.Errorf("failed to verify password")))
+		handleDBError(ctx, err)
 		return
 	}
 	if !isValid {
-		ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("invalid email or password")))
+		ctx.JSON(http.StatusUnauthorized, errorResponse(fmt.Errorf("無効なメールアドレスまたはパスワード")))
 		return
 	}
 
@@ -300,7 +290,7 @@ func (s *Server) LoginUser(ctx *gin.Context) {
 
 	accessToken, payload, err := s.tokenMaker.CreateToken(user.UserID, "user", s.config.AccessTokenDuration)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(fmt.Errorf("failed to create token")))
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -315,7 +305,7 @@ func (s *Server) LoginUser(ctx *gin.Context) {
 
 	Token, err := s.store.CreateToken(ctx, tokenData)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
