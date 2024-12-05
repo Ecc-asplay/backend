@@ -37,7 +37,7 @@ FROM
 ORDER BY
     CREATED_AT DESC;
 
--- name: GetPostOfKeywords :many
+-- name: SearchPost :many
 SELECT
     *
 FROM

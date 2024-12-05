@@ -66,33 +66,36 @@ func (server *Server) GinRequest(config util.Config) {
 	// User
 	r.POST("/users", server.CreateUser)
 	r.POST("/login", server.LoginUser)
-	r.GET("/getposts", server.GetAllPost)
+	r.GET("/post/getall", server.GetAllPost)
+	r.POST("/post/search", server.SearchPost)
 
+	// ログイン後
 	authRoutes := r.Group("/").Use(authMiddleware(server.tokenMaker))
 
-	// User
-	r.DELETE("/users/:id", server.DeleteUser)
-	r.GET("/users/:id", server.GetUserData)
-	r.PUT("/users/:id/password", server.ResetPassword)
-	r.PUT("/users/:id/disease-condition", server.UpdateDiseaseAndCondition)
-	r.PUT("/users/:id/email", server.UpdateEmail)
-	r.PUT("/users/:id/privacy", server.UpdateIsPrivacy)
-	r.PUT("/users/:id/name", server.UpdateName)
+	// ユーザー
+	authRoutes.DELETE("/users/:id", server.DeleteUser)
+	authRoutes.GET("/users/:id", server.GetUserData)
+	authRoutes.PUT("/users/:id/password", server.ResetPassword)
+	authRoutes.PUT("/users/:id/disease-condition", server.UpdateDiseaseAndCondition)
+	authRoutes.PUT("/users/:id/email", server.UpdateEmail)
+	authRoutes.PUT("/users/:id/privacy", server.UpdateIsPrivacy)
+	authRoutes.PUT("/users/:id/name", server.UpdateName)
 
-	// Post
-	r.POST("/createpost", server.CreatePost)
-	r.DELETE("/delpost", server.DeletePost)
+	// 投稿
+	authRoutes.POST("/post/add", server.CreatePost)
+	authRoutes.DELETE("/post/del", server.DeletePost)
+	authRoutes.PUT("/post/update", server.UpdatePost)
 
-	// Tag
+	// タップ
 	r.POST("/tag/add", server.CreateTag)
 	r.POST("/tag/get", server.FindTag)
 
 	// Bookmark
-	authRoutes.POST("createbookmark", server.CreateBookmark)
-	authRoutes.DELETE("deletebookmark", server.DeleteBookmark)
-	r.GET("getbookmark", server.GetBookmark)
+	authRoutes.POST("/bookmark/add", server.CreateBookmark)
+	authRoutes.DELETE("/bookmark/del", server.DeleteBookmark)
+	authRoutes.GET("/bookmark/get", server.GetBookmark)
 
-	// Comment
+	// コメント
 	r.GET("/getcommentlist/:post_id", server.GetCommentsList)
 	authRoutes.POST("/createcomment", server.CreateComment)
 	r.PUT("/updatecomment", server.UpdateComments)

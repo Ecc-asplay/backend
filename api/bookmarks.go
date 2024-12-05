@@ -22,7 +22,6 @@ func (s *Server) CreateBookmark(ctx *gin.Context) {
 	}
 
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
-
 	data := db.CreateBookmarksParams{
 		PostID: req.PostID,
 		UserID: authPayload.UserID,
@@ -44,7 +43,6 @@ func (s *Server) DeleteBookmark(ctx *gin.Context) {
 	}
 
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
-
 	data := db.DeleteBookmarksParams{
 		PostID: req.PostID,
 		UserID: authPayload.UserID,
@@ -59,15 +57,7 @@ func (s *Server) DeleteBookmark(ctx *gin.Context) {
 }
 
 func (s *Server) GetBookmark(ctx *gin.Context) {
-
-	var req bookmarkRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
-		return
-	}
-
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
-
 	bookmark, err := s.store.GetAllBookmarks(ctx, authPayload.UserID)
 	if err != nil {
 		handleDBError(ctx, err)
