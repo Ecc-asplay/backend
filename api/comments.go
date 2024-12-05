@@ -1,7 +1,6 @@
 package api
 
 import (
-	"database/sql"
 	"net/http"
 
 	db "github.com/Ecc-asplay/backend/db/sqlc"
@@ -45,7 +44,7 @@ func (s *Server) CreateComment(ctx *gin.Context) {
 
 	comment, err := s.store.CreateComments(ctx, arg)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -62,7 +61,7 @@ func (s *Server) GetCommentsList(ctx *gin.Context) {
 
 	comments, err := s.store.GetCommentsList(ctx, postID)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -93,7 +92,7 @@ func (s *Server) UpdateComments(ctx *gin.Context) {
 
 	comment, err := s.store.UpdateComments(ctx, arg)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		handleDBError(ctx, err)
 		return
 	}
 
@@ -110,11 +109,7 @@ func (s *Server) DeleteComments(ctx *gin.Context) {
 
 	err = s.store.DeleteComments(ctx, commentID)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			ctx.JSON(http.StatusNotFound, gin.H{"error": "comment not found"})
-		} else {
-			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
-		}
+		handleDBError(ctx, err)
 		return
 	}
 
