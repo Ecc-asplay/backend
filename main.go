@@ -18,57 +18,57 @@ import (
 )
 
 func main() {
-	// log 設置
+	// log 設定
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
-	// env Data 取る
+	// 環境変数の読み込み
 	config, err := util.LoadConfig("./")
 	if err != nil {
-		log.Error().Err(err).Msg("app.env cannot find")
+		log.Error().Err(err).Msg("app.env が見つかりません")
 		os.Exit(1)
 	}
 
-	// psql 接続
+	// PostgreSQL 接続
 	conn, err := pgxpool.New(context.Background(), config.DBSource)
 	if err != nil {
-		log.Error().Err(err).Msg("cannot connect to db")
+		log.Error().Err(err).Msg("データベースに接続できません")
 		os.Exit(1)
 	}
 
-	// migration 実行
+	// マイグレーション実行
 	initMigration(config.MigrationURL, config.DBSource)
 
 	// DB 起動
 	store := db.NewStore(conn)
 
-	// redis Options settings
+	// Redis 設定
 	redisOpt := asynq.RedisClientOpt{
 		Addr: config.RedisAddress,
 		DB:   0,
 	}
-	// redis キャッシュ 接続
+	// Redis キャッシュ接続
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     config.RedisAddress,
 		Password: "",
 		DB:       1,
 	})
 
-	// Processer
+	// プロセッサ設定
 	taskDistributor := worker.NewRedisTaskDistributor(redisOpt)
 	runTaskProcessor(redisOpt, store)
 
-	// Server 設置
+	// サーバ設定
 	server, err := api.SetupRouter(config, store, rdb, taskDistributor)
 	if err != nil {
-		log.Error().Err(err).Msg("cannot create server")
+		log.Error().Err(err).Msg("サーバを作成できません")
 		os.Exit(1)
 	}
 
-	// server 起動
-	log.Info().Msgf("Connecting to Gin Server at %s", config.HTTPServerAddress)
+	// サーバ起動
+	log.Info().Msgf("Ginサーバに接続中: %s", config.HTTPServerAddress)
 	err = server.Start(config.HTTPServerAddress)
 	if err != nil {
-		log.Error().Err(err).Msg("cannot start server")
+		log.Error().Err(err).Msg("サーバを起動できません")
 		os.Exit(1)
 	}
 }
@@ -76,23 +76,23 @@ func main() {
 func initMigration(migrationURL string, dbSource string) {
 	migration, err := migrate.New(migrationURL, dbSource)
 	if err != nil {
-		log.Fatal().Err(err).Msg("cannot create new migrate instance")
+		log.Fatal().Err(err).Msg("マイグレーションインスタンスの作成に失敗しました")
 		os.Exit(1)
 	}
 
 	if err = migration.Up(); err != nil && err != migrate.ErrNoChange {
-		log.Fatal().Err(err).Msg("failed to run migrate up")
+		log.Fatal().Err(err).Msg("マイグレーションの実行に失敗しました")
 		os.Exit(1)
 	}
 
-	log.Info().Msg("db migrated successfully")
+	log.Info().Msg("データベースのマイグレーションが成功しました")
 }
 
 func runTaskProcessor(redisOpt asynq.RedisClientOpt, store db.Store) {
 	taskProcessor := worker.NewRedisTaskProcessor(redisOpt, store)
-	log.Info().Msg("start task processor")
+	log.Info().Msg("タスクプロセッサを開始します")
 	err := taskProcessor.Start()
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to start task processor")
+		log.Fatal().Err(err).Msg("タスクプロセッサの起動に失敗しました")
 	}
 }

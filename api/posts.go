@@ -30,7 +30,7 @@ func (s *Server) CreatePost(ctx *gin.Context) {
 
 	var req CreatePostRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err, "投稿作成：無効な入力データです")
 		return
 	}
 
@@ -47,7 +47,7 @@ func (s *Server) CreatePost(ctx *gin.Context) {
 
 	post, err := s.store.CreatePost(ctx, postData)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		handleDBError(ctx, err, "投稿作成：保存を失敗しました")
 		return
 	}
 
@@ -60,7 +60,7 @@ func (s *Server) GetPost(ctx *gin.Context) {
 
 	userPost, err := s.store.GetUserAllPosts(ctx, authPayload.UserID)
 	if err != nil {
-		handleDBError(ctx, err)
+		handleDBError(ctx, err, "ユーザー投稿取得を失敗しました")
 		return
 	}
 
@@ -71,7 +71,7 @@ func (s *Server) GetPost(ctx *gin.Context) {
 func (s *Server) GetAllPost(ctx *gin.Context) {
 	allPosts, err := s.redis.Get("AllPosts").Result()
 	if err != nil && err != redis.Nil {
-		handleDBError(ctx, err)
+		handleDBError(ctx, err, "Redis投稿取得：データ締め切りました")
 		return
 	}
 
@@ -79,7 +79,7 @@ func (s *Server) GetAllPost(ctx *gin.Context) {
 		var posts []db.Post
 		err := json.Unmarshal([]byte(allPosts), &posts)
 		if err != nil {
-			handleDBError(ctx, err)
+			handleDBError(ctx, err, "Redis投稿取得：データ変更を失敗しました")
 			return
 		}
 
@@ -87,24 +87,23 @@ func (s *Server) GetAllPost(ctx *gin.Context) {
 	} else {
 		post, err := s.store.GetPostsList(ctx)
 		if err != nil {
-			ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+			handleDBError(ctx, err, "Psql投稿取得を失敗しました")
 			return
 		}
 
 		postJSON, err := json.Marshal(post)
 		if err != nil {
-			handleDBError(ctx, err)
+			handleDBError(ctx, err, "Psql投稿取得：JSON変更を失敗しました")
 			return
 		}
 
 		err = s.redis.Set("AllPosts", postJSON, 5*time.Minute).Err()
 		if err != nil {
-			handleDBError(ctx, err)
+			handleDBError(ctx, err, "Redis投稿保存を失敗しました")
 			return
 		}
 
-		log.Info().Msg("all posts added in Redis")
-
+		log.Info().Msg("すべての投稿がRedisに追加されました")
 		ctx.JSON(http.StatusOK, post)
 	}
 }
@@ -113,13 +112,13 @@ func (s *Server) GetAllPost(ctx *gin.Context) {
 func (s *Server) SearchPost(ctx *gin.Context) {
 	var req string
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err, "投稿検索：無効な入力データです")
 		return
 	}
 
 	findPost, err := s.store.SearchPost(ctx, req)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		handleDBError(ctx, err, "投稿検索を失敗しました")
 		return
 	}
 
@@ -136,7 +135,7 @@ func (s *Server) DeletePost(ctx *gin.Context) {
 
 	var req DeletePostRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err, "投稿削除：無効な入力データです")
 		return
 	}
 
@@ -146,7 +145,7 @@ func (s *Server) DeletePost(ctx *gin.Context) {
 	})
 
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		handleDBError(ctx, err, "投稿削除を失敗しました")
 		return
 	}
 
@@ -169,7 +168,7 @@ func (s *Server) UpdatePost(ctx *gin.Context) {
 
 	var req UpdatePostsRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err, "投稿更新：無効な入力データです")
 		return
 	}
 	newPostData := db.UpdatePostsParams{
@@ -185,7 +184,7 @@ func (s *Server) UpdatePost(ctx *gin.Context) {
 
 	newPost, err := s.store.UpdatePosts(ctx, newPostData)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		handleDBError(ctx, err, "投稿更新を失敗しました")
 		return
 	}
 
