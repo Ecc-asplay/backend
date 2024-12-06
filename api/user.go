@@ -250,11 +250,14 @@ func (s *Server) UpdateName(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"状態": "ユーザー名が正常に更新されました"})
 }
 
+type LoginRequest struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+}
+
 func (s *Server) LoginUser(ctx *gin.Context) {
-	var req struct {
-		Email    string `json:"email" binding:"required,email"`
-		Password string `json:"password" binding:"required"`
-	}
+
+	var req LoginRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "ユーザー ログイン：無効な入力データです")
