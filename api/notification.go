@@ -17,7 +17,7 @@ type CreateNotificationRequest struct {
 func (s *Server) CreateNotification(ctx *gin.Context) {
 	var req CreateNotificationRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err, "通知作成：無効な入力データです")
 		return
 	}
 
@@ -30,7 +30,7 @@ func (s *Server) CreateNotification(ctx *gin.Context) {
 
 	notification, err := s.store.CreateNotification(ctx, arg)
 	if err != nil {
-		handleDBError(ctx, err)
+		handleDBError(ctx, err, "通知の作成に失敗しました")
 		return
 	}
 
@@ -42,7 +42,7 @@ func (s *Server) GetNotificationsByUser(ctx *gin.Context) {
 
 	notifications, err := s.store.GetNotification(ctx, authPayload.UserID)
 	if err != nil {
-		handleDBError(ctx, err)
+		handleDBError(ctx, err, "通知の取得に失敗しました")
 		return
 	}
 
@@ -54,7 +54,7 @@ func (s *Server) MarkNotificationsAsRead(ctx *gin.Context) {
 
 	notifications, err := s.store.UpdateNotification(ctx, authPayload.UserID)
 	if err != nil {
-		handleDBError(ctx, err)
+		handleDBError(ctx, err, "通知を既読にできませんでした")
 		return
 	}
 
