@@ -7,10 +7,13 @@ package db
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 const createAdminUser = `-- name: CreateAdminUser :one
 INSERT INTO ADMINUSER (
+    admin_id,
     EMAIL,
     HASHPASSWORD,
     STAFF_NAME,
@@ -19,19 +22,22 @@ INSERT INTO ADMINUSER (
     $1,
     $2,
     $3,
-    $4
-) RETURNING email, hashpassword, staff_name, department, joined_at
+    $4,
+    $5
+) RETURNING email, hashpassword, staff_name, department, joined_at, admin_id
 `
 
 type CreateAdminUserParams struct {
-	Email        string `json:"email"`
-	Hashpassword string `json:"hashpassword"`
-	StaffName    string `json:"staff_name"`
-	Department   string `json:"department"`
+	AdminID      uuid.UUID `json:"admin_id"`
+	Email        string    `json:"email"`
+	Hashpassword string    `json:"hashpassword"`
+	StaffName    string    `json:"staff_name"`
+	Department   string    `json:"department"`
 }
 
 func (q *Queries) CreateAdminUser(ctx context.Context, arg CreateAdminUserParams) (Adminuser, error) {
 	row := q.db.QueryRow(ctx, createAdminUser,
+		arg.AdminID,
 		arg.Email,
 		arg.Hashpassword,
 		arg.StaffName,
@@ -44,6 +50,7 @@ func (q *Queries) CreateAdminUser(ctx context.Context, arg CreateAdminUserParams
 		&i.StaffName,
 		&i.Department,
 		&i.JoinedAt,
+		&i.AdminID,
 	)
 	return i, err
 }
@@ -61,6 +68,7 @@ func (q *Queries) DeleteAdminUser(ctx context.Context, email string) error {
 
 const getAdminLogin = `-- name: GetAdminLogin :one
 SELECT
+    admin_id,
     HASHPASSWORD
 FROM
     ADMINUSER
@@ -68,9 +76,14 @@ WHERE
     EMAIL = $1 LIMIT 1
 `
 
-func (q *Queries) GetAdminLogin(ctx context.Context, email string) (string, error) {
+type GetAdminLoginRow struct {
+	AdminID      uuid.UUID `json:"admin_id"`
+	Hashpassword string    `json:"hashpassword"`
+}
+
+func (q *Queries) GetAdminLogin(ctx context.Context, email string) (GetAdminLoginRow, error) {
 	row := q.db.QueryRow(ctx, getAdminLogin, email)
-	var hashpassword string
-	err := row.Scan(&hashpassword)
-	return hashpassword, err
+	var i GetAdminLoginRow
+	err := row.Scan(&i.AdminID, &i.Hashpassword)
+	return i, err
 }

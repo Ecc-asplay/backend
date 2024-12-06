@@ -257,58 +257,59 @@ func (s *Server) LoginUser(ctx *gin.Context) {
 	}
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		handleDBError(ctx, err, "ログイン：無効な入力データです")
+		handleDBError(ctx, err, "ユーザー ログイン：無効な入力データです")
 		return
 	}
 
 	// ハッシュパスワードを取得
 	hashedPassword, err := s.store.GetLogin(ctx, req.Email)
 	if err != nil {
-		handleDBError(ctx, err, "ログイン：ハッシュパスワード取得を失敗しました")
+		handleDBError(ctx, err, "ユーザー ログイン：ハッシュパスワード取得を失敗しました")
 		return
 	}
 
 	// パスワードを検証
 	isValid, err := util.CheckPassword(req.Password, hashedPassword.Hashpassword)
 	if err != nil {
-		handleDBError(ctx, err, "ログイン：パスワード認証を失敗しました")
+		handleDBError(ctx, err, "ユーザー ログイン：パスワード認証を失敗しました")
 		return
 	}
+
 	if !isValid {
 		handleDBError(ctx, err, "無効なメールアドレスまたはパスワード")
 		return
-	}
+	} else {
+		// ユーザー情報を取得
+		user, err := s.store.GetUserData(ctx, hashedPassword.UserID)
+		if err != nil {
+			handleDBError(ctx, err, "ユーザー ログイン：ユーザーデータ取得を失敗しました")
+			return
+		}
 
-	// ユーザー情報を取得
-	user, err := s.store.GetUserData(ctx, hashedPassword.UserID)
-	if err != nil {
-		handleDBError(ctx, err, "ログイン：ユーザーデータ取得を失敗しました")
-		return
-	}
+		accessToken, payload, err := s.tokenMaker.CreateToken(user.UserID, "user", s.config.AccessTokenDuration)
+		if err != nil {
+			handleDBError(ctx, err, "ユーザー ログイン：トークン作成を失敗しました")
+			return
+		}
 
-	accessToken, payload, err := s.tokenMaker.CreateToken(user.UserID, "user", s.config.AccessTokenDuration)
-	if err != nil {
-		handleDBError(ctx, err, "ログイン：トークン作成を失敗しました")
-		return
-	}
+		tokenData := db.CreateTokenParams{
+			ID:          util.CreateUUID(),
+			UserID:      payload.UserID,
+			AccessToken: accessToken,
+			Roles:       payload.Role,
+			Status:      "Login",
+			ExpiresAt:   pgtype.Timestamp{Time: payload.ExpiredAt, Valid: true},
+		}
 
-	tokenData := db.CreateTokenParams{
-		ID:          util.CreateUUID(),
-		UserID:      payload.UserID,
-		AccessToken: accessToken,
-		Roles:       payload.Role,
-		Status:      "Login",
-		ExpiresAt:   pgtype.Timestamp{Time: payload.ExpiredAt, Valid: true},
-	}
+		Token, err := s.store.CreateToken(ctx, tokenData)
+		if err != nil {
+			handleDBError(ctx, err, "ユーザー ログイン：トークン保存を失敗しました")
+			return
+		}
 
-	Token, err := s.store.CreateToken(ctx, tokenData)
-	if err != nil {
-		handleDBError(ctx, err, "ログイン：トークン保存を失敗しました")
-		return
+		ctx.JSON(http.StatusOK, gin.H{
+			"access_token": accessToken,
+			"login_at":     Token.TakeAt,
+		})
 	}
-
-	ctx.JSON(http.StatusOK, gin.H{
-		"access_token": accessToken,
-		"login_at":     Token.TakeAt,
-	})
 }
