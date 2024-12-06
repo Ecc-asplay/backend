@@ -42,7 +42,7 @@ func TestCreateAdminUser(t *testing.T) {
 }
 
 func TestGetAdminLogin(t *testing.T) {
-	pw := "abcd12345"
+	pw := "abcde12345"
 	hash, err := util.Hash(pw)
 	if err != nil {
 		log.Fatal(err)

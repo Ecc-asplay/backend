@@ -108,7 +108,7 @@ func (server *Server) GinRequest(config util.Config) {
 	// 管理者
 	authManage := r.Group("/admin").Use(authMiddleware(server.tokenMaker))
 	authManage.POST("/create", server.CreateAdminUser)
-	authManage.POST("/del", server.DeleteAdminUser)
+	authManage.DELETE("/del", server.DeleteAdminUser)
 
 	server.router = r
 }

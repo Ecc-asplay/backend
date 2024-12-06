@@ -12,13 +12,8 @@ import (
 	"github.com/Ecc-asplay/backend/util"
 )
 
-type LoginAdminRequest struct {
-	Email    string `json:"email" binding:"required"`
-	Password string `json:"password" binding:"required"`
-}
-
 func (s *Server) LoginAdmin(ctx *gin.Context) {
-	var req LoginAdminRequest
+	var req LoginRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "Admin作成：無効な入力データです")
 		return
@@ -112,6 +107,10 @@ func (s *Server) CreateAdminUser(ctx *gin.Context) {
 	})
 }
 
+type DeleteAdminUserRequest struct {
+	Email string `json:"email" binding:"required,email"`
+}
+
 func (s *Server) DeleteAdminUser(ctx *gin.Context) {
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	if authPayload.Role != "admin" {
@@ -119,13 +118,13 @@ func (s *Server) DeleteAdminUser(ctx *gin.Context) {
 		return
 	}
 
-	var req string
+	var req DeleteAdminUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "Admin削除：無効な入力データです")
 		return
 	}
 
-	err := s.store.DeleteAdminUser(ctx, req)
+	err := s.store.DeleteAdminUser(ctx, req.Email)
 	if err != nil {
 		handleDBError(ctx, err, "Admin削除を失敗しました")
 		return
