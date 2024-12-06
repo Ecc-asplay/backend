@@ -3,8 +3,10 @@ package api
 import (
 	"net/http"
 
-	db "github.com/Ecc-asplay/backend/db/sqlc"
 	"github.com/gin-gonic/gin"
+
+	db "github.com/Ecc-asplay/backend/db/sqlc"
+
 )
 
 type CreateSearchedRecordRequest struct {
@@ -15,7 +17,7 @@ type CreateSearchedRecordRequest struct {
 func (s *Server) CreateSearchRecord(ctx *gin.Context) {
 	var req CreateSearchedRecordRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err, "検索記録作成：無効な入力データです")
 		return
 	}
 
@@ -26,7 +28,7 @@ func (s *Server) CreateSearchRecord(ctx *gin.Context) {
 
 	record, err := s.store.CreateSearchedRecord(ctx, arg)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "failed to create search record"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "検索レコードの作成に失敗しました"})
 		return
 	}
 
@@ -36,7 +38,7 @@ func (s *Server) CreateSearchRecord(ctx *gin.Context) {
 func (s *Server) GetSearchedRecordList(ctx *gin.Context) {
 	records, err := s.store.GetSearchedRecordList(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch search records"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "検索レコードの取得に失敗しました"})
 		return
 	}
 

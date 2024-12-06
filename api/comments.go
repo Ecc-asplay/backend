@@ -3,11 +3,12 @@ package api
 import (
 	"net/http"
 
+	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+
 	db "github.com/Ecc-asplay/backend/db/sqlc"
 	"github.com/Ecc-asplay/backend/token"
 	"github.com/Ecc-asplay/backend/util"
-	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
 // 以下は仮の値
@@ -24,12 +25,13 @@ type CreateCommentRequest struct {
 }
 
 func (s *Server) CreateComment(ctx *gin.Context) {
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
 	var req CreateCommentRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err, "コメント作成：無効な入力データです")
 		return
 	}
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
 	arg := db.CreateCommentsParams{
 		CommentID:  util.CreateUUID(),
@@ -44,7 +46,7 @@ func (s *Server) CreateComment(ctx *gin.Context) {
 
 	comment, err := s.store.CreateComments(ctx, arg)
 	if err != nil {
-		handleDBError(ctx, err)
+		handleDBError(ctx, err, "コメント作成を失敗しました")
 		return
 	}
 
@@ -55,13 +57,13 @@ func (s *Server) GetCommentsList(ctx *gin.Context) {
 	postIDStr := ctx.Param("post_id")
 	postID, err := uuid.Parse(postIDStr)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err, "コメントリスト取得：投稿ID取得を失敗しました")
 		return
 	}
 
 	comments, err := s.store.GetCommentsList(ctx, postID)
 	if err != nil {
-		handleDBError(ctx, err)
+		handleDBError(ctx, err, "コメントリスト取得を失敗しました")
 		return
 	}
 
@@ -78,7 +80,7 @@ type UpdateCommentRequest struct {
 func (s *Server) UpdateComments(ctx *gin.Context) {
 	var req UpdateCommentRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err, "コメント更新：無効な入力データです")
 		return
 	}
 
@@ -92,7 +94,7 @@ func (s *Server) UpdateComments(ctx *gin.Context) {
 
 	comment, err := s.store.UpdateComments(ctx, arg)
 	if err != nil {
-		handleDBError(ctx, err)
+		handleDBError(ctx, err, "コメント更新を失敗しました")
 		return
 	}
 
@@ -103,15 +105,15 @@ func (s *Server) DeleteComments(ctx *gin.Context) {
 	commentIDStr := ctx.Param("comment_id")
 	commentID, err := uuid.Parse(commentIDStr)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err, "コメント削除：コメントID取得を失敗しました")
 		return
 	}
 
 	err = s.store.DeleteComments(ctx, commentID)
 	if err != nil {
-		handleDBError(ctx, err)
+		handleDBError(ctx, err, "コメント削除を失敗しました")
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "comment deleted"})
+	ctx.JSON(http.StatusOK, gin.H{"状態": "コメントが削除されました"})
 }

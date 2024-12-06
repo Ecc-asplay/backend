@@ -31,7 +31,7 @@ type Server struct {
 func SetupRouter(config util.Config, store db.Store, redis *redis.Client, taskDistributor worker.TaskDistributor) (*Server, error) {
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
-		return nil, fmt.Errorf("cannot create token maker: %w", err)
+		return nil, fmt.Errorf("トークンメーカーの作成に失敗しました: %w", err)
 	}
 
 	server := &Server{
@@ -66,7 +66,7 @@ func (server *Server) GinRequest(config util.Config) {
 
 	r.Use(cors.New(corsConfig))
 
-	// User
+	// ログイン前
 	r.POST("/users", server.CreateUser)
 	r.POST("/login", server.LoginUser)
 	r.GET("/post/getall", server.GetAllPost)
@@ -121,26 +121,29 @@ func (server *Server) Start(address string) error {
 }
 
 var (
-	ErrInvalidInput     = errors.New("invalid input")
-	ErrPermissionDenied = errors.New("permission denied")
-	ErrConflict         = errors.New("conflict")
+	ErrInvalidInput     = errors.New("無効な入力です")
+	ErrPermissionDenied = errors.New("権限が拒否されました")
+	ErrConflict         = errors.New("リソースの競合です")
+	ErrUnauthorized     = errors.New("認証に失敗しました")
 )
 
-func errorResponse(err error) gin.H {
-	return gin.H{"error": err.Error()}
+func errorResponse(err error, msg string) gin.H {
+	return gin.H{"エラー": err.Error(), "メッセージ": msg}
 }
 
-func handleDBError(ctx *gin.Context, err error) {
+func handleDBError(ctx *gin.Context, err error, msg string) {
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
-		ctx.JSON(http.StatusNotFound, errorResponse(err))
+		ctx.JSON(http.StatusNotFound, errorResponse(err, msg))
 	case errors.Is(err, ErrInvalidInput):
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		ctx.JSON(http.StatusBadRequest, errorResponse(err, msg))
 	case errors.Is(err, ErrPermissionDenied):
-		ctx.JSON(http.StatusForbidden, errorResponse(err))
+		ctx.JSON(http.StatusForbidden, errorResponse(err, msg))
 	case errors.Is(err, ErrConflict):
-		ctx.JSON(http.StatusConflict, errorResponse(err))
+		ctx.JSON(http.StatusConflict, errorResponse(err, msg))
+	case errors.Is(err, ErrUnauthorized):
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err, msg))
 	default:
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err, msg))
 	}
 }

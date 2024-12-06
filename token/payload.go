@@ -38,7 +38,7 @@ func NewPayload(UserID uuid.UUID, role string, duration time.Duration) (*Payload
 
 func (payload *Payload) Valid() error {
 	if time.Now().After(payload.ExpiredAt) {
-		return errors.New("token has expired")
+		return errors.New("トークンの有効期限が切れました")
 	}
 	return nil
 }
