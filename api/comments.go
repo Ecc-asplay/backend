@@ -16,7 +16,6 @@ import (
 // "flagged": コメントが不適切な内容としてフラグされた状態。
 
 type CreateCommentRequest struct {
-	//UserID     uuid.UUID `json:"user_id" binding:"required"`
 	PostID     uuid.UUID `json:"post_id" binding:"required"`
 	Comments   string    `json:"comments" binding:"required"`
 	IsPublic   bool      `json:"is_public"`
