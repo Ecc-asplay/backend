@@ -17,7 +17,7 @@ type CreateSearchedRecordRequest struct {
 func (s *Server) CreateSearchRecord(ctx *gin.Context) {
 	var req CreateSearchedRecordRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		handleDBError(ctx, err, "検索記録作成：無効な入力データです")
 		return
 	}
 

@@ -19,7 +19,7 @@ func init() {
 
 func RandomInt(max int) int {
 	if max <= 0 {
-		log.Fatal("Invalid max value: must be greater than 0")
+		log.Fatal("無効な最大値です: 0 より大きい必要があります")
 	}
 	return rand.Intn(max)
 }
@@ -61,7 +61,7 @@ func SwitchAge(Y, M, D int) int32 {
 
 	age := int64(currentYear - Y)
 	if age < 0 || age > math.MaxInt32 {
-		log.Fatal("Invalid age calculation: overflow or negative age")
+		log.Fatal("無効な年齢計算です: オーバーフローまたは負の年齢")
 	}
 
 	if currentMonth < M || (currentMonth == M && currentDay < D) {

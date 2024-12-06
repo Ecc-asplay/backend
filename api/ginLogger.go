@@ -27,6 +27,7 @@ func GinLogger() gin.HandlerFunc {
 		logger.Str("protocol", "http").
 			Str("method", method).
 			Str("path", path).
+			// Str("Message").
 			Int("status_code", statusCode).
 			Dur("duration", duration).
 			Msg("received an HTTP request")
