@@ -20,7 +20,7 @@ type CreateTagRequest struct {
 func (s *Server) CreateTag(ctx *gin.Context) {
 	var req CreateTagRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		handleDBError(ctx, err)
+		handleDBError(ctx, err, "タップ作成：無効な入力データです")
 		return
 	}
 
@@ -31,20 +31,20 @@ func (s *Server) CreateTag(ctx *gin.Context) {
 
 	tag, err := s.store.CreateTag(ctx, tagData)
 	if err != nil {
-		handleDBError(ctx, err)
+		handleDBError(ctx, err, "Psqlタップ作成を失敗しました")
 		return
 	}
 
 	// Redisに追加する
 	err = s.redis.SAdd("Tag", tag).Err()
 	if err != nil {
-		handleDBError(ctx, err)
+		handleDBError(ctx, err, "Redisタップ作成を失敗しました")
 		return
 	}
 
 	err = s.redis.Expire("Tag", 1*time.Hour).Err()
 	if err != nil {
-		handleDBError(ctx, err)
+		handleDBError(ctx, err, "Redisタップ作成：有効時間設定を失敗しました")
 		return
 	}
 
@@ -61,14 +61,14 @@ func (s *Server) FindTag(ctx *gin.Context) {
 	var result []string
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		handleDBError(ctx, err)
+		handleDBError(ctx, err, "タップ検索：無効な入力データです")
 		return
 	}
 
 	// Redisから取る
 	members, err := s.redis.SMembers("Tag").Result()
 	if err != nil {
-		handleDBError(ctx, err)
+		handleDBError(ctx, err, "Redisタップ検索：データ取得を失敗しました")
 		members = nil
 	}
 	if len(members) > 0 {
@@ -86,20 +86,20 @@ func (s *Server) FindTag(ctx *gin.Context) {
 	// Psql から取る
 	tag, err := s.store.FindTag(ctx, req.TagComments)
 	if err != nil {
-		handleDBError(ctx, err)
+		handleDBError(ctx, err, "Psqlタップ検索を失敗しました")
 		return
 	}
 
 	// Redis更新
 	err = s.redis.SAdd("Tag", tag).Err()
 	if err != nil {
-		handleDBError(ctx, err)
+		handleDBError(ctx, err, "Redisタップ検索の保存を失敗しました")
 		return
 	}
 
 	err = s.redis.Expire("Tag", 1*time.Hour).Err()
 	if err != nil {
-		handleDBError(ctx, err)
+		handleDBError(ctx, err, "Redisタップ検索：有効時間設定を失敗しました")
 		return
 	}
 

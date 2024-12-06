@@ -115,23 +115,26 @@ var (
 	ErrInvalidInput     = errors.New("無効な入力です")
 	ErrPermissionDenied = errors.New("権限が拒否されました")
 	ErrConflict         = errors.New("リソースの競合です")
+	ErrUnauthorized     = errors.New("認証に失敗しました")
 )
 
-func errorResponse(err error) gin.H {
-	return gin.H{"エラー": err.Error()}
+func errorResponse(err error, msg string) gin.H {
+	return gin.H{"エラー": err.Error(), "メッセージ": msg}
 }
 
-func handleDBError(ctx *gin.Context, err error) {
+func handleDBError(ctx *gin.Context, err error, msg string) {
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
-		ctx.JSON(http.StatusNotFound, errorResponse(err))
+		ctx.JSON(http.StatusNotFound, errorResponse(err, msg))
 	case errors.Is(err, ErrInvalidInput):
-		ctx.JSON(http.StatusBadRequest, errorResponse(err))
+		ctx.JSON(http.StatusBadRequest, errorResponse(err, msg))
 	case errors.Is(err, ErrPermissionDenied):
-		ctx.JSON(http.StatusForbidden, errorResponse(err))
+		ctx.JSON(http.StatusForbidden, errorResponse(err, msg))
 	case errors.Is(err, ErrConflict):
-		ctx.JSON(http.StatusConflict, errorResponse(err))
+		ctx.JSON(http.StatusConflict, errorResponse(err, msg))
+	case errors.Is(err, ErrUnauthorized):
+		ctx.JSON(http.StatusUnauthorized, errorResponse(err, msg))
 	default:
-		ctx.JSON(http.StatusInternalServerError, errorResponse(err))
+		ctx.JSON(http.StatusInternalServerError, errorResponse(err, msg))
 	}
 }

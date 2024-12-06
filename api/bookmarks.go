@@ -17,7 +17,7 @@ type bookmarkRequest struct {
 func (s *Server) CreateBookmark(ctx *gin.Context) {
 	var req bookmarkRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		handleDBError(ctx, err)
+		handleDBError(ctx, err, "ブックマーク作成：無効な入力データです")
 		return
 	}
 
@@ -29,7 +29,7 @@ func (s *Server) CreateBookmark(ctx *gin.Context) {
 
 	createBookmark, err := s.store.CreateBookmarks(ctx, data)
 	if err != nil {
-		handleDBError(ctx, err)
+		handleDBError(ctx, err, "ブックマーク作成を失敗しました")
 	}
 
 	ctx.JSON(http.StatusCreated, createBookmark)
@@ -38,7 +38,7 @@ func (s *Server) CreateBookmark(ctx *gin.Context) {
 func (s *Server) DeleteBookmark(ctx *gin.Context) {
 	var req bookmarkRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		handleDBError(ctx, err)
+		handleDBError(ctx, err, "ブックマーク削除：無効な入力データです")
 		return
 	}
 
@@ -50,7 +50,8 @@ func (s *Server) DeleteBookmark(ctx *gin.Context) {
 
 	err := s.store.DeleteBookmarks(ctx, data)
 	if err != nil {
-		handleDBError(ctx, err)
+		handleDBError(ctx, err, "ブックマーク削除を失敗しました")
+		return
 	}
 
 	ctx.Status(http.StatusOK)
@@ -58,9 +59,10 @@ func (s *Server) DeleteBookmark(ctx *gin.Context) {
 
 func (s *Server) GetBookmark(ctx *gin.Context) {
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
 	bookmark, err := s.store.GetAllBookmarks(ctx, authPayload.UserID)
 	if err != nil {
-		handleDBError(ctx, err)
+		handleDBError(ctx, err, "ブックマーク取得を失敗しました")
 	}
 
 	ctx.JSON(http.StatusOK, bookmark)
