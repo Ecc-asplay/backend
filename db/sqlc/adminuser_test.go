@@ -42,7 +42,7 @@ func TestCreateAdminUser(t *testing.T) {
 }
 
 func TestGetAdminLogin(t *testing.T) {
-	pw := util.RandomPassword(20)
+	pw := "abcd12345"
 	hash, err := util.Hash(pw)
 	if err != nil {
 		log.Fatal(err)
@@ -50,7 +50,7 @@ func TestGetAdminLogin(t *testing.T) {
 
 	Data := CreateAdminUserParams{
 		AdminID:      util.CreateUUID(),
-		Email:        gofakeit.Email(),
+		Email:        "abcde12345@gmail.com",
 		Hashpassword: hash,
 		StaffName:    gofakeit.Name(),
 		Department:   gofakeit.JobTitle(),
