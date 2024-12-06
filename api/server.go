@@ -69,11 +69,16 @@ func (server *Server) GinRequest(config util.Config) {
 	// ログイン前
 	r.POST("/users", server.CreateUser)
 	r.POST("/login", server.LoginUser)
+	// r.POST("/management", server.LoginAdmin)
 	r.GET("/post/getall", server.GetAllPost)
 	r.POST("/post/search", server.SearchPost)
 
 	// ログイン後
 	authRoutes := r.Group("/").Use(authMiddleware(server.tokenMaker))
+	authManage := r.Group("/manage").Use(authMiddleware(server.tokenMaker))
+
+	// admin
+	authManage.POST("/admin/create", server.CreateAdminUser)
 
 	// ユーザー
 	authRoutes.DELETE("/users/:id", server.DeleteUser)
