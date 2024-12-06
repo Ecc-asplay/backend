@@ -69,16 +69,12 @@ func (server *Server) GinRequest(config util.Config) {
 	// ログイン前
 	r.POST("/users", server.CreateUser)
 	r.POST("/login", server.LoginUser)
-	// r.POST("/management", server.LoginAdmin)
+	r.POST("/management", server.LoginAdmin)
 	r.GET("/post/getall", server.GetAllPost)
 	r.POST("/post/search", server.SearchPost)
 
 	// ログイン後
 	authRoutes := r.Group("/").Use(authMiddleware(server.tokenMaker))
-	authManage := r.Group("/manage").Use(authMiddleware(server.tokenMaker))
-
-	// admin
-	authManage.POST("/admin/create", server.CreateAdminUser)
 
 	// ユーザー
 	authRoutes.DELETE("/users/:id", server.DeleteUser)
@@ -108,6 +104,11 @@ func (server *Server) GinRequest(config util.Config) {
 	authRoutes.POST("/createcomment", server.CreateComment)
 	r.PUT("/updatecomment", server.UpdateComments)
 	r.DELETE("/deletecomment/:comment_id", server.DeleteComments)
+
+	// 管理者
+	authManage := r.Group("/admin").Use(authMiddleware(server.tokenMaker))
+	authManage.POST("/create", server.CreateAdminUser)
+	authManage.POST("/del", server.DeleteAdminUser)
 
 	server.router = r
 }
