@@ -1,5 +1,6 @@
 -- name: CreateAdminUser :one
 INSERT INTO ADMINUSER (
+    admin_id,
     EMAIL,
     HASHPASSWORD,
     STAFF_NAME,
@@ -8,11 +9,13 @@ INSERT INTO ADMINUSER (
     $1,
     $2,
     $3,
-    $4
+    $4,
+    $5
 ) RETURNING *;
 
 -- name: GetAdminLogin :one
 SELECT
+    admin_id,
     HASHPASSWORD
 FROM
     ADMINUSER
