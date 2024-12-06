@@ -21,6 +21,8 @@ dropDB:
 # createMigrate:
 # 	migrate create -ext sql -dir db/migration -seq init_table
 
+
+
 #up
 migrateup:
 	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose up
@@ -36,6 +38,13 @@ migratedown1:
 	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose down 1
 migratedown2:
 	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose down 2
+
+
+#psql reset
+tablereset:
+	make migratedown
+	make migrateup
+	make sqlc
 
 
 # Redis　ダウンロードと作成
@@ -69,7 +78,7 @@ server:
 	go run main.go
 
 
-.PHONY: postgres dropPsql createDB dropDB migrateup migratedown migrateup1 migratedown1 migrateup2 migratedown2 sqlc 
+.PHONY: postgres dropPsql createDB dropDB migrateup migratedown migrateup1 migratedown1 migrateup2 migratedown2 sqlc tablereset
 		redis dropRedis
 		resetDB
 		test server

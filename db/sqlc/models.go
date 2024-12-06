@@ -15,6 +15,7 @@ type Adminuser struct {
 	StaffName    string           `json:"staff_name"`
 	Department   string           `json:"department"`
 	JoinedAt     pgtype.Timestamp `json:"joined_at"`
+	AdminID      uuid.UUID        `json:"admin_id"`
 }
 
 type Blockuser struct {
