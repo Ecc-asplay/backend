@@ -16,7 +16,6 @@ import (
 // "flagged": コメントが不適切な内容としてフラグされた状態。
 
 type CreateCommentRequest struct {
-	//UserID     uuid.UUID `json:"user_id" binding:"required"`
 	PostID     uuid.UUID `json:"post_id" binding:"required"`
 	Comments   string    `json:"comments" binding:"required"`
 	IsPublic   bool      `json:"is_public"`
@@ -46,7 +45,7 @@ func (s *Server) CreateComment(ctx *gin.Context) {
 
 	comment, err := s.store.CreateComments(ctx, arg)
 	if err != nil {
-		handleDBError(ctx, err, "コメント作成を失敗しました")
+		handleDBError(ctx, err, "コメント作成に失敗しました")
 		return
 	}
 
@@ -57,13 +56,13 @@ func (s *Server) GetCommentsList(ctx *gin.Context) {
 	postIDStr := ctx.Param("post_id")
 	postID, err := uuid.Parse(postIDStr)
 	if err != nil {
-		handleDBError(ctx, err, "コメントリスト取得：投稿ID取得を失敗しました")
+		handleDBError(ctx, err, "コメントリスト取得：投稿ID取得に失敗しました")
 		return
 	}
 
 	comments, err := s.store.GetCommentsList(ctx, postID)
 	if err != nil {
-		handleDBError(ctx, err, "コメントリスト取得を失敗しました")
+		handleDBError(ctx, err, "コメントリスト取得に失敗しました")
 		return
 	}
 
@@ -94,7 +93,7 @@ func (s *Server) UpdateComments(ctx *gin.Context) {
 
 	comment, err := s.store.UpdateComments(ctx, arg)
 	if err != nil {
-		handleDBError(ctx, err, "コメント更新を失敗しました")
+		handleDBError(ctx, err, "コメント更新に失敗しました")
 		return
 	}
 
@@ -105,13 +104,13 @@ func (s *Server) DeleteComments(ctx *gin.Context) {
 	commentIDStr := ctx.Param("comment_id")
 	commentID, err := uuid.Parse(commentIDStr)
 	if err != nil {
-		handleDBError(ctx, err, "コメント削除：コメントID取得を失敗しました")
+		handleDBError(ctx, err, "コメント削除：コメントID取得に失敗しました")
 		return
 	}
 
 	err = s.store.DeleteComments(ctx, commentID)
 	if err != nil {
-		handleDBError(ctx, err, "コメント削除を失敗しました")
+		handleDBError(ctx, err, "コメント削除に失敗しました")
 		return
 	}
 

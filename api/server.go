@@ -90,7 +90,7 @@ func (server *Server) GinRequest(config util.Config) {
 	authRoutes.DELETE("/post/del", server.DeletePost)
 	authRoutes.PUT("/post/update", server.UpdatePost)
 
-	// タップ
+	// タグ
 	r.POST("/tag/add", server.CreateTag)
 	r.POST("/tag/get", server.FindTag)
 
@@ -99,11 +99,20 @@ func (server *Server) GinRequest(config util.Config) {
 	authRoutes.DELETE("/bookmark/del", server.DeleteBookmark)
 	authRoutes.GET("/bookmark/get", server.GetBookmark)
 
-	// コメント
-	r.GET("/getcommentlist/:post_id", server.GetCommentsList)
-	authRoutes.POST("/createcomment", server.CreateComment)
-	r.PUT("/updatecomment", server.UpdateComments)
-	r.DELETE("/deletecomment/:comment_id", server.DeleteComments)
+	// Comment
+	r.GET("/comment/getlist/:post_id", server.GetCommentsList)
+	authRoutes.POST("/comment/create", server.CreateComment)
+	r.PUT("/comment/update", server.UpdateComments)
+	r.DELETE("/comment/delete/:comment_id", server.DeleteComments)
+
+	// Searchrecord
+	r.POST("/searchrecord/getlist", server.GetSearchedRecordList)
+	r.POST("/searchrecord/create", server.CreateSearchRecord)
+
+	// Notification
+	authRoutes.POST("/notification/create", server.CreateNotification)
+	authRoutes.GET("/notification/get", server.GetNotificationsByUser)
+	authRoutes.PUT("/notification/read", server.MarkNotificationsAsRead)
 
 	// 管理者
 	authManage := r.Group("/admin").Use(authMiddleware(server.tokenMaker))
