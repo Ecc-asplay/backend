@@ -18,7 +18,7 @@ const (
 
 type TaskProcessor interface {
 	Start() error
-	ProcessTask(ctx context.Context, task *asynq.Task) error
+	ProcessVerifyEmailTask(ctx context.Context, task *asynq.Task) error
 }
 
 type RedisTaskProcessor struct {
@@ -56,7 +56,7 @@ func NewRedisTaskProcessor(redisOpt asynq.RedisClientOpt, store db.Store) TaskPr
 func (processor *RedisTaskProcessor) Start() error {
 	mux := asynq.NewServeMux()
 
-	mux.HandleFunc("CreateUser", processor.ProcessTask)
+	mux.HandleFunc("CreateUser", processor.ProcessVerifyEmailTask)
 
 	return processor.server.Start(mux)
 }
