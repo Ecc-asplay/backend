@@ -12,17 +12,17 @@ import (
 
 	db "github.com/Ecc-asplay/backend/db/sqlc"
 	"github.com/Ecc-asplay/backend/token"
+	"github.com/Ecc-asplay/backend/util"
 )
 
 // Create
 type CreatePostRequest struct {
-	PostID   uuid.UUID `json:"post_id"`
-	ShowID   string    `json:"show_id"`
-	Title    string    `json:"title"`
-	Feel     string    `json:"feel"`
-	Content  []byte    `json:"content"`
-	Reaction int32     `json:"reaction"`
-	Status   string    `json:"status"`
+	ShowID   string `json:"show_id"`
+	Title    string `json:"title"`
+	Feel     string `json:"feel"`
+	Content  []byte `json:"content"`
+	Reaction int32  `json:"reaction"`
+	Status   string `json:"status"`
 }
 
 func (s *Server) CreatePost(ctx *gin.Context) {
@@ -34,10 +34,19 @@ func (s *Server) CreatePost(ctx *gin.Context) {
 		return
 	}
 
+	postID := util.CreateUUID()
+	var showID string
+
+	if req.ShowID == "" {
+		showID = postID.String()
+	} else {
+		showID = req.ShowID
+	}
+
 	postData := db.CreatePostParams{
 		UserID:   authPayload.UserID,
-		PostID:   req.PostID,
-		ShowID:   req.ShowID,
+		PostID:   postID,
+		ShowID:   showID,
 		Title:    req.Title,
 		Feel:     req.Feel,
 		Content:  req.Content,
@@ -108,15 +117,19 @@ func (s *Server) GetAllPost(ctx *gin.Context) {
 	}
 }
 
+type SearchRequest struct {
+	Keyword string `json:"keyword" binding:"required"`
+}
+
 // Search
 func (s *Server) SearchPost(ctx *gin.Context) {
-	var req string
+	var req SearchRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "投稿検索：無効な入力データです")
 		return
 	}
 
-	findPost, err := s.store.SearchPost(ctx, req)
+	findPost, err := s.store.SearchPost(ctx, req.Keyword)
 	if err != nil {
 		handleDBError(ctx, err, "投稿検索を失敗しました")
 		return
