@@ -13,11 +13,11 @@ import (
 )
 
 type CreateUserRequset struct {
-	Username string      `json:"username" binding:"required"`
-	Email    string      `json:"email" binding:"required"`
-	Birth    pgtype.Date `json:"birth" binding:"required"`
-	Gender   string      `json:"gender"`
-	Password string      `json:"password" binding:"required"`
+	Username string `json:"username" binding:"required"`
+	Email    string `json:"email" binding:"required"`
+	Birth    string `json:"birth" binding:"required"`
+	Gender   string `json:"gender"`
+	Password string `json:"password" binding:"required"`
 }
 
 func (s *Server) CreateUser(ctx *gin.Context) {
@@ -33,11 +33,16 @@ func (s *Server) CreateUser(ctx *gin.Context) {
 		return
 	}
 
+	birth := pgtype.Date{
+		Time:  time.Time{},
+		Valid: true,
+	}
+
 	data := db.CreateUserParams{
 		UserID:       util.CreateUUID(),
 		Username:     req.Username,
 		Email:        req.Email,
-		Birth:        req.Birth,
+		Birth:        birth,
 		Gender:       req.Gender,
 		Disease:      "",
 		Condition:    "",

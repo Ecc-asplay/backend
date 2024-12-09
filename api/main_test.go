@@ -19,6 +19,7 @@ func TestMain(m *testing.M) {
 
 func newTestServer(t *testing.T) *Server {
 	config := util.Config{
+		FrontAddress:        []string{"*"},
 		TokenSymmetricKey:   util.RandomString(32),
 		AccessTokenDuration: time.Minute,
 	}
