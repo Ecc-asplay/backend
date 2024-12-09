@@ -94,7 +94,7 @@ func TestCreateUserAPI(t *testing.T) {
 			name: "Invalid Email",
 			body: CreateUserRequset{
 				Username: gofakeit.Name(),
-				Email:    "invalid-email",
+				Email:    "",
 				Birth:    util.RandomDate(),
 				Gender:   util.RandomGender(),
 				Password: util.RandomString(20),
