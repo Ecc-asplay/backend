@@ -141,14 +141,19 @@ func handleDBError(ctx *gin.Context, err error, msg string) {
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		ctx.JSON(http.StatusNotFound, errorResponse(err, msg))
+
 	case errors.Is(err, ErrInvalidInput):
 		ctx.JSON(http.StatusBadRequest, errorResponse(err, msg))
+
 	case errors.Is(err, ErrPermissionDenied):
 		ctx.JSON(http.StatusForbidden, errorResponse(err, msg))
+
 	case errors.Is(err, ErrConflict):
 		ctx.JSON(http.StatusConflict, errorResponse(err, msg))
+
 	case errors.Is(err, ErrUnauthorized):
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err, msg))
+
 	default:
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err, msg))
 	}

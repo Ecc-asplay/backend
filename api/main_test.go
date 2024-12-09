@@ -1,14 +1,18 @@
 package api
 
 import (
+	"context"
 	"os"
 	"testing"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/lib/pq"
+	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/require"
 
+	db "github.com/Ecc-asplay/backend/db/sqlc"
 	"github.com/Ecc-asplay/backend/util"
 )
 
@@ -24,8 +28,23 @@ func newTestServer(t *testing.T) *Server {
 		AccessTokenDuration: time.Minute,
 	}
 
-	server, err := SetupRouter(config, nil, nil, nil)
+	config, err := util.LoadConfig("../")
+	if err != nil {
+		log.Error().Err(err).Msg("app.env が見つかりません")
+		os.Exit(1)
+	}
+
+	conn, err := pgxpool.New(context.Background(), config.DBSource)
+	if err != nil {
+		log.Error().Err(err).Msg("データベースに接続できません")
+		os.Exit(1)
+	}
+
+	store := db.NewStore(conn)
+
+	server, err := SetupRouter(config, store, nil, nil)
 	require.NoError(t, err)
+	require.NotEmpty(t, server)
 
 	return server
 }
