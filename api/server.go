@@ -101,9 +101,9 @@ func (server *Server) GinRequest(config util.Config) {
 
 	// Comment
 	r.GET("/comment/getlist/:post_id", server.GetCommentsList)
-	r.PUT("/comment/update", server.UpdateComments)
-	r.DELETE("/comment/delete/:comment_id", server.DeleteComments)
 	authRoutes.POST("/comment/create", server.CreateComment)
+	authRoutes.PUT("/comment/update", server.UpdateComments)
+	authRoutes.DELETE("/comment/delete/:comment_id", server.DeleteComments)
 
 	// Searchrecord
 	r.POST("/searchrecord/getlist", server.GetSearchedRecordList)
@@ -113,6 +113,12 @@ func (server *Server) GinRequest(config util.Config) {
 	authRoutes.POST("/notification/create", server.CreateNotification)
 	authRoutes.GET("/notification/get", server.GetNotificationsByUser)
 	authRoutes.PUT("/notification/read", server.MarkNotificationsAsRead)
+
+	// Blockuser
+	authRoutes.POST("/block/create", server.CreateBlockUser)
+	authRoutes.GET("/block/get", server.GetBlockUsersByUser)
+	authRoutes.GET("/block/getlist", server.GetAllBlockedUsers)
+	authRoutes.PUT("/block/update", server.UnblockUser)
 
 	// 管理者
 	authManage := r.Group("/admin").Use(authMiddleware(server.tokenMaker))
