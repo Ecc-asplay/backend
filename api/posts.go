@@ -22,7 +22,7 @@ type CreatePostRequest struct {
 	Feel     string `json:"feel"`
 	Content  []byte `json:"content"`
 	Reaction int32  `json:"reaction"`
-	Status   string `json:"status"`
+	Status   string `json:"status" binding:"required"`
 }
 
 func (s *Server) CreatePost(ctx *gin.Context) {
@@ -184,6 +184,7 @@ func (s *Server) UpdatePost(ctx *gin.Context) {
 		handleDBError(ctx, err, "投稿更新：無効な入力データです")
 		return
 	}
+
 	newPostData := db.UpdatePostsParams{
 		UserID:      authPayload.UserID,
 		PostID:      req.PostID,

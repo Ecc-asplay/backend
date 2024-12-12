@@ -46,6 +46,7 @@ func main() {
 		Addr: config.RedisAddress,
 		DB:   0,
 	}
+
 	// Redis キャッシュ接続
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     config.RedisAddress,

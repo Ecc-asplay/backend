@@ -90,8 +90,8 @@ func RandomGender() string {
 }
 
 func RandomDate() time.Time {
-	year := RandomInt(25) + 2000 // Random year between 2000 and 2024
-	month := RandomInt(12) + 1   // Random month between 1 and 12
+	year := RandomInt(25) + 2000
+	month := RandomInt(12) + 1
 
 	var day int
 	if month == 2 {
