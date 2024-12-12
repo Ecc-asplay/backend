@@ -208,8 +208,7 @@ func TestDeleteUserAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/users/%s", tc.body)
-			request, err := http.NewRequest(http.MethodDelete, url, bytes.NewReader(data))
+			request, err := http.NewRequest(http.MethodDelete, "/users/del", bytes.NewReader(data))
 			require.NoError(t, err)
 			require.NotEmpty(t, request)
 
@@ -275,9 +274,7 @@ func TestResetPasswordAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/users/%s/password", tc.userID)
-
-			request, err := http.NewRequest(http.MethodPut, url, bytes.NewReader(data))
+			request, err := http.NewRequest(http.MethodPut, "/users/password", bytes.NewReader(data))
 			require.NoError(t, err)
 			require.NotEmpty(t, request)
 
@@ -344,9 +341,7 @@ func TestUpdatediseaseConditionAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/users/%s/disease-condition", tc.userID)
-
-			request, err := http.NewRequest(http.MethodPut, url, bytes.NewReader(data))
+			request, err := http.NewRequest(http.MethodPut, "/users/disease-condition", bytes.NewReader(data))
 			require.NoError(t, err)
 			require.NotEmpty(t, request)
 
@@ -411,9 +406,7 @@ func TestUpdateEmailAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/users/%s/email", tc.userID)
-
-			request, err := http.NewRequest(http.MethodPut, url, bytes.NewReader(data))
+			request, err := http.NewRequest(http.MethodPut, "/users/email", bytes.NewReader(data))
 			require.NoError(t, err)
 			require.NotEmpty(t, request)
 
@@ -482,9 +475,7 @@ func TestUpdateIsPrivacyAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/users/%s/privacy", tc.userID)
-
-			request, err := http.NewRequest(http.MethodPut, url, bytes.NewReader(data))
+			request, err := http.NewRequest(http.MethodPut, "/users/privacy", bytes.NewReader(data))
 			require.NoError(t, err)
 			require.NotEmpty(t, request)
 
@@ -550,9 +541,7 @@ func TestUpdateNameAPI(t *testing.T) {
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/users/%s/name", tc.userID)
-
-			request, err := http.NewRequest(http.MethodPut, url, bytes.NewReader(data))
+			request, err := http.NewRequest(http.MethodPut, "/users/name", bytes.NewReader(data))
 			require.NoError(t, err)
 			require.NotEmpty(t, request)
 

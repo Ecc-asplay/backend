@@ -239,7 +239,6 @@ func (s *Server) UpdateName(ctx *gin.Context) {
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
 	var req NewUsernameRequest
-
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "ユーザー名更新：無効な入力データです")
 		return
