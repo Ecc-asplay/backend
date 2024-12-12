@@ -77,18 +77,19 @@ func (server *Server) GinRequest(config util.Config) {
 	authRoutes := r.Group("/").Use(authMiddleware(server.tokenMaker))
 
 	// ユーザー
-	authRoutes.DELETE("/users/:id", server.DeleteUser)
-	authRoutes.GET("/users/:id", server.GetUserData)
-	authRoutes.PUT("/users/:id/password", server.ResetPassword)
-	authRoutes.PUT("/users/:id/disease-condition", server.UpdateDiseaseAndCondition)
-	authRoutes.PUT("/users/:id/email", server.UpdateEmail)
-	authRoutes.PUT("/users/:id/privacy", server.UpdateIsPrivacy)
-	authRoutes.PUT("/users/:id/name", server.UpdateName)
+	authRoutes.DELETE("/users", server.DeleteUser)
+	authRoutes.GET("/users", server.GetUserData)
+	authRoutes.PUT("/users/password", server.ResetPassword)
+	authRoutes.PUT("/users/disease-condition", server.UpdateDiseaseAndCondition)
+	authRoutes.PUT("/users/email", server.UpdateEmail)
+	authRoutes.PUT("/users/privacy", server.UpdateIsPrivacy)
+	authRoutes.PUT("/users/name", server.UpdateName)
 
 	// 投稿
 	authRoutes.POST("/post/add", server.CreatePost)
 	authRoutes.DELETE("/post/del", server.DeletePost)
 	authRoutes.PUT("/post/update", server.UpdatePost)
+	authRoutes.PUT("/post/get", server.UpdatePost)
 
 	// タグ
 	r.POST("/tag/add", server.CreateTag)

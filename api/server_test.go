@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis"
 	"github.com/jackc/pgx/v5/pgxpool"
 	_ "github.com/lib/pq"
 	"github.com/rs/zerolog/log"
@@ -40,9 +41,15 @@ func newTestServer(t *testing.T) *Server {
 		os.Exit(1)
 	}
 
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     config.RedisAddress,
+		Password: "",
+		DB:       1,
+	})
+
 	store := db.NewStore(conn)
 
-	server, err := SetupRouter(config, store, nil, nil)
+	server, err := SetupRouter(config, store, rdb, nil)
 	require.NoError(t, err)
 	require.NotEmpty(t, server)
 
