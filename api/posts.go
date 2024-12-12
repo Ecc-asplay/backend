@@ -117,19 +117,15 @@ func (s *Server) GetAllPost(ctx *gin.Context) {
 	}
 }
 
-type SearchRequest struct {
-	Keyword string `json:"keyword" binding:"required"`
-}
-
 // Search
 func (s *Server) SearchPost(ctx *gin.Context) {
-	var req SearchRequest
+	var req string
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "投稿検索：無効な入力データです")
 		return
 	}
 
-	findPost, err := s.store.SearchPost(ctx, req.Keyword)
+	findPost, err := s.store.SearchPost(ctx, req)
 	if err != nil {
 		handleDBError(ctx, err, "投稿検索を失敗しました")
 		return

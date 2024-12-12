@@ -63,60 +63,6 @@ func CreateRandomPost(t *testing.T, user User) Post {
 				},
 			},
 		},
-		{
-			"type": "paragraph",
-			"children": []map[string]interface{}{
-				{
-					"color":     gofakeit.Color(),
-					"underline": util.RandomBool(),
-					"fontsize":  Wsize[4],
-					"text":      "偏頭痛が痛い",
-				},
-			},
-		},
-		{
-			"type": "paragraph",
-			"children": []map[string]interface{}{
-				{
-					"bold":     util.RandomBool(),
-					"color":    gofakeit.Color(),
-					"strike":   util.RandomBool(),
-					"fontsize": Wsize[5],
-					"text":     "四十",
-				},
-				{
-					"bold":     util.RandomBool(),
-					"color":    gofakeit.Color(),
-					"strike":   util.RandomBool(),
-					"fontsize": Wsize[6],
-					"text":     "肩",
-				},
-				{
-					"bold":     util.RandomBool(),
-					"color":    gofakeit.Color(),
-					"strike":   util.RandomBool(),
-					"fontsize": Wsize[7],
-					"text":     "がつらい",
-				},
-			},
-		},
-		{
-			"type": "paragraph",
-			"children": []map[string]interface{}{
-				{
-					"bold":     util.RandomBool(),
-					"color":    gofakeit.Color(),
-					"fontsize": Wsize[8],
-					"text":     "深爪",
-				},
-				{
-					"bold":     util.RandomBool(),
-					"color":    gofakeit.Color(),
-					"fontsize": Wsize[9],
-					"text":     "が深い",
-				},
-			},
-		},
 	}
 	contentJson, err := json.MarshalIndent(contentData, "", "  ")
 	if err != nil {
@@ -167,14 +113,7 @@ func TestDeletePost(t *testing.T) {
 
 	err := testQueries.DeletePost(context.Background(), delete)
 	require.NoError(t, err)
-
-	img, err := testQueries.GetImage(context.Background(), post.PostID)
-	if img != nil {
-		err = testQueries.DeleteImage(context.Background(), post.PostID)
-		require.NoError(t, err)
-	}
 }
-
 func TestGetPostOfKeywords(t *testing.T) {
 	user := CreateRandomUser(t)
 	var Wsize []int
@@ -308,6 +247,90 @@ func TestGetPostOfKeywords(t *testing.T) {
 	require.GreaterOrEqual(t, len(foundPost), 1)
 }
 
+// func TestGetPostOfKeywords(t *testing.T) {
+// 	user := CreateRandomUser(t)
+// 	var Wsize []int
+// 	for i := 0; i < 12; i++ {
+// 		size := util.RandomInt(24) + 16
+// 		Wsize = append(Wsize, size)
+// 	}
+
+// 	contentData := []map[string]interface{}{
+// 		{
+// 			"type": "paragraph",
+// 			"children": []map[string]interface{}{
+// 				{
+// 					"bold":     util.RandomBool(),
+// 					"color":    gofakeit.Color(),
+// 					"italic":   util.RandomBool(),
+// 					"fontsize": Wsize[3],
+// 					"text":     "頭痛が",
+// 				},
+// 				{
+// 					"bold":     util.RandomBool(),
+// 					"color":    gofakeit.Color(),
+// 					"italic":   util.RandomBool(),
+// 					"fontsize": Wsize[3],
+// 					"text":     "痛い",
+// 				},
+// 			},
+// 		},
+// 		{
+// 			"type": "paragraph",
+// 			"children": []map[string]interface{}{
+// 				{
+// 					"color":     gofakeit.Color(),
+// 					"underline": util.RandomBool(),
+// 					"fontsize":  Wsize[4],
+// 					"text":      "偏頭痛が痛い",
+// 				},
+// 			},
+// 		},
+// 		{
+// 			"type": "paragraph",
+// 			"children": []map[string]interface{}{
+// 				{
+// 					"bold":     util.RandomBool(),
+// 					"color":    gofakeit.Color(),
+// 					"fontsize": Wsize[8],
+// 					"text":     "深爪",
+// 				},
+// 				{
+// 					"bold":     util.RandomBool(),
+// 					"color":    gofakeit.Color(),
+// 					"fontsize": Wsize[9],
+// 					"text":     "が深い",
+// 				},
+// 			},
+// 		},
+// 	}
+// 	contentJson, err := json.MarshalIndent(contentData, "", "  ")
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+
+// 	newPost := CreatePostParams{
+// 		PostID:      util.CreateUUID(),
+// 		UserID:      user.UserID,
+// 		ShowID:      util.RandomString(10),
+// 		Title:       "aaaaaaaaaaaaaaaaaaaa",
+// 		Feel:        util.RandomMood(),
+// 		Content:     contentJson,
+// 		Reaction:    rand.Int31(),
+// 		IsSensitive: util.RandomBool(),
+// 		Status:      util.RandomStatus(),
+// 	}
+
+// 	post, err := testQueries.CreatePost(context.Background(), newPost)
+// 	require.NoError(t, err)
+// 	require.NotEmpty(t, post)
+
+// 	foundPost, err := testQueries.SearchPost(context.Background(), "a")
+// 	require.NoError(t, err)
+// 	require.NotEmpty(t, foundPost)
+// 	require.GreaterOrEqual(t, len(foundPost), 1)
+// }
+
 func TestGetPostsList(t *testing.T) {
 
 	for i := 0; i < 10; i++ {
@@ -346,59 +369,6 @@ func TestUpdatePosts(t *testing.T) {
 	}
 
 	contentData := []map[string]interface{}{
-		{
-			"type": "paragraph",
-			"children": []map[string]interface{}{
-				{
-					"bold":     util.RandomBool(),
-					"color":    gofakeit.Color(),
-					"fontsize": Wsize[0],
-					"text":     "頭",
-				},
-				{
-					"bold":     util.RandomBool(),
-					"color":    gofakeit.Color(),
-					"fontsize": Wsize[1],
-					"text":     "が痛",
-				},
-				{
-					"bold":     util.RandomBool(),
-					"color":    gofakeit.Color(),
-					"fontsize": Wsize[2],
-					"text":     "い",
-				},
-			},
-		},
-		{
-			"type": "paragraph",
-			"children": []map[string]interface{}{
-				{
-					"bold":     util.RandomBool(),
-					"color":    gofakeit.Color(),
-					"italic":   util.RandomBool(),
-					"fontsize": Wsize[3],
-					"text":     "頭痛が",
-				},
-				{
-					"bold":     util.RandomBool(),
-					"color":    gofakeit.Color(),
-					"italic":   util.RandomBool(),
-					"fontsize": Wsize[3],
-					"text":     "痛い",
-				},
-			},
-		},
-		{
-			"type": "paragraph",
-			"children": []map[string]interface{}{
-				{
-					"color":     gofakeit.Color(),
-					"underline": util.RandomBool(),
-					"fontsize":  Wsize[4],
-					"text":      "偏頭痛が痛い",
-				},
-			},
-		},
 		{
 			"type": "paragraph",
 			"children": []map[string]interface{}{
