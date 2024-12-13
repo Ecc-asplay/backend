@@ -57,17 +57,6 @@ dropRedis:
 	docker stop redis || true
 	docker rm redis || true
 
-# reset docker db
-resetDB:
-	make dropPsql
-	make dropRedis
-	make postgres
-	make redis
-	sleep 3
-	make createDB
-	make migrateup
-	make test
-
 #Sqlc
 sqlc:
 	sqlc generate
@@ -81,5 +70,4 @@ server:
 
 .PHONY: postgres dropPsql createDB dropDB migrateup migratedown migrateup1 migratedown1 migrateup2 migratedown2 sqlc tablereset
 		redis dropRedis
-		resetDB
 		test server

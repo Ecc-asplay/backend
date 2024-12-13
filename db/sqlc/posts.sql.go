@@ -238,6 +238,7 @@ SET
     CONTENT = COALESCE($6, CONTENT),
     REACTION = COALESCE($7, REACTION),
     IS_SENSITIVE = COALESCE($8, IS_SENSITIVE),
+    status = COALESCE($9, status),
     UPDATED_AT = NOW()
 WHERE
     USER_ID = $1
@@ -254,6 +255,7 @@ type UpdatePostsParams struct {
 	Content     []byte    `json:"content"`
 	Reaction    int32     `json:"reaction"`
 	IsSensitive bool      `json:"is_sensitive"`
+	Status      string    `json:"status"`
 }
 
 func (q *Queries) UpdatePosts(ctx context.Context, arg UpdatePostsParams) (Post, error) {
@@ -266,6 +268,7 @@ func (q *Queries) UpdatePosts(ctx context.Context, arg UpdatePostsParams) (Post,
 		arg.Content,
 		arg.Reaction,
 		arg.IsSensitive,
+		arg.Status,
 	)
 	var i Post
 	err := row.Scan(

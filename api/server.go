@@ -16,30 +16,27 @@ import (
 	db "github.com/Ecc-asplay/backend/db/sqlc"
 	"github.com/Ecc-asplay/backend/token"
 	"github.com/Ecc-asplay/backend/util"
-	"github.com/Ecc-asplay/backend/worker"
 )
 
 type Server struct {
-	store           db.Store
-	router          *gin.Engine
-	redis           *redis.Client
-	config          util.Config
-	tokenMaker      token.Maker
-	taskDistributor worker.TaskDistributor
+	store      db.Store
+	router     *gin.Engine
+	redis      *redis.Client
+	config     util.Config
+	tokenMaker token.Maker
 }
 
-func SetupRouter(config util.Config, store db.Store, redis *redis.Client, taskDistributor worker.TaskDistributor) (*Server, error) {
+func SetupRouter(config util.Config, store db.Store, redis *redis.Client) (*Server, error) {
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("トークンメーカーの作成に失敗しました: %w", err)
 	}
 
 	server := &Server{
-		store:           store,
-		config:          config,
-		redis:           redis,
-		tokenMaker:      tokenMaker,
-		taskDistributor: taskDistributor,
+		store:      store,
+		config:     config,
+		redis:      redis,
+		tokenMaker: tokenMaker,
 	}
 
 	server.GinRequest(config)
@@ -71,7 +68,7 @@ func (server *Server) GinRequest(config util.Config) {
 	r.POST("/login", server.LoginUser)
 	r.POST("/management", server.LoginAdmin)
 	r.GET("/post/getall", server.GetAllPost)
-	r.POST("/post/search", server.SearchPost)
+	// r.POST("/post/search", server.SearchPost)
 
 	// ログイン後
 	authRoutes := r.Group("/").Use(authMiddleware(server.tokenMaker))
