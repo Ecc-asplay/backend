@@ -17,6 +17,17 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+var hiragana = []rune("あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん")
+
+func RandomHiragana(length int) string {
+	rand.Seed(time.Now().UnixNano())
+	result := make([]rune, length)
+	for i := 0; i < length; i++ {
+		result[i] = hiragana[rand.Intn(len(hiragana))]
+	}
+	return string(result)
+}
+
 func RandomInt(max int) int {
 	if max <= 0 {
 		log.Fatal("無効な最大値です: 0 より大きい必要があります")

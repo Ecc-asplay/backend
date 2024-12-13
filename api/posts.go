@@ -118,25 +118,25 @@ func (s *Server) GetAllPost(ctx *gin.Context) {
 }
 
 // Search
-func (s *Server) SearchPost(ctx *gin.Context) {
-	var req string
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		handleDBError(ctx, err, "投稿検索：無効な入力データです")
-		return
-	}
+// func (s *Server) SearchPost(ctx *gin.Context) {
+// 	var req string
+// 	if err := ctx.ShouldBindJSON(&req); err != nil {
+// 		handleDBError(ctx, err, "投稿検索：無効な入力データです")
+// 		return
+// 	}
 
-	findPost, err := s.store.SearchPost(ctx, req)
-	if err != nil {
-		handleDBError(ctx, err, "投稿検索を失敗しました")
-		return
-	}
+// 	findPost, err := s.store.SearchPost(ctx, req)
+// 	if err != nil {
+// 		handleDBError(ctx, err, "投稿検索を失敗しました")
+// 		return
+// 	}
 
-	ctx.JSON(http.StatusOK, findPost)
-}
+// 	ctx.JSON(http.StatusOK, findPost)
+// }
 
 // Delete
 type DeletePostRequest struct {
-	PostID uuid.UUID `json:"post_id"`
+	PostID uuid.UUID `json:"post_id" binding:"required"`
 }
 
 func (s *Server) DeletePost(ctx *gin.Context) {
@@ -163,13 +163,14 @@ func (s *Server) DeletePost(ctx *gin.Context) {
 
 // Update
 type UpdatePostsRequest struct {
-	PostID      uuid.UUID `json:"post_id"`
+	PostID      uuid.UUID `json:"post_id" binding:"required"`
 	ShowID      string    `json:"show_id"`
 	Title       string    `json:"title"`
 	Feel        string    `json:"feel"`
 	Content     []byte    `json:"content"`
 	Reaction    int32     `json:"reaction"`
 	IsSensitive bool      `json:"is_sensitive"`
+	Status      string    `json:"status" binding:"required"`
 }
 
 func (s *Server) UpdatePost(ctx *gin.Context) {
@@ -190,6 +191,7 @@ func (s *Server) UpdatePost(ctx *gin.Context) {
 		Content:     req.Content,
 		Reaction:    req.Reaction,
 		IsSensitive: req.IsSensitive,
+		Status:      req.Status,
 	}
 
 	newPost, err := s.store.UpdatePosts(ctx, newPostData)

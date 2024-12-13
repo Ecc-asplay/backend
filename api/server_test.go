@@ -49,7 +49,7 @@ func newTestServer(t *testing.T) *Server {
 
 	store := db.NewStore(conn)
 
-	server, err := SetupRouter(config, store, rdb, nil)
+	server, err := SetupRouter(config, store, rdb)
 	require.NoError(t, err)
 	require.NotEmpty(t, server)
 
