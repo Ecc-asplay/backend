@@ -89,7 +89,7 @@ func (server *Server) GinRequest(config util.Config) {
 	authRoutes.POST("/post/add", server.CreatePost)
 	authRoutes.DELETE("/post/del", server.DeletePost)
 	authRoutes.PUT("/post/update", server.UpdatePost)
-	authRoutes.PUT("/post/get", server.GetPost)
+	authRoutes.GET("/post/get", server.GetPost)
 
 	// タグ
 	r.POST("/tag/add", server.CreateTag)
