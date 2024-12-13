@@ -60,6 +60,7 @@ jobs:
         chmod +x migrate
         sudo mv migrate /usr/local/bin/
         which migrate
+
     - name: Create app.env
       run: |
         echo "ENVIRONMENT=${{secrets.ENVIRONMENT}}" >> app.env
@@ -73,6 +74,8 @@ jobs:
         echo "HTTP_SERVER_ADDRESS=${{secrets.HTTP_SERVER_ADDRESS}}" >> app.env
         echo "TOKEN_SYMMETRIC_KEY=${{secrets.TOKEN_SYMMETRIC_KEY}}" >> app.env
         echo "ACCESS_TOKEN_DURATION=${{secrets.ACCESS_TOKEN_DURATION}}" >> app.env
+        echo "AWS_ACCESS_KEY=${{secrets.AWS_ACCESS_KEY}}" >> app.env
+        echo "AWS_SECRET_KEY=${{secrets.AWS_SECRET_KEY}}" >> app.env
 
     - name: Run migrations
       run: make migrateup
