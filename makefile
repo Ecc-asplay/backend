@@ -24,8 +24,6 @@ dropDB:
 # createMigrate:
 # 	migrate create -ext sql -dir db/migration -seq init_table
 
-
-
 #up
 migrateup:
 	migrate -path db/migration -database "${DBSource}" -verbose up
