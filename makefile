@@ -1,4 +1,7 @@
 DBName = asplay
+DBSource = postgresql://root:secret@localhost:5432/asplay?sslmode=disable
+# DBSource = postgresql://root:Secret123qwecc@asplaytest2.c9s8a6m6kots.us-east-1.rds.amazonaws.com:5432/asplay
+
 
 # PSQL　ダウンロードと作成
 postgres:
@@ -21,23 +24,21 @@ dropDB:
 # createMigrate:
 # 	migrate create -ext sql -dir db/migration -seq init_table
 
-
-
 #up
 migrateup:
-	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose up
+	migrate -path db/migration -database "${DBSource}" -verbose up
 migrateup1:
-	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose up 1
+	migrate -path db/migration -database "${DBSource}" -verbose up 1
 migrateup2:
-	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose up 2
+	migrate -path db/migration -database "${DBSource}" -verbose up 2
 
 #down
 migratedown:
-	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose down
+	migrate -path db/migration -database "${DBSource}" -verbose down
 migratedown1:
-	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose down 1
+	migrate -path db/migration -database "${DBSource}" -verbose down 1
 migratedown2:
-	migrate -path db/migration -database "postgresql://root:secret@localhost:5432/asplay?sslmode=disable" -verbose down 2
+	migrate -path db/migration -database "${DBSource}" -verbose down 2
 
 
 #psql reset
@@ -56,17 +57,6 @@ dropRedis:
 	docker stop redis || true
 	docker rm redis || true
 
-# reset docker db
-resetDB:
-	make dropPsql
-	make dropRedis
-	make postgres
-	make redis
-	sleep 3
-	make createDB
-	make migrateup
-	make test
-
 #Sqlc
 sqlc:
 	sqlc generate
@@ -80,5 +70,4 @@ server:
 
 .PHONY: postgres dropPsql createDB dropDB migrateup migratedown migrateup1 migratedown1 migrateup2 migratedown2 sqlc tablereset
 		redis dropRedis
-		resetDB
 		test server

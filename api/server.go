@@ -16,30 +16,27 @@ import (
 	db "github.com/Ecc-asplay/backend/db/sqlc"
 	"github.com/Ecc-asplay/backend/token"
 	"github.com/Ecc-asplay/backend/util"
-	"github.com/Ecc-asplay/backend/worker"
 )
 
 type Server struct {
-	store           db.Store
-	router          *gin.Engine
-	redis           *redis.Client
-	config          util.Config
-	tokenMaker      token.Maker
-	taskDistributor worker.TaskDistributor
+	store      db.Store
+	router     *gin.Engine
+	redis      *redis.Client
+	config     util.Config
+	tokenMaker token.Maker
 }
 
-func SetupRouter(config util.Config, store db.Store, redis *redis.Client, taskDistributor worker.TaskDistributor) (*Server, error) {
+func SetupRouter(config util.Config, store db.Store, redis *redis.Client) (*Server, error) {
 	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
 	if err != nil {
 		return nil, fmt.Errorf("トークンメーカーの作成に失敗しました: %w", err)
 	}
 
 	server := &Server{
-		store:           store,
-		config:          config,
-		redis:           redis,
-		tokenMaker:      tokenMaker,
-		taskDistributor: taskDistributor,
+		store:      store,
+		config:     config,
+		redis:      redis,
+		tokenMaker: tokenMaker,
 	}
 
 	server.GinRequest(config)
@@ -71,24 +68,25 @@ func (server *Server) GinRequest(config util.Config) {
 	r.POST("/login", server.LoginUser)
 	r.POST("/management", server.LoginAdmin)
 	r.GET("/post/getall", server.GetAllPost)
-	r.POST("/post/search", server.SearchPost)
+	// r.POST("/post/search", server.SearchPost)
 
 	// ログイン後
 	authRoutes := r.Group("/").Use(authMiddleware(server.tokenMaker))
 
 	// ユーザー
-	authRoutes.DELETE("/users/:id", server.DeleteUser)
-	authRoutes.GET("/users/:id", server.GetUserData)
-	authRoutes.PUT("/users/:id/password", server.ResetPassword)
-	authRoutes.PUT("/users/:id/disease-condition", server.UpdateDiseaseAndCondition)
-	authRoutes.PUT("/users/:id/email", server.UpdateEmail)
-	authRoutes.PUT("/users/:id/privacy", server.UpdateIsPrivacy)
-	authRoutes.PUT("/users/:id/name", server.UpdateName)
+	authRoutes.DELETE("/users/del", server.DeleteUser)
+	authRoutes.GET("/users", server.GetUserData)
+	authRoutes.PUT("/users/password", server.ResetPassword)
+	authRoutes.PUT("/users/disease-condition", server.UpdateDiseaseAndCondition)
+	authRoutes.PUT("/users/email", server.UpdateEmail)
+	authRoutes.PUT("/users/privacy", server.UpdateIsPrivacy)
+	authRoutes.PUT("/users/name", server.UpdateName)
 
 	// 投稿
 	authRoutes.POST("/post/add", server.CreatePost)
 	authRoutes.DELETE("/post/del", server.DeletePost)
 	authRoutes.PUT("/post/update", server.UpdatePost)
+	authRoutes.GET("/post/get", server.GetPost)
 
 	// タグ
 	r.POST("/tag/add", server.CreateTag)

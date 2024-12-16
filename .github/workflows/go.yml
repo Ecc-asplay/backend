@@ -61,6 +61,22 @@ jobs:
         sudo mv migrate /usr/local/bin/
         which migrate
 
+    - name: Create app.env
+      run: |
+        echo "ENVIRONMENT=${{secrets.ENVIRONMENT}}" >> app.env
+        echo "DB_DRIVER=${{secrets.DB_DRIVER}}" >> app.env
+        echo "DB_SOURCE=${{secrets.DB_SOURCE}}" >> app.env
+        echo "FRONT_ADDRESS=${{secrets.FRONT_ADDRESS}}" >> app.env
+        echo "ALLOW_HEADERS=${{secrets.ALLOW_HEADERS}}" >> app.env
+        echo "REDIS_ADDRESS=${{secrets.REDIS_ADDRESS}}" >> app.env
+        echo "REDIS_PASSWORD=${{secrets.REDIS_PASSWORD}}" >> app.env
+        echo "MIGRATION_URL=${{secrets.MIGRATION_URL}}" >> app.env
+        echo "HTTP_SERVER_ADDRESS=${{secrets.HTTP_SERVER_ADDRESS}}" >> app.env
+        echo "TOKEN_SYMMETRIC_KEY=${{secrets.TOKEN_SYMMETRIC_KEY}}" >> app.env
+        echo "ACCESS_TOKEN_DURATION=${{secrets.ACCESS_TOKEN_DURATION}}" >> app.env
+        echo "AWS_ACCESS_KEY=${{secrets.AWS_ACCESS_KEY}}" >> app.env
+        echo "AWS_SECRET_KEY=${{secrets.AWS_SECRET_KEY}}" >> app.env
+
     - name: Run migrations
       run: make migrateup
 
