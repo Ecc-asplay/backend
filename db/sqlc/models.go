@@ -44,6 +44,7 @@ type Comment struct {
 	IsCensored bool             `json:"is_censored"`
 	CreatedAt  pgtype.Timestamp `json:"created_at"`
 	UpdatedAt  pgtype.Timestamp `json:"updated_at"`
+	PostUser   uuid.UUID        `json:"post_user"`
 }
 
 type Image struct {

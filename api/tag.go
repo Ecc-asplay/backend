@@ -1,6 +1,8 @@
 package api
 
 import (
+	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 	"time"
@@ -10,14 +12,21 @@ import (
 	"github.com/rs/zerolog/log"
 
 	db "github.com/Ecc-asplay/backend/db/sqlc"
+	"github.com/Ecc-asplay/backend/token"
 )
 
 type CreateTagRequest struct {
-	PostID      uuid.UUID `json:"post_id"`
+	PostID      uuid.UUID `json:"post_id" binding:"required"`
 	TagComments string    `json:"tag_comments" binding:"required"`
 }
 
 func (s *Server) CreateTag(ctx *gin.Context) {
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if authPayload == nil {
+		handleDBError(ctx, errors.New("404"), "タグ作成：トークンない")
+		return
+	}
+
 	var req CreateTagRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "タグ作成：無効な入力データです")
@@ -35,8 +44,14 @@ func (s *Server) CreateTag(ctx *gin.Context) {
 		return
 	}
 
+	tagJSON, err := json.Marshal(tag)
+	if err != nil {
+		handleDBError(ctx, err, "Redisタグ作成：JSONシリアライズを失敗しました")
+		return
+	}
+
 	// Redisに追加する
-	err = s.redis.SAdd("Tag", tag).Err()
+	err = s.redis.SAdd("Tag", tagJSON).Err()
 	if err != nil {
 		handleDBError(ctx, err, "Redisタグ作成を失敗しました")
 		return
@@ -90,16 +105,22 @@ func (s *Server) FindTag(ctx *gin.Context) {
 		return
 	}
 
-	// Redis更新
-	err = s.redis.SAdd("Tag", tag).Err()
+	tagJSON, err := json.Marshal(tag)
 	if err != nil {
-		handleDBError(ctx, err, "Redisタグ検索の保存を失敗しました")
+		handleDBError(ctx, err, "Redisタグ追加：JSONシリアライズを失敗しました")
+		return
+	}
+
+	// Redis更新
+	err = s.redis.SAdd("Tag", tagJSON).Err()
+	if err != nil {
+		handleDBError(ctx, err, "Redisタグ追加の保存を失敗しました")
 		return
 	}
 
 	err = s.redis.Expire("Tag", 1*time.Hour).Err()
 	if err != nil {
-		handleDBError(ctx, err, "Redisタグ検索：有効時間設定を失敗しました")
+		handleDBError(ctx, err, "Redisタグ追加：有効時間設定を失敗しました")
 		return
 	}
 

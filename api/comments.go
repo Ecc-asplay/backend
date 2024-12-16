@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -53,6 +54,12 @@ func (s *Server) CreateComment(ctx *gin.Context) {
 }
 
 func (s *Server) GetCommentsList(ctx *gin.Context) {
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if authPayload == nil {
+		handleDBError(ctx, errors.New("404"), "コメントリスト取得：トークンない")
+		return
+	}
+
 	postIDStr := ctx.Param("post_id")
 	postID, err := uuid.Parse(postIDStr)
 	if err != nil {
@@ -101,6 +108,12 @@ func (s *Server) UpdateComments(ctx *gin.Context) {
 }
 
 func (s *Server) DeleteComments(ctx *gin.Context) {
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if authPayload == nil {
+		handleDBError(ctx, errors.New("404"), "コメント削除：トークンない")
+		return
+	}
+
 	commentIDStr := ctx.Param("comment_id")
 	commentID, err := uuid.Parse(commentIDStr)
 	if err != nil {
@@ -115,4 +128,20 @@ func (s *Server) DeleteComments(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"状態": "コメントが削除されました"})
+}
+
+func (s *Server) GetAllComments(ctx *gin.Context) {
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if authPayload == nil {
+		handleDBError(ctx, errors.New("404"), "全部コメント取得：トークンない")
+		return
+	}
+
+	allComment, err := s.store.GetAllComments(ctx, authPayload.UserID)
+	if err != nil {
+		handleDBError(ctx, err, "全部コメント取得に失敗しました")
+		return
+	}
+
+	ctx.JSON(http.StatusOK, allComment)
 }
