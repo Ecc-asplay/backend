@@ -12,16 +12,16 @@ import (
 	"github.com/Ecc-asplay/backend/util"
 )
 
-type CreateUserRequset struct {
-	Username string    `json:"username" binding:"required"`
-	Email    string    `json:"email" binding:"required"`
-	Birth    time.Time `json:"birth" binding:"required"`
-	Gender   string    `json:"gender"`
-	Password string    `json:"password" binding:"required"`
+type CreateUserRequest struct {
+	Username string      `json:"username" binding:"required"`
+	Email    string      `json:"email" binding:"required"`
+	Birth    pgtype.Date `json:"birth" binding:"required"`
+	Gender   string      `json:"gender"`
+	Password string      `json:"password" binding:"required"`
 }
 
 func (s *Server) CreateUser(ctx *gin.Context) {
-	var req CreateUserRequset
+	var req CreateUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "ユーザー作成：無効な入力データです")
 		return
@@ -33,16 +33,11 @@ func (s *Server) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	birth := pgtype.Date{
-		Time:  req.Birth,
-		Valid: true,
-	}
-
 	data := db.CreateUserParams{
 		UserID:       util.CreateUUID(),
 		Username:     req.Username,
 		Email:        req.Email,
-		Birth:        birth,
+		Birth:        req.Birth,
 		Gender:       req.Gender,
 		Disease:      "",
 		Condition:    "",
@@ -117,12 +112,14 @@ func (s *Server) GetUserData(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, user)
 }
 
+type NewPasswordRequest struct {
+	NewPassword string `json:"new_password" binding:"required"`
+}
+
 func (s *Server) ResetPassword(ctx *gin.Context) {
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
-	var req struct {
-		NewPassword string `json:"new_password" binding:"required"`
-	}
+	var req NewPasswordRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "パスワード再設定：無効な入力データです")
@@ -150,13 +147,15 @@ func (s *Server) ResetPassword(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"状態": "パスワードのリセットが成功しました"})
 }
 
+type NewDiseaseAndConditionRequest struct {
+	Disease   string `json:"disease" binding:"required"`
+	Condition string `json:"condition" binding:"required"`
+}
+
 func (s *Server) UpdateDiseaseAndCondition(ctx *gin.Context) {
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
-	var req struct {
-		Disease   string `json:"disease" binding:"required"`
-		Condition string `json:"condition" binding:"required"`
-	}
+	var req NewDiseaseAndConditionRequest
 
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "病歴と病状更新：無効な入力データです")
@@ -178,13 +177,14 @@ func (s *Server) UpdateDiseaseAndCondition(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"状態": "病歴と病状が正常に更新されました"})
 }
 
+type NewEmailRequest struct {
+	NewEmail string `json:"new_email" binding:"required,email"`
+}
+
 func (s *Server) UpdateEmail(ctx *gin.Context) {
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
-	var req struct {
-		NewEmail string `json:"new_email" binding:"required,email"`
-	}
-
+	var req NewEmailRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "メール更新：無効な入力データです")
 		return
@@ -204,13 +204,14 @@ func (s *Server) UpdateEmail(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"状態": "メールアドレスが正常に更新されました"})
 }
 
+type UpdatePrivacyRequest struct {
+	IsPrivacy bool `json:"is_privacy" binding:"required"`
+}
+
 func (s *Server) UpdateIsPrivacy(ctx *gin.Context) {
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
-	var req struct {
-		IsPrivacy bool `json:"is_privacy" binding:"required"`
-	}
-
+	var req UpdatePrivacyRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "プライバシー更新：無効な入力データです")
 		return
@@ -230,12 +231,14 @@ func (s *Server) UpdateIsPrivacy(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"状態": "プライバシー設定が正常に更新されました"})
 }
 
+type NewUsernameRequest struct {
+	NewUsername string `json:"new_username" binding:"required"`
+}
+
 func (s *Server) UpdateName(ctx *gin.Context) {
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
-	var req struct {
-		NewUsername string `json:"new_username" binding:"required"`
-	}
 
+	var req NewUsernameRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "ユーザー名更新：無効な入力データです")
 		return
@@ -263,7 +266,6 @@ type LoginRequest struct {
 func (s *Server) LoginUser(ctx *gin.Context) {
 
 	var req LoginRequest
-
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "ユーザー ログイン：無効な入力データです")
 		return

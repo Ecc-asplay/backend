@@ -17,6 +17,17 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+var hiragana = []rune("あいうえおかきくけこさしすせそたちつてとなにぬねのはひふへほまみむめもやゆよらりるれろわをん")
+
+func RandomHiragana(length int) string {
+	rand.Seed(time.Now().UnixNano())
+	result := make([]rune, length)
+	for i := 0; i < length; i++ {
+		result[i] = hiragana[rand.Intn(len(hiragana))]
+	}
+	return string(result)
+}
+
 func RandomInt(max int) int {
 	if max <= 0 {
 		log.Fatal("無効な最大値です: 0 より大きい必要があります")
@@ -90,8 +101,8 @@ func RandomGender() string {
 }
 
 func RandomDate() time.Time {
-	year := RandomInt(25) + 2000 // Random year between 2000 and 2024
-	month := RandomInt(12) + 1   // Random month between 1 and 12
+	year := RandomInt(25) + 2000
+	month := RandomInt(12) + 1
 
 	var day int
 	if month == 2 {

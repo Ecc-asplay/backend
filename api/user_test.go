@@ -8,7 +8,6 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"time"
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/google/uuid"
@@ -25,14 +24,23 @@ type UserRsp struct {
 	User_Information db.User
 }
 
-func RandomCreateUserAPI(t *testing.T) UserRsp {
-	userData := CreateUserRequset{
-		Username: gofakeit.Name(),
-		Email:    gofakeit.Email(),
-		Birth:    util.RandomDate(),
-		Gender:   util.RandomGender(),
-		Password: util.RandomString(20),
+func RandomCreateUserAPI(t *testing.T, CusData CreateUserRequest) UserRsp {
+	var userData CreateUserRequest
+	if CusData.Email != "" && CusData.Username != "" && CusData.Password != "" {
+		userData = CusData
+	} else {
+		userData = CreateUserRequest{
+			Username: gofakeit.Name(),
+			Email:    gofakeit.Email(),
+			Birth: pgtype.Date{
+				Time:  util.RandomDate(),
+				Valid: true,
+			},
+			Gender:   util.RandomGender(),
+			Password: util.RandomString(20),
+		}
 	}
+
 	var createdUser UserRsp
 
 	t.Run("RandomCreate", func(t *testing.T) {
@@ -56,21 +64,25 @@ func RandomCreateUserAPI(t *testing.T) UserRsp {
 		require.NoError(t, err)
 		fmt.Println(" ")
 	})
+
 	return createdUser
 }
 
 func TestCreateUserAPI(t *testing.T) {
-	userData := CreateUserRequset{
+	userData := CreateUserRequest{
 		Username: gofakeit.Name(),
 		Email:    gofakeit.Email(),
-		Birth:    util.RandomDate(),
+		Birth: pgtype.Date{
+			Time:  util.RandomDate(),
+			Valid: true,
+		},
 		Gender:   util.RandomGender(),
 		Password: util.RandomString(20),
 	}
 
 	testCases := []struct {
 		name          string
-		body          CreateUserRequset
+		body          CreateUserRequest
 		checkResponse func(recorder *httptest.ResponseRecorder)
 	}{
 		{
@@ -83,10 +95,12 @@ func TestCreateUserAPI(t *testing.T) {
 		},
 		{
 			name: "ユーザーIDない",
-			body: CreateUserRequset{
-				Email:    gofakeit.Email(),
-				Birth:    util.RandomDate(),
-				Gender:   util.RandomGender(),
+			body: CreateUserRequest{
+				Email: gofakeit.Email(),
+				Birth: pgtype.Date{
+					Time:  util.RandomDate(),
+					Valid: true,
+				}, Gender: util.RandomGender(),
 				Password: util.RandomString(20),
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
@@ -95,11 +109,13 @@ func TestCreateUserAPI(t *testing.T) {
 		},
 		{
 			name: "無効なデータ（メール）",
-			body: CreateUserRequset{
+			body: CreateUserRequest{
 				Username: gofakeit.Name(),
 				Email:    "",
-				Birth:    util.RandomDate(),
-				Gender:   util.RandomGender(),
+				Birth: pgtype.Date{
+					Time:  util.RandomDate(),
+					Valid: true,
+				}, Gender: util.RandomGender(),
 				Password: util.RandomString(20),
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
@@ -108,10 +124,10 @@ func TestCreateUserAPI(t *testing.T) {
 		},
 		{
 			name: "無効なデータ（誕生日）",
-			body: CreateUserRequset{
+			body: CreateUserRequest{
 				Username: gofakeit.Name(),
 				Email:    gofakeit.Email(),
-				Birth:    time.Time{},
+				Birth:    pgtype.Date{},
 				Gender:   util.RandomGender(),
 				Password: util.RandomString(20),
 			},
@@ -142,39 +158,27 @@ func TestCreateUserAPI(t *testing.T) {
 	}
 }
 
-func requireBodyMatchUser(t *testing.T, body *bytes.Buffer, user CreateUserRequset) {
-	data, err := io.ReadAll(body)
-	require.NoError(t, err)
-	var gotUser UserRsp
-	err = json.Unmarshal(data, &gotUser)
-	require.NoError(t, err)
-	require.Equal(t, user.Username, gotUser.User_Information.Username)
-	require.Equal(t, user.Email, gotUser.User_Information.Email)
-	require.Equal(t, user.Gender, gotUser.User_Information.Gender)
-	require.NotEmpty(t, gotUser.User_Information.Hashpassword)
-}
-
 func TestDeleteUserAPI(t *testing.T) {
-	userData := RandomCreateUserAPI(t)
+	userData := RandomCreateUserAPI(t, CreateUserRequest{})
 	token := "Bearer " + userData.Access_Token
 	testCases := []struct {
 		name          string
-		userID        uuid.UUID
+		body          uuid.UUID
 		token         string
 		checkResponse func(recorder *httptest.ResponseRecorder)
 	}{
 		{
-			name:   "OK",
-			userID: userData.User_Information.UserID,
-			token:  token,
+			name:  "OK",
+			body:  userData.User_Information.UserID,
+			token: token,
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
 			},
 		},
 		{
-			name:   "無効なデータ（ユーザーID）",
-			userID: util.CreateUUID(),
-			token:  token,
+			name:  "無効なデータ（ユーザーID）",
+			body:  util.CreateUUID(),
+			token: token,
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusNotFound, recorder.Code)
 			},
@@ -187,9 +191,9 @@ func TestDeleteUserAPI(t *testing.T) {
 			},
 		},
 		{
-			name:   "トークンない",
-			userID: userData.User_Information.UserID,
-			token:  "",
+			name:  "トークンない",
+			body:  userData.User_Information.UserID,
+			token: "",
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnauthorized, recorder.Code)
 			},
@@ -201,11 +205,10 @@ func TestDeleteUserAPI(t *testing.T) {
 			server := newTestServer(t)
 			require.NotEmpty(t, server)
 
-			data, err := json.Marshal(tc.userID)
+			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/users/%s", tc.userID)
-			request, err := http.NewRequest(http.MethodDelete, url, bytes.NewReader(data))
+			request, err := http.NewRequest(http.MethodDelete, "/users/del", bytes.NewReader(data))
 			require.NoError(t, err)
 			require.NotEmpty(t, request)
 
@@ -222,35 +225,30 @@ func TestDeleteUserAPI(t *testing.T) {
 }
 
 func TestResetPasswordAPI(t *testing.T) {
-	type newPw struct {
-		NewPassword string `json:"new_password" binding:"required"`
-	}
-
-	userData := RandomCreateUserAPI(t)
+	userData := RandomCreateUserAPI(t, CreateUserRequest{})
 	token := "Bearer " + userData.Access_Token
 	testCases := []struct {
 		name          string
 		userID        uuid.UUID
-		newPassword   newPw
+		body          NewPasswordRequest
 		token         string
 		checkResponse func(recorder *httptest.ResponseRecorder)
 	}{
 		{
 			name:   "OK",
 			userID: userData.User_Information.UserID,
-			newPassword: newPw{
+			body: NewPasswordRequest{
 				NewPassword: util.RandomString(20),
 			},
 			token: token,
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
-				// requireBodyMatchUser(t, recorder.Body,)
 			},
 		},
 		{
 			name:   "トークンない",
 			userID: userData.User_Information.UserID,
-			newPassword: newPw{
+			body: NewPasswordRequest{
 				NewPassword: util.RandomString(20),
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
@@ -273,12 +271,10 @@ func TestResetPasswordAPI(t *testing.T) {
 			server := newTestServer(t)
 			require.NotEmpty(t, server)
 
-			data, err := json.Marshal(tc.newPassword)
+			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/users/%s/password", tc.userID)
-
-			request, err := http.NewRequest(http.MethodPut, url, bytes.NewReader(data))
+			request, err := http.NewRequest(http.MethodPut, "/users/password", bytes.NewReader(data))
 			require.NoError(t, err)
 			require.NotEmpty(t, request)
 
@@ -294,24 +290,19 @@ func TestResetPasswordAPI(t *testing.T) {
 }
 
 func TestUpdatediseaseConditionAPI(t *testing.T) {
-	type newDiseaseAndCondition struct {
-		Disease   string `json:"disease" binding:"required"`
-		Condition string `json:"condition" binding:"required"`
-	}
-
-	userData := RandomCreateUserAPI(t)
+	userData := RandomCreateUserAPI(t, CreateUserRequest{})
 	token := "Bearer " + userData.Access_Token
 	testCases := []struct {
-		name                   string
-		userID                 uuid.UUID
-		newDiseaseAndCondition newDiseaseAndCondition
-		token                  string
-		checkResponse          func(recorder *httptest.ResponseRecorder)
+		name          string
+		userID        uuid.UUID
+		body          NewDiseaseAndConditionRequest
+		token         string
+		checkResponse func(recorder *httptest.ResponseRecorder)
 	}{
 		{
 			name:   "OK",
 			userID: userData.User_Information.UserID,
-			newDiseaseAndCondition: newDiseaseAndCondition{
+			body: NewDiseaseAndConditionRequest{
 				Disease:   util.RandomDisease(),
 				Condition: util.RandomCondition(),
 			},
@@ -323,7 +314,7 @@ func TestUpdatediseaseConditionAPI(t *testing.T) {
 		{
 			name:   "トークンない",
 			userID: userData.User_Information.UserID,
-			newDiseaseAndCondition: newDiseaseAndCondition{
+			body: NewDiseaseAndConditionRequest{
 				Disease:   util.RandomDisease(),
 				Condition: util.RandomCondition(),
 			},
@@ -347,12 +338,10 @@ func TestUpdatediseaseConditionAPI(t *testing.T) {
 			server := newTestServer(t)
 			require.NotEmpty(t, server)
 
-			data, err := json.Marshal(tc.newDiseaseAndCondition)
+			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/users/%s/disease-condition", tc.userID)
-
-			request, err := http.NewRequest(http.MethodPut, url, bytes.NewReader(data))
+			request, err := http.NewRequest(http.MethodPut, "/users/disease-condition", bytes.NewReader(data))
 			require.NoError(t, err)
 			require.NotEmpty(t, request)
 
@@ -368,23 +357,19 @@ func TestUpdatediseaseConditionAPI(t *testing.T) {
 }
 
 func TestUpdateEmailAPI(t *testing.T) {
-	type newEmail struct {
-		NewEmail string `json:"new_email" binding:"required,email"`
-	}
-
-	userData := RandomCreateUserAPI(t)
+	userData := RandomCreateUserAPI(t, CreateUserRequest{})
 	token := "Bearer " + userData.Access_Token
 	testCases := []struct {
 		name          string
 		userID        uuid.UUID
-		newEmail      newEmail
+		body          NewEmailRequest
 		token         string
 		checkResponse func(recorder *httptest.ResponseRecorder)
 	}{
 		{
 			name:   "OK",
 			userID: userData.User_Information.UserID,
-			newEmail: newEmail{
+			body: NewEmailRequest{
 				NewEmail: gofakeit.Email(),
 			},
 			token: token,
@@ -395,7 +380,7 @@ func TestUpdateEmailAPI(t *testing.T) {
 		{
 			name:   "トークンない",
 			userID: userData.User_Information.UserID,
-			newEmail: newEmail{
+			body: NewEmailRequest{
 				NewEmail: gofakeit.Email(),
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
@@ -418,12 +403,10 @@ func TestUpdateEmailAPI(t *testing.T) {
 			server := newTestServer(t)
 			require.NotEmpty(t, server)
 
-			data, err := json.Marshal(tc.newEmail)
+			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
 
-			url := fmt.Sprintf("/users/%s/email", tc.userID)
-
-			request, err := http.NewRequest(http.MethodPut, url, bytes.NewReader(data))
+			request, err := http.NewRequest(http.MethodPut, "/users/email", bytes.NewReader(data))
 			require.NoError(t, err)
 			require.NotEmpty(t, request)
 
@@ -436,4 +419,231 @@ func TestUpdateEmailAPI(t *testing.T) {
 			fmt.Println(" ")
 		})
 	}
+}
+
+func TestUpdateIsPrivacyAPI(t *testing.T) {
+	type Privacy struct {
+		IsPrivacy bool `json:"is_privacy" binding:"required"`
+	}
+
+	userData := RandomCreateUserAPI(t, CreateUserRequest{})
+	token := "Bearer " + userData.Access_Token
+	testCases := []struct {
+		name          string
+		userID        uuid.UUID
+		body          Privacy
+		token         string
+		checkResponse func(recorder *httptest.ResponseRecorder)
+	}{
+		{
+			name:   "OK",
+			userID: userData.User_Information.UserID,
+			body: Privacy{
+				IsPrivacy: !userData.User_Information.IsPrivacy,
+			},
+			token: token,
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recorder.Code)
+			},
+		},
+		{
+			name:   "トークンない",
+			userID: userData.User_Information.UserID,
+			body: Privacy{
+				IsPrivacy: !userData.User_Information.IsPrivacy,
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
+			name:   "メールない",
+			userID: userData.User_Information.UserID,
+			token:  token,
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusInternalServerError, recorder.Code)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			server := newTestServer(t)
+			require.NotEmpty(t, server)
+
+			data, err := json.Marshal(tc.body)
+			require.NoError(t, err)
+
+			request, err := http.NewRequest(http.MethodPut, "/users/privacy", bytes.NewReader(data))
+			require.NoError(t, err)
+			require.NotEmpty(t, request)
+
+			request.Header.Set("Content-Type", "application/json")
+			request.Header.Set("Authorization", tc.token)
+
+			server.router.ServeHTTP(recorder, request)
+			require.NotEmpty(t, recorder)
+			tc.checkResponse(recorder)
+			fmt.Println(" ")
+		})
+	}
+}
+
+func TestUpdateNameAPI(t *testing.T) {
+
+	userData := RandomCreateUserAPI(t, CreateUserRequest{})
+	token := "Bearer " + userData.Access_Token
+	testCases := []struct {
+		name          string
+		userID        uuid.UUID
+		body          NewUsernameRequest
+		token         string
+		checkResponse func(recorder *httptest.ResponseRecorder)
+	}{
+		{
+			name:   "OK",
+			userID: userData.User_Information.UserID,
+			body: NewUsernameRequest{
+				NewUsername: gofakeit.Name(),
+			},
+			token: token,
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recorder.Code)
+			},
+		},
+		{
+			name:   "トークンない",
+			userID: userData.User_Information.UserID,
+			body: NewUsernameRequest{
+				NewUsername: gofakeit.Name(),
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
+			name:   "メールない",
+			userID: userData.User_Information.UserID,
+			token:  token,
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusInternalServerError, recorder.Code)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			server := newTestServer(t)
+			require.NotEmpty(t, server)
+
+			data, err := json.Marshal(tc.body)
+			require.NoError(t, err)
+
+			request, err := http.NewRequest(http.MethodPut, "/users/name", bytes.NewReader(data))
+			require.NoError(t, err)
+			require.NotEmpty(t, request)
+
+			request.Header.Set("Content-Type", "application/json")
+			request.Header.Set("Authorization", tc.token)
+
+			server.router.ServeHTTP(recorder, request)
+			require.NotEmpty(t, recorder)
+			tc.checkResponse(recorder)
+			fmt.Println(" ")
+		})
+	}
+}
+
+func TestLoginUser(t *testing.T) {
+	email := gofakeit.Email()
+	userData := RandomCreateUserAPI(t, CreateUserRequest{
+		Username: gofakeit.Name(),
+		Email:    email,
+		Birth: pgtype.Date{
+			Time:  util.RandomDate(),
+			Valid: true,
+		},
+		Gender:   gofakeit.Gender(),
+		Password: "123qwecc",
+	})
+
+	testCases := []struct {
+		name          string
+		body          LoginRequest
+		checkResponse func(recorder *httptest.ResponseRecorder)
+	}{
+		{
+			name: "OK",
+			body: LoginRequest{
+				Email:    userData.User_Information.Email,
+				Password: "123qwecc",
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recorder.Code)
+			},
+		},
+		{
+			name: "メールない",
+			body: LoginRequest{
+				Password: "123qwecc",
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusInternalServerError, recorder.Code)
+			},
+		},
+		{
+			name: "無効なデータ（メール&パスワード）",
+			body: LoginRequest{
+				Email:    gofakeit.Email(),
+				Password: "123qwecc",
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusNotFound, recorder.Code)
+			},
+		},
+		{
+			name: "パスワードない",
+			body: LoginRequest{
+				Email: userData.User_Information.Email,
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusInternalServerError, recorder.Code)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			recorder := httptest.NewRecorder()
+			server := newTestServer(t)
+			require.NotEmpty(t, server)
+
+			data, err := json.Marshal(tc.body)
+			require.NoError(t, err)
+
+			request, err := http.NewRequest(http.MethodPost, "/login", bytes.NewReader(data))
+			require.NoError(t, err)
+			require.NotEmpty(t, request)
+
+			server.router.ServeHTTP(recorder, request)
+			require.NotEmpty(t, recorder)
+			tc.checkResponse(recorder)
+			fmt.Println(" ")
+		})
+	}
+
+}
+
+func requireBodyMatchUser(t *testing.T, body *bytes.Buffer, user CreateUserRequest) {
+	data, err := io.ReadAll(body)
+	require.NoError(t, err)
+	var gotUser UserRsp
+	err = json.Unmarshal(data, &gotUser)
+	require.NoError(t, err)
+	require.Equal(t, user.Username, gotUser.User_Information.Username)
+	require.Equal(t, user.Email, gotUser.User_Information.Email)
+	require.Equal(t, user.Gender, gotUser.User_Information.Gender)
+	require.NotEmpty(t, gotUser.User_Information.Hashpassword)
 }
