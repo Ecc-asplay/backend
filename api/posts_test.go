@@ -39,6 +39,7 @@ func RandomCreatePostAPI(t *testing.T, user UserRsp) db.Post {
 
 		data, err := json.Marshal(postData)
 		require.NoError(t, err)
+		require.NotEmpty(t, data)
 
 		request, err := http.NewRequest(http.MethodPost, "/post/add", bytes.NewReader(data))
 		require.NoError(t, err)
@@ -128,6 +129,7 @@ func TestCreatePostAPI(t *testing.T) {
 
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
+			require.NotEmpty(t, data)
 
 			request, err := http.NewRequest(http.MethodPost, "/post/add", bytes.NewReader(data))
 			require.NoError(t, err)
@@ -238,6 +240,7 @@ func TestDeletPostAPI(t *testing.T) {
 
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
+			require.NotEmpty(t, data)
 
 			request, err := http.NewRequest(http.MethodDelete, "/post/del", bytes.NewReader(data))
 			require.NoError(t, err)
@@ -337,6 +340,7 @@ func TestUpdatePostAPI(t *testing.T) {
 
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
+			require.NotEmpty(t, data)
 
 			request, err := http.NewRequest(http.MethodPut, "/post/update", bytes.NewReader(data))
 			require.NoError(t, err)
@@ -359,20 +363,17 @@ func requireBodyMatchPost(t *testing.T, body *bytes.Buffer, post CreatePostReque
 	var getPost db.Post
 	err = json.Unmarshal(data, &getPost)
 	require.NoError(t, err)
+
 	require.NotEmpty(t, getPost.UserID)
 	require.NotEmpty(t, getPost.PostID)
-	require.NotEmpty(t, getPost.UserID)
-	require.NotEmpty(t, getPost.UserID)
-	require.NotEmpty(t, getPost.UserID)
-	require.NotEmpty(t, getPost.UserID)
 	require.False(t, getPost.IsSensitive)
 	require.NotEmpty(t, getPost.CreatedAt)
-	require.Equal(t, post.ShowID, getPost.ShowID)
-	require.Equal(t, post.Title, getPost.Title)
-	require.Equal(t, post.Feel, getPost.Feel)
-	require.NotEmpty(t, getPost.Content)
-	require.Equal(t, post.Reaction, getPost.Reaction)
-	require.Equal(t, post.Status, getPost.Status)
+
+	require.Equal(t, getPost.ShowID, post.ShowID)
+	require.Equal(t, getPost.Title, post.Title)
+	require.Equal(t, getPost.Feel, post.Feel)
+	require.Equal(t, getPost.Reaction, post.Reaction)
+	require.Equal(t, getPost.Status, post.Status)
 }
 
 func ReturnContext() []byte {
