@@ -18,15 +18,6 @@ func (s *Server) SendVerificationEmail(ctx *gin.Context) {
 		return
 	}
 
-	// mailConfig := util.MailConfig{
-	// 	SMTPHost:    "smtp.gmail.com",
-	// 	SMTPPort:    "587",
-	// 	Username:    "asplayyamiyoake@gmail.com",
-	// 	Password:    "fowjtjaxnjthxoar",
-	// 	FromAddress: "asplayyamiyoake@gmail.com",
-	// 	FromName:    "やみよあけ公式",
-	// }
-
 	// 環境変数からMailConfigをロード
 	mailConfig := util.LoadMailConfig()
 
