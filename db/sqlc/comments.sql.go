@@ -16,6 +16,7 @@ INSERT INTO COMMENTS (
     COMMENT_ID,
     USER_ID,
     POST_ID,
+    post_user,
     STATUS,
     IS_PUBLIC,
     COMMENTS,
@@ -29,14 +30,16 @@ INSERT INTO COMMENTS (
     $5,
     $6,
     $7,
-    $8
-) RETURNING comment_id, user_id, post_id, status, is_public, comments, reaction, is_censored, created_at, updated_at
+    $8,
+    $9
+) RETURNING comment_id, user_id, post_id, status, is_public, comments, reaction, is_censored, created_at, updated_at, post_user
 `
 
 type CreateCommentsParams struct {
 	CommentID  uuid.UUID `json:"comment_id"`
 	UserID     uuid.UUID `json:"user_id"`
 	PostID     uuid.UUID `json:"post_id"`
+	PostUser   uuid.UUID `json:"post_user"`
 	Status     string    `json:"status"`
 	IsPublic   bool      `json:"is_public"`
 	Comments   string    `json:"comments"`
@@ -49,6 +52,7 @@ func (q *Queries) CreateComments(ctx context.Context, arg CreateCommentsParams) 
 		arg.CommentID,
 		arg.UserID,
 		arg.PostID,
+		arg.PostUser,
 		arg.Status,
 		arg.IsPublic,
 		arg.Comments,
@@ -67,6 +71,7 @@ func (q *Queries) CreateComments(ctx context.Context, arg CreateCommentsParams) 
 		&i.IsCensored,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.PostUser,
 	)
 	return i, err
 }
@@ -82,9 +87,52 @@ func (q *Queries) DeleteComments(ctx context.Context, commentID uuid.UUID) error
 	return err
 }
 
+const getAllComments = `-- name: GetAllComments :many
+SELECT
+    comment_id, user_id, post_id, status, is_public, comments, reaction, is_censored, created_at, updated_at, post_user
+FROM
+    COMMENTS
+WHERE
+    post_user = $1
+ORDER BY
+    COMMENT_ID DESC
+`
+
+func (q *Queries) GetAllComments(ctx context.Context, postUser uuid.UUID) ([]Comment, error) {
+	rows, err := q.db.Query(ctx, getAllComments, postUser)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Comment{}
+	for rows.Next() {
+		var i Comment
+		if err := rows.Scan(
+			&i.CommentID,
+			&i.UserID,
+			&i.PostID,
+			&i.Status,
+			&i.IsPublic,
+			&i.Comments,
+			&i.Reaction,
+			&i.IsCensored,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.PostUser,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCommentsList = `-- name: GetCommentsList :many
 SELECT
-    comment_id, user_id, post_id, status, is_public, comments, reaction, is_censored, created_at, updated_at
+    comment_id, user_id, post_id, status, is_public, comments, reaction, is_censored, created_at, updated_at, post_user
 FROM
     COMMENTS
 WHERE
@@ -113,6 +161,7 @@ func (q *Queries) GetCommentsList(ctx context.Context, postID uuid.UUID) ([]Comm
 			&i.IsCensored,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.PostUser,
 		); err != nil {
 			return nil, err
 		}
@@ -135,7 +184,7 @@ SET
     UPDATED_AT = NOW()
 WHERE
     COMMENT_ID = $1
-RETURNING comment_id, user_id, post_id, status, is_public, comments, reaction, is_censored, created_at, updated_at
+RETURNING comment_id, user_id, post_id, status, is_public, comments, reaction, is_censored, created_at, updated_at, post_user
 `
 
 type UpdateCommentsParams struct {
@@ -168,6 +217,7 @@ func (q *Queries) UpdateComments(ctx context.Context, arg UpdateCommentsParams) 
 		&i.IsCensored,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.PostUser,
 	)
 	return i, err
 }

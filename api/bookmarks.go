@@ -15,13 +15,14 @@ type bookmarkRequest struct {
 }
 
 func (s *Server) CreateBookmark(ctx *gin.Context) {
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
 	var req bookmarkRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "ブックマーク作成：無効な入力データです")
 		return
 	}
 
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	data := db.CreateBookmarksParams{
 		PostID: req.PostID,
 		UserID: authPayload.UserID,
@@ -36,13 +37,14 @@ func (s *Server) CreateBookmark(ctx *gin.Context) {
 }
 
 func (s *Server) DeleteBookmark(ctx *gin.Context) {
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
 	var req bookmarkRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "ブックマーク削除：無効な入力データです")
 		return
 	}
 
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	data := db.DeleteBookmarksParams{
 		PostID: req.PostID,
 		UserID: authPayload.UserID,

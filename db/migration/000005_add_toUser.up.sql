@@ -1,0 +1,2 @@
+ALTER TABLE comments
+ADD COLUMN post_user UUID NOT NULL;

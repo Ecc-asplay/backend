@@ -15,6 +15,7 @@ func CreateRandomComment(t *testing.T, user User, post Post) Comment {
 	commentData := CreateCommentsParams{
 		CommentID:  util.CreateUUID(),
 		UserID:     user.UserID,
+		PostUser:   post.UserID,
 		PostID:     post.PostID,
 		Status:     util.RandomStatus(),
 		IsPublic:   util.RandomBool(),
@@ -28,6 +29,7 @@ func CreateRandomComment(t *testing.T, user User, post Post) Comment {
 	require.NotEmpty(t, comment)
 	require.Equal(t, comment.CommentID, commentData.CommentID)
 	require.Equal(t, comment.UserID, commentData.UserID)
+	require.Equal(t, comment.PostUser, commentData.PostUser)
 	require.Equal(t, comment.PostID, commentData.PostID)
 	require.Equal(t, comment.Status, commentData.Status)
 	require.Equal(t, comment.IsPublic, commentData.IsPublic)
@@ -72,6 +74,7 @@ func TestGetCommentsList(t *testing.T) {
 func TestUpdateComments(t *testing.T) {
 	user1 := CreateRandomUser(t)
 	post := CreateRandomPost(t, user1)
+
 	user2 := CreateRandomUser(t)
 	comment := CreateRandomComment(t, user2, post)
 
@@ -89,5 +92,18 @@ func TestUpdateComments(t *testing.T) {
 	require.Equal(t, updatedComment.CommentID, comment.CommentID)
 	require.Equal(t, updatedComment.UserID, comment.UserID)
 	require.Equal(t, updatedComment.PostID, comment.PostID)
+}
 
+func TestGetAllComment(t *testing.T) {
+	user1 := CreateRandomUser(t)
+	post := CreateRandomPost(t, user1)
+	for i := 0; i < 100; i++ {
+		user2 := CreateRandomUser(t)
+		CreateRandomComment(t, user2, post)
+	}
+
+	allCommentData, err := testQueries.GetAllComments(context.Background(), user1.UserID)
+	require.NoError(t, err)
+	require.NotEmpty(t, allCommentData)
+	require.GreaterOrEqual(t, len(allCommentData), 1)
 }

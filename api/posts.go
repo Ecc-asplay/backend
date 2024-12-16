@@ -64,7 +64,7 @@ func (s *Server) CreatePost(ctx *gin.Context) {
 }
 
 // Get Post of User
-func (s *Server) GetPost(ctx *gin.Context) {
+func (s *Server) GetUserPost(ctx *gin.Context) {
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
 	userPost, err := s.store.GetUserAllPosts(ctx, authPayload.UserID)
