@@ -32,6 +32,7 @@ type Querier interface {
 	GetAdminLogin(ctx context.Context, email string) (GetAdminLoginRow, error)
 	GetAllBlockUsersList(ctx context.Context) ([]Blockuser, error)
 	GetAllBookmarks(ctx context.Context, userID uuid.UUID) ([]Bookmark, error)
+	GetAllComments(ctx context.Context, postUser uuid.UUID) ([]Comment, error)
 	GetBlockUserlist(ctx context.Context, userID uuid.UUID) ([]Blockuser, error)
 	GetCommentsList(ctx context.Context, postID uuid.UUID) ([]Comment, error)
 	GetImage(ctx context.Context, postID uuid.UUID) ([]Image, error)

@@ -3,6 +3,7 @@ INSERT INTO COMMENTS (
     COMMENT_ID,
     USER_ID,
     POST_ID,
+    post_user,
     STATUS,
     IS_PUBLIC,
     COMMENTS,
@@ -16,7 +17,8 @@ INSERT INTO COMMENTS (
     $5,
     $6,
     $7,
-    $8
+    $8,
+    $9
 ) RETURNING *;
 
 -- name: GetCommentsList :many
@@ -26,6 +28,16 @@ FROM
     COMMENTS
 WHERE
     POST_ID = $1
+ORDER BY
+    COMMENT_ID DESC;
+
+-- name: GetAllComments :many
+SELECT
+    *
+FROM
+    COMMENTS
+WHERE
+    post_user = $1
 ORDER BY
     COMMENT_ID DESC;
 

@@ -31,6 +31,8 @@ migrateup1:
 	migrate -path db/migration -database "${DBSource}" -verbose up 1
 migrateup2:
 	migrate -path db/migration -database "${DBSource}" -verbose up 2
+migrateup3:
+	migrate -path db/migration -database "${DBSource}" -verbose up 3
 
 #down
 migratedown:
@@ -39,6 +41,8 @@ migratedown1:
 	migrate -path db/migration -database "${DBSource}" -verbose down 1
 migratedown2:
 	migrate -path db/migration -database "${DBSource}" -verbose down 2
+migratedown3:
+	migrate -path db/migration -database "${DBSource}" -verbose down 3
 
 
 #psql reset
@@ -68,6 +72,6 @@ server:
 	go run main.go
 
 
-.PHONY: postgres dropPsql createDB dropDB migrateup migratedown migrateup1 migratedown1 migrateup2 migratedown2 sqlc tablereset
+.PHONY: postgres dropPsql createDB dropDB migrateup migratedown migrateup1 migratedown1 migrateup2 migratedown2 migrateup3 migratedown3 sqlc tablereset
 		redis dropRedis
 		test server

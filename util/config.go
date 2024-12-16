@@ -18,12 +18,12 @@ type Config struct {
 	HTTPServerAddress   string        `mapstructure:"HTTP_SERVER_ADDRESS"`
 	TokenSymmetricKey   string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
 	AccessTokenDuration time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
-	SMTPHost            string        `mapstructure:"SMTP_HOST"`
-	SMTPPort            string        `mapstructure:"SMTP_PORT"`
-	SMTPUser            string        `mapstructure:"SMTP_USER"`
-	SMTPPassword        string        `mapstructure:"SMTP_PASSWORD"`
-	SMTPFromAddress     string        `mapstructure:"SMTP_FROM_ADDRESS"`
-	SMTPFromName        string        `mapstructure:"SMTP_FROM_NAME"`
+	SmtpHost            string        `mapstructure:"SMTP_HOST"`
+	SmtpPort            int           `mapstructure:"SMTP_PORT"`
+	SmtpUser            string        `mapstructure:"SMTP_USER"`
+	SmtpPassword        string        `mapstructure:"SMTP_PASSWORD"`
+	SmtpFromAddress     string        `mapstructure:"SMTP_FROM_ADDRESS"`
+	SmtpFromName        string        `mapstructure:"SMTP_FROMNAME"`
 }
 
 func LoadConfig(path string) (config Config, err error) {

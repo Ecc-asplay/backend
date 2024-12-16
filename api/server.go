@@ -70,7 +70,11 @@ func (server *Server) GinRequest(config util.Config) {
 	r.GET("/post/getall", server.GetAllPost)
 	// r.POST("/post/search", server.SearchPost)
 
-	// ログイン後
+	// Searchrecord
+	r.POST("/searchrecord/getlist", server.GetSearchedRecordList)
+	r.POST("/searchrecord/create", server.CreateSearchRecord)
+
+	// ーーーーーー　ログイン後　ーーーーー
 	authRoutes := r.Group("/").Use(authMiddleware(server.tokenMaker))
 
 	// ユーザー
@@ -86,11 +90,11 @@ func (server *Server) GinRequest(config util.Config) {
 	authRoutes.POST("/post/add", server.CreatePost)
 	authRoutes.DELETE("/post/del", server.DeletePost)
 	authRoutes.PUT("/post/update", server.UpdatePost)
-	authRoutes.GET("/post/get", server.GetPost)
+	authRoutes.GET("/post/get", server.GetUserPost)
 
 	// タグ
-	r.POST("/tag/add", server.CreateTag)
-	r.POST("/tag/get", server.FindTag)
+	authRoutes.POST("/tag/add", server.CreateTag)
+	authRoutes.POST("/tag/get", server.FindTag)
 
 	// Bookmark
 	authRoutes.POST("/bookmark/add", server.CreateBookmark)
@@ -100,12 +104,9 @@ func (server *Server) GinRequest(config util.Config) {
 	// Comment
 	r.GET("/comment/getlist/:post_id", server.GetCommentsList)
 	authRoutes.POST("/comment/create", server.CreateComment)
+	authRoutes.GET("/comment/all", server.GetAllComments)
 	authRoutes.PUT("/comment/update", server.UpdateComments)
 	authRoutes.DELETE("/comment/delete/:comment_id", server.DeleteComments)
-
-	// Searchrecord
-	r.POST("/searchrecord/getlist", server.GetSearchedRecordList)
-	r.POST("/searchrecord/create", server.CreateSearchRecord)
 
 	// Notification
 	authRoutes.POST("/notification/create", server.CreateNotification)
@@ -118,7 +119,7 @@ func (server *Server) GinRequest(config util.Config) {
 	authRoutes.GET("/block/getlist", server.GetAllBlockedUsers)
 	authRoutes.PUT("/block/update", server.UnblockUser)
 
-	// 管理者
+	// ーーーーー　管理者　ーーーーー
 	authManage := r.Group("/admin").Use(authMiddleware(server.tokenMaker))
 	authManage.POST("/create", server.CreateAdminUser)
 	authManage.DELETE("/del", server.DeleteAdminUser)
