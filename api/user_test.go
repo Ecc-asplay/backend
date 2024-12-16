@@ -50,6 +50,7 @@ func RandomCreateUserAPI(t *testing.T, CusData CreateUserRequest) UserRsp {
 
 		data, err := json.Marshal(userData)
 		require.NoError(t, err)
+		require.NotEmpty(t, data)
 
 		request, err := http.NewRequest(http.MethodPost, "/users", bytes.NewReader(data))
 		require.NoError(t, err)
@@ -145,6 +146,7 @@ func TestCreateUserAPI(t *testing.T) {
 
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
+			require.NotEmpty(t, data)
 
 			request, err := http.NewRequest(http.MethodPost, "/users", bytes.NewReader(data))
 			require.NoError(t, err)
@@ -491,7 +493,6 @@ func TestUpdateIsPrivacyAPI(t *testing.T) {
 }
 
 func TestUpdateNameAPI(t *testing.T) {
-
 	userData := RandomCreateUserAPI(t, CreateUserRequest{})
 	token := "Bearer " + userData.Access_Token
 	testCases := []struct {

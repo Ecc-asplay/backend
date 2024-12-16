@@ -15,28 +15,27 @@ import (
 	"github.com/Ecc-asplay/backend/util"
 )
 
-func RandomCreateBookmarkAPI(t *testing.T, user1 UserRsp) db.Bookmark {
+func RandomCreateBlockUser(t *testing.T, user1 UserRsp) db.Blockuser {
 	token := "Bearer " + user1.Access_Token
+	BlockUserAccount := RandomCreateUserAPI(t, CreateUserRequest{})
 
-	user2 := RandomCreateUserAPI(t, CreateUserRequest{})
-	post := RandomCreatePostAPI(t, user2)
-
-	BMData := bookmarkRequest{
-		PostID: post.PostID,
+	blockData := CreateBlockUserRequest{
+		BlockUserID: BlockUserAccount.User_Information.UserID,
+		Reason:      util.RandomString(10),
 	}
 
-	var createBM db.Bookmark
+	var createBlockUser db.Blockuser
 
-	t.Run("RandomBookmark", func(t *testing.T) {
+	t.Run("RandomCreateBlockUser", func(t *testing.T) {
 		recode := httptest.NewRecorder()
 		server := newTestServer(t)
 		require.NotEmpty(t, server)
 
-		data, err := json.Marshal(BMData)
+		data, err := json.Marshal(blockData)
 		require.NoError(t, err)
 		require.NotEmpty(t, data)
 
-		request, err := http.NewRequest(http.MethodPost, "/bookmark/add", bytes.NewReader(data))
+		request, err := http.NewRequest(http.MethodPost, "/block/create", bytes.NewReader(data))
 		require.NoError(t, err)
 		require.NotEmpty(t, request)
 
@@ -46,166 +45,67 @@ func RandomCreateBookmarkAPI(t *testing.T, user1 UserRsp) db.Bookmark {
 		server.router.ServeHTTP(recode, request)
 		require.NotEmpty(t, recode)
 
-		bm, err := io.ReadAll(recode.Body)
+		buser, err := io.ReadAll(recode.Body)
 		require.NoError(t, err)
 
-		err = json.Unmarshal(bm, &createBM)
+		err = json.Unmarshal(buser, &createBlockUser)
 		require.NoError(t, err)
 
 		fmt.Println(" ")
 	})
-
-	return createBM
+	return createBlockUser
 }
 
-func TestCreateBookmarkAPI(t *testing.T) {
-	user := RandomCreateUserAPI(t, CreateUserRequest{})
-	token := "Bearer " + user.Access_Token
-	post := RandomCreatePostAPI(t, user)
-	BMData := bookmarkRequest{
-		PostID: post.PostID,
+func TestCreateBlockUser(t *testing.T) {
+	user1 := RandomCreateUserAPI(t, CreateUserRequest{})
+	token := "Bearer " + user1.Access_Token
+	BlockUserAccount := RandomCreateUserAPI(t, CreateUserRequest{})
+
+	blockData := CreateBlockUserRequest{
+		BlockUserID: BlockUserAccount.User_Information.UserID,
+		Reason:      util.RandomString(10),
 	}
+
 	testCases := []struct {
 		name          string
 		token         string
-		body          bookmarkRequest
-		checkResponse func(recorder *httptest.ResponseRecorder)
-	}{
-		{
-			name:  "OK",
-			token: token,
-			body:  BMData,
-			checkResponse: func(recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusCreated, recorder.Code)
-				requireBodyMatchBookmark(t, recorder.Body, BMData)
-			},
-		},
-		{
-			name: "トークンない",
-			body: BMData,
-			checkResponse: func(recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnauthorized, recorder.Code)
-			},
-		},
-		{
-			name:  "投稿IDない",
-			token: token,
-			body: bookmarkRequest{
-				PostID: util.CreateUUID(),
-			},
-			checkResponse: func(recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusInternalServerError, recorder.Code)
-			},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			recode := httptest.NewRecorder()
-			server := newTestServer(t)
-			require.NotEmpty(t, server)
-
-			data, err := json.Marshal(tc.body)
-			require.NoError(t, err)
-			require.NotEmpty(t, data)
-
-			request, err := http.NewRequest(http.MethodPost, "/bookmark/add", bytes.NewReader(data))
-			require.NoError(t, err)
-			require.NotEmpty(t, request)
-
-			request.Header.Set("Content-Type", "application/json")
-			request.Header.Set("Authorization", tc.token)
-
-			server.router.ServeHTTP(recode, request)
-			require.NotEmpty(t, recode)
-
-			tc.checkResponse(recode)
-			fmt.Println(" ")
-		})
-	}
-}
-
-func TestGetBookmark(t *testing.T) {
-	user := RandomCreateUserAPI(t, CreateUserRequest{})
-	token := "Bearer " + user.Access_Token
-	for i := 0; i < 10; i++ {
-		RandomCreateBookmarkAPI(t, user)
-	}
-	testCases := []struct {
-		name          string
-		token         string
+		body          CreateBlockUserRequest
 		checkResponse func(recorder *httptest.ResponseRecorder)
 	}{
 		{
 			name:  "ok",
 			token: token,
+			body:  blockData,
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusOK, recorder.Code)
+				require.Equal(t, http.StatusCreated, recorder.Code)
 			},
 		},
 		{
 			name: "トークンない",
-			checkResponse: func(recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnauthorized, recorder.Code)
-			},
-		},
-	}
-
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			recode := httptest.NewRecorder()
-			server := newTestServer(t)
-			require.NotEmpty(t, server)
-
-			request, err := http.NewRequest(http.MethodGet, "/bookmark/get", nil)
-			require.NoError(t, err)
-			require.NotEmpty(t, request)
-
-			request.Header.Set("Content-Type", "application/json")
-			request.Header.Set("Authorization", tc.token)
-
-			server.router.ServeHTTP(recode, request)
-			require.NotEmpty(t, recode)
-			tc.checkResponse(recode)
-			fmt.Println(" ")
-		})
-	}
-}
-
-func DeleteBookmark(t *testing.T) {
-	user := RandomCreateUserAPI(t, CreateUserRequest{})
-	token := "Bearer " + user.Access_Token
-	bm := RandomCreateBookmarkAPI(t, user)
-
-	testCases := []struct {
-		name          string
-		token         string
-		body          bookmarkRequest
-		checkResponse func(recorder *httptest.ResponseRecorder)
-	}{
-		{
-			name:  "OK",
-			token: token,
-			body: bookmarkRequest{
-				PostID: bm.PostID,
-			},
-			checkResponse: func(recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusOK, recorder.Code)
-			},
-		},
-		{
-			name: "トークンない",
-			body: bookmarkRequest{
-				PostID: bm.PostID,
+			body: CreateBlockUserRequest{
+				BlockUserID: BlockUserAccount.User_Information.UserID,
+				Reason:      util.RandomString(10),
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnauthorized, recorder.Code)
 			},
 		},
 		{
-			name: "投稿IDない",
+			name: "ブロックユーザーIDない",
+			body: CreateBlockUserRequest{
+				Reason: util.RandomString(10),
+			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusInternalServerError, recorder.Code)
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
+			name: "理由ない",
+			body: CreateBlockUserRequest{
+				BlockUserID: BlockUserAccount.User_Information.UserID,
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
 			},
 		},
 	}
@@ -220,7 +120,7 @@ func DeleteBookmark(t *testing.T) {
 			require.NoError(t, err)
 			require.NotEmpty(t, data)
 
-			request, err := http.NewRequest(http.MethodDelete, "/bookmark/del", bytes.NewBuffer(data))
+			request, err := http.NewRequest(http.MethodPost, "/block/create", bytes.NewReader(data))
 			require.NoError(t, err)
 			require.NotEmpty(t, request)
 
@@ -236,16 +136,143 @@ func DeleteBookmark(t *testing.T) {
 	}
 }
 
-func requireBodyMatchBookmark(t *testing.T, body *bytes.Buffer, bm bookmarkRequest) {
+func TestUnBlockUserAPI(t *testing.T) {
+	user := RandomCreateUserAPI(t, CreateUserRequest{})
+	token := "Bearer " + user.Access_Token
+	blockuser := RandomCreateBlockUser(t, user)
+
+	unblockData := UnblockUserRequest{
+		BlockUserID: blockuser.BlockuserID,
+	}
+
+	testCases := []struct {
+		name          string
+		token         string
+		body          UnblockUserRequest
+		checkResponse func(recorder *httptest.ResponseRecorder)
+	}{
+		{
+			name:  "ok",
+			token: token,
+			body:  unblockData,
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recorder.Code)
+			},
+		},
+		{
+			name: "トークンない",
+			body: unblockData,
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+		{
+			name:  "ブロックユーザーIDない",
+			token: token,
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusInternalServerError, recorder.Code)
+			},
+		},
+		{
+			name:  "ブロックユーザーID違った",
+			token: token,
+			body: UnblockUserRequest{
+				BlockUserID: util.CreateUUID(),
+			},
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusNotFound, recorder.Code)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			recode := httptest.NewRecorder()
+			server := newTestServer(t)
+			require.NotEmpty(t, server)
+
+			data, err := json.Marshal(tc.body)
+			require.NoError(t, err)
+			require.NotEmpty(t, data)
+
+			request, err := http.NewRequest(http.MethodPut, "/block/update", bytes.NewReader(data))
+			require.NoError(t, err)
+			require.NotEmpty(t, request)
+
+			request.Header.Set("Content-Type", "application/json")
+			request.Header.Set("Authorization", tc.token)
+
+			server.router.ServeHTTP(recode, request)
+			require.NotEmpty(t, recode)
+
+			tc.checkResponse(recode)
+			fmt.Println(" ")
+		})
+	}
+
+}
+
+func TestGetBlockUserByUserAPI(t *testing.T) {
+	user := RandomCreateUserAPI(t, CreateUserRequest{})
+	token := "Bearer " + user.Access_Token
+	for i := 0; i < 10; i++ {
+		RandomCreateBlockUser(t, user)
+	}
+
+	testCases := []struct {
+		name          string
+		token         string
+		checkResponse func(recorder *httptest.ResponseRecorder)
+	}{
+		{
+			name:  "OK",
+			token: token,
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recorder.Code)
+			},
+		},
+		{
+			name: "トークンない",
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorder.Code)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			recode := httptest.NewRecorder()
+			server := newTestServer(t)
+			require.NotEmpty(t, server)
+
+			request, err := http.NewRequest(http.MethodGet, "/block/get", nil)
+			require.NoError(t, err)
+			require.NotEmpty(t, request)
+
+			request.Header.Set("Content-Type", "application/json")
+			request.Header.Set("Authorization", tc.token)
+
+			server.router.ServeHTTP(recode, request)
+			require.NotEmpty(t, recode)
+
+			tc.checkResponse(recode)
+			fmt.Println(" ")
+		})
+	}
+}
+
+func requireBodyMatchBlockUser(t *testing.T, body *bytes.Buffer, buser CreateBlockUserRequest) {
 	data, err := io.ReadAll(body)
 	require.NoError(t, err)
 	require.NotEmpty(t, data)
 
-	var getBookmark db.Bookmark
-	err = json.Unmarshal(data, &getBookmark)
+	var getBlockUser db.Blockuser
+	err = json.Unmarshal(data, &getBlockUser)
 	require.NoError(t, err)
 
-	require.NotEmpty(t, getBookmark.UserID)
-	require.NotEmpty(t, getBookmark.CreatedAt)
-	require.Equal(t, getBookmark.PostID, bm.PostID)
+	require.NotEmpty(t, getBlockUser.UserID)
+	require.Equal(t, buser.BlockUserID, getBlockUser.BlockuserID)
+	require.Equal(t, buser.Reason, getBlockUser.Reason)
+	require.NotEmpty(t, getBlockUser.Status)
+	require.NotEmpty(t, getBlockUser.BlockAt)
 }

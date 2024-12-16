@@ -16,13 +16,14 @@ type CreateBlockUserRequest struct {
 }
 
 func (s *Server) CreateBlockUser(ctx *gin.Context) {
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
 	var req CreateBlockUserRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "無効な入力データです")
 		return
 	}
 
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.CreateBlockParams{
 		UserID:      authPayload.UserID,
 		BlockuserID: req.BlockUserID,

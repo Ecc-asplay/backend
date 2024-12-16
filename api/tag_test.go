@@ -34,6 +34,7 @@ func RandomCreateTagAPI(t *testing.T) db.Tag {
 
 		data, err := json.Marshal(tagData)
 		require.NoError(t, err)
+		require.NotEmpty(t, data)
 
 		request, err := http.NewRequest(http.MethodPost, "/tag/add", bytes.NewReader(data))
 		require.NoError(t, err)
@@ -118,6 +119,7 @@ func TestCreateTagAPI(t *testing.T) {
 
 			data, err := json.Marshal(tc.body)
 			require.NoError(t, err)
+			require.NotEmpty(t, data)
 
 			request, err := http.NewRequest(http.MethodPost, "/tag/add", bytes.NewReader(data))
 			require.NoError(t, err)
