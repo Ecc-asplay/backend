@@ -123,7 +123,7 @@ func (server *Server) GinRequest(config util.Config) {
 	authManage.POST("/create", server.CreateAdminUser)
 	authManage.DELETE("/del", server.DeleteAdminUser)
 
-	//　認証メール確認
+	//　認証メール
 	r.POST("/mail/send", server.SendVerificationEmail)
 	r.POST("/mail/cheack", server.VerifyCode)
 
