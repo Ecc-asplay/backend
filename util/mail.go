@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/smtp"
+	"strconv"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -11,7 +12,7 @@ import (
 
 type MailConfig struct {
 	SMTPHost    string
-	SMTPPort    string
+	SMTPPort    int
 	Username    string
 	Password    string
 	FromAddress string
@@ -20,12 +21,12 @@ type MailConfig struct {
 
 func LoadMailConfig(config Config) MailConfig {
 	return MailConfig{
-		SMTPHost:    config.SMTPHost,
-		SMTPPort:    config.SMTPPort,
-		Username:    config.SMTPUser,
-		Password:    config.SMTPPassword,
-		FromAddress: config.SMTPFromAddress,
-		FromName:    config.SMTPFromName,
+		SMTPHost:    config.SmtpHost,
+		SMTPPort:    config.SmtpPort,
+		Username:    config.SmtpUser,
+		Password:    config.SmtpPassword,
+		FromAddress: config.SmtpFromAddress,
+		FromName:    config.SmtpFromName,
 	}
 }
 
@@ -41,7 +42,7 @@ func SendMail(config MailConfig, to []string, subject, body string) error {
 	auth := smtp.PlainAuth("", config.Username, config.Password, config.SMTPHost)
 
 	// メール送信
-	err := smtp.SendMail(config.SMTPHost+":"+config.SMTPPort, auth, config.FromAddress, to, []byte(msg))
+	err := smtp.SendMail(config.SMTPHost+":"+strconv.Itoa(config.SMTPPort), auth, config.FromAddress, to, []byte(msg))
 	if err != nil {
 		return fmt.Errorf("メールの送信に失敗しました: %w", err)
 	}
