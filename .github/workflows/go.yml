@@ -76,6 +76,12 @@ jobs:
         echo "ACCESS_TOKEN_DURATION=${{secrets.ACCESS_TOKEN_DURATION}}" >> app.env
         echo "AWS_ACCESS_KEY=${{secrets.AWS_ACCESS_KEY}}" >> app.env
         echo "AWS_SECRET_KEY=${{secrets.AWS_SECRET_KEY}}" >> app.env
+        echo "SMTP_HOST=${{secrets.SMTP_HOST}}" >> app.env
+        echo "SMTP_PORT=${{secrets.SMTP_PORT}}" >> app.env
+        echo "SMTP_USER=${{secrets.SMTP_USER}}" >> app.env
+        echo "SMTP_PASSWORD=${{secrets.SMTP_PASSWORD}}" >> app.env
+        echo "SMTP_FROM_ADDRESS=${{secrets.SMTP_FROM_ADDRESS}}" >> app.env
+        echo "SMTP_FROM_NAME=${{secrets.SMTP_FROMNAME}}" >> app.env
 
     - name: Run migrations
       run: make migrateup

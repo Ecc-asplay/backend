@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/smtp"
+	"os"
 	"time"
 
 	"github.com/go-redis/redis"
@@ -16,6 +17,22 @@ type MailConfig struct {
 	Password    string
 	FromAddress string
 	FromName    string
+}
+
+// 環境変数からMailConfigをロード
+func LoadMailConfig() MailConfig {
+	config := MailConfig{
+		SMTPHost:    os.Getenv("SMTP_HOST"),
+		SMTPPort:    os.Getenv("SMTP_PORT"),
+		Username:    os.Getenv("SMTP_USER"),
+		Password:    os.Getenv("SMTP_PASSWORD"),
+		FromAddress: os.Getenv("SMTP_FROM_ADDRESS"),
+		FromName:    os.Getenv("SMTP_FROMNAME"),
+	}
+
+	fmt.Printf("Loaded MailConfig: %+v\n", config) // デバッグ出力
+
+	return config
 }
 
 func SendMail(config MailConfig, to []string, subject, body string) error {
