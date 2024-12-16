@@ -6,7 +6,6 @@ import (
 	"github.com/gin-gonic/gin"
 
 	db "github.com/Ecc-asplay/backend/db/sqlc"
-
 )
 
 type CreateSearchedRecordRequest struct {
@@ -28,7 +27,7 @@ func (s *Server) CreateSearchRecord(ctx *gin.Context) {
 
 	record, err := s.store.CreateSearchedRecord(ctx, arg)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "検索レコードの作成に失敗しました"})
+		handleDBError(ctx, err, "検索レコードの作成に失敗しました")
 		return
 	}
 
@@ -38,7 +37,7 @@ func (s *Server) CreateSearchRecord(ctx *gin.Context) {
 func (s *Server) GetSearchedRecordList(ctx *gin.Context) {
 	records, err := s.store.GetSearchedRecordList(ctx)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": "検索レコードの取得に失敗しました"})
+		handleDBError(ctx, err, "検索レコードの取得に失敗しました")
 		return
 	}
 
