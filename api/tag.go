@@ -63,7 +63,6 @@ func (s *Server) CreateTag(ctx *gin.Context) {
 		return
 	}
 
-	log.Info().Msg("タグがRedisで正常に更新されました")
 	ctx.JSON(http.StatusCreated, tag)
 }
 

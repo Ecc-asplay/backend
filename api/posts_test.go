@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v7"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/require"
 
 	db "github.com/Ecc-asplay/backend/db/sqlc"
@@ -33,22 +34,7 @@ func RandomCreatePostAPI(t *testing.T, user UserRsp) db.Post {
 	var createPost db.Post
 
 	t.Run("RandomPost", func(t *testing.T) {
-		recorder := httptest.NewRecorder()
-		server := newTestServer(t)
-		require.NotEmpty(t, server)
-
-		data, err := json.Marshal(postData)
-		require.NoError(t, err)
-		require.NotEmpty(t, data)
-
-		request, err := http.NewRequest(http.MethodPost, "/post/add", bytes.NewReader(data))
-		require.NoError(t, err)
-		require.NotEmpty(t, request)
-
-		request.Header.Set("Content-Type", "application/json")
-		request.Header.Set("Authorization", token)
-
-		server.router.ServeHTTP(recorder, request)
+		recorder := APITestAfterLogin(t, postData, http.MethodPost, "/post/add", token)
 		require.NotEmpty(t, recorder)
 
 		user, err := io.ReadAll(recorder.Body)
@@ -63,7 +49,17 @@ func RandomCreatePostAPI(t *testing.T, user UserRsp) db.Post {
 }
 
 func TestCreatePostAPI(t *testing.T) {
-	user := RandomCreateUserAPI(t, CreateUserRequest{})
+	user := createTestUser(t, CreateUserRequest{
+		Username: gofakeit.Name(),
+		Email:    gofakeit.Email(),
+		Birth: pgtype.Date{
+			Time:  util.RandomDate(),
+			Valid: true,
+		},
+		Gender:   util.RandomGender(),
+		Password: util.RandomString(20),
+	})
+
 	token := "Bearer " + user.Access_Token
 	jsonData := ReturnContext()
 
@@ -123,23 +119,7 @@ func TestCreatePostAPI(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			recorder := httptest.NewRecorder()
-			server := newTestServer(t)
-			require.NotEmpty(t, server)
-
-			data, err := json.Marshal(tc.body)
-			require.NoError(t, err)
-			require.NotEmpty(t, data)
-
-			request, err := http.NewRequest(http.MethodPost, "/post/add", bytes.NewReader(data))
-			require.NoError(t, err)
-			require.NotEmpty(t, request)
-
-			request.Header.Set("Content-Type", "application/json")
-			request.Header.Set("Authorization", tc.token)
-
-			server.router.ServeHTTP(recorder, request)
-			require.NotEmpty(t, recorder)
+			recorder := APITestAfterLogin(t, tc.body, http.MethodPost, "/post/add", tc.token)
 			tc.checkResponse(recorder)
 			fmt.Println(" ")
 		})
@@ -147,7 +127,17 @@ func TestCreatePostAPI(t *testing.T) {
 }
 
 func TestGetUserPostAPI(t *testing.T) {
-	User := RandomCreateUserAPI(t, CreateUserRequest{})
+	User := createTestUser(t, CreateUserRequest{
+		Username: gofakeit.Name(),
+		Email:    gofakeit.Email(),
+		Birth: pgtype.Date{
+			Time:  util.RandomDate(),
+			Valid: true,
+		},
+		Gender:   util.RandomGender(),
+		Password: util.RandomString(20),
+	})
+
 	for i := 0; i < 10; i++ {
 		RandomCreatePostAPI(t, User)
 	}
@@ -174,19 +164,7 @@ func TestGetUserPostAPI(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			recorder := httptest.NewRecorder()
-			server := newTestServer(t)
-			require.NotEmpty(t, server)
-
-			request, err := http.NewRequest(http.MethodGet, "/post/get", nil)
-			require.NoError(t, err)
-			require.NotEmpty(t, request)
-
-			request.Header.Set("Content-Type", "application/json")
-			request.Header.Set("Authorization", tc.token)
-
-			server.router.ServeHTTP(recorder, request)
-			require.NotEmpty(t, recorder)
+			recorder := APITestAfterLogin(t, nil, http.MethodGet, "/post/get", tc.token)
 			tc.checkResponse(recorder)
 			fmt.Println(" ")
 		})
@@ -194,7 +172,17 @@ func TestGetUserPostAPI(t *testing.T) {
 }
 
 func TestDeletPostAPI(t *testing.T) {
-	User := RandomCreateUserAPI(t, CreateUserRequest{})
+	User := createTestUser(t, CreateUserRequest{
+		Username: gofakeit.Name(),
+		Email:    gofakeit.Email(),
+		Birth: pgtype.Date{
+			Time:  util.RandomDate(),
+			Valid: true,
+		},
+		Gender:   util.RandomGender(),
+		Password: util.RandomString(20),
+	})
+
 	Post := RandomCreatePostAPI(t, User)
 	token := "Bearer " + User.Access_Token
 
@@ -234,23 +222,7 @@ func TestDeletPostAPI(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			recorder := httptest.NewRecorder()
-			server := newTestServer(t)
-			require.NotEmpty(t, server)
-
-			data, err := json.Marshal(tc.body)
-			require.NoError(t, err)
-			require.NotEmpty(t, data)
-
-			request, err := http.NewRequest(http.MethodDelete, "/post/del", bytes.NewReader(data))
-			require.NoError(t, err)
-			require.NotEmpty(t, request)
-
-			request.Header.Set("Content-Type", "application/json")
-			request.Header.Set("Authorization", tc.token)
-
-			server.router.ServeHTTP(recorder, request)
-			require.NotEmpty(t, recorder)
+			recorder := APITestAfterLogin(t, tc.body, http.MethodDelete, "/post/del", tc.token)
 			tc.checkResponse(recorder)
 			fmt.Println(" ")
 		})
@@ -258,7 +230,17 @@ func TestDeletPostAPI(t *testing.T) {
 }
 
 func TestUpdatePostAPI(t *testing.T) {
-	User := RandomCreateUserAPI(t, CreateUserRequest{})
+	User := createTestUser(t, CreateUserRequest{
+		Username: gofakeit.Name(),
+		Email:    gofakeit.Email(),
+		Birth: pgtype.Date{
+			Time:  util.RandomDate(),
+			Valid: true,
+		},
+		Gender:   util.RandomGender(),
+		Password: util.RandomString(20),
+	})
+
 	Post := RandomCreatePostAPI(t, User)
 	token := "Bearer " + User.Access_Token
 
@@ -334,23 +316,7 @@ func TestUpdatePostAPI(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			recorder := httptest.NewRecorder()
-			server := newTestServer(t)
-			require.NotEmpty(t, server)
-
-			data, err := json.Marshal(tc.body)
-			require.NoError(t, err)
-			require.NotEmpty(t, data)
-
-			request, err := http.NewRequest(http.MethodPut, "/post/update", bytes.NewReader(data))
-			require.NoError(t, err)
-			require.NotEmpty(t, request)
-
-			request.Header.Set("Content-Type", "application/json")
-			request.Header.Set("Authorization", tc.token)
-
-			server.router.ServeHTTP(recorder, request)
-			require.NotEmpty(t, recorder)
+			recorder := APITestAfterLogin(t, tc.body, http.MethodPut, "/post/update", tc.token)
 			tc.checkResponse(recorder)
 			fmt.Println(" ")
 		})

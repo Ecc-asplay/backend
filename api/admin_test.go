@@ -1,12 +1,10 @@
 package api
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/http/httptest"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v7"
@@ -83,28 +81,11 @@ func RandomCreateAdminUser(t *testing.T) db.Adminuser {
 	var createAdmin db.Adminuser
 
 	t.Run("RandomCreateAdminUser", func(t *testing.T) {
-		recode := httptest.NewRecorder()
-		server := newTestServer(t)
-		require.NotEmpty(t, server)
+		recorder := APITestAfterLogin(t, adminData, http.MethodPost, "/admin/create", adminToken)
+		require.Equal(t, http.StatusCreated, recorder.Code)
+		require.NotEmpty(t, recorder.Body)
 
-		data, err := json.Marshal(adminData)
-		require.NoError(t, err)
-		require.NotEmpty(t, data)
-
-		request, err := http.NewRequest(http.MethodPost, "/admin/create", bytes.NewReader(data))
-		require.NoError(t, err)
-		require.NotEmpty(t, request)
-
-		request.Header.Set("Content-Type", "application/json")
-		request.Header.Set("Authorization", adminToken)
-
-		server.router.ServeHTTP(recode, request)
-		require.NotEmpty(t, recode)
-
-		require.Equal(t, http.StatusCreated, recode.Code)
-		require.NotEmpty(t, recode.Body)
-
-		err = json.Unmarshal(recode.Body.Bytes(), &createAdmin)
+		err := json.Unmarshal(recorder.Body.Bytes(), &createAdmin)
 		require.NoError(t, err)
 		fmt.Println(" ")
 	})

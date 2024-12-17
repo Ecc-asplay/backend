@@ -156,7 +156,6 @@ func (s *Server) UpdateDiseaseAndCondition(ctx *gin.Context) {
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
 	var req NewDiseaseAndConditionRequest
-
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "病歴と病状更新：無効な入力データです")
 		return
@@ -210,7 +209,6 @@ type UpdatePrivacyRequest struct {
 
 func (s *Server) UpdateIsPrivacy(ctx *gin.Context) {
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
-
 	var req UpdatePrivacyRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "プライバシー更新：無効な入力データです")

@@ -9,6 +9,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/brianvoe/gofakeit/v7"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/require"
 
 	db "github.com/Ecc-asplay/backend/db/sqlc"
@@ -17,7 +19,16 @@ import (
 
 func RandomCreateBlockUser(t *testing.T, user1 UserRsp) db.Blockuser {
 	token := "Bearer " + user1.Access_Token
-	BlockUserAccount := RandomCreateUserAPI(t, CreateUserRequest{})
+	BlockUserAccount := createTestUser(t, CreateUserRequest{
+		Username: gofakeit.Name(),
+		Email:    gofakeit.Email(),
+		Birth: pgtype.Date{
+			Time:  util.RandomDate(),
+			Valid: true,
+		},
+		Gender:   util.RandomGender(),
+		Password: util.RandomString(20),
+	})
 
 	blockData := CreateBlockUserRequest{
 		BlockUserID: BlockUserAccount.User_Information.UserID,
@@ -27,25 +38,9 @@ func RandomCreateBlockUser(t *testing.T, user1 UserRsp) db.Blockuser {
 	var createBlockUser db.Blockuser
 
 	t.Run("RandomCreateBlockUser", func(t *testing.T) {
-		recode := httptest.NewRecorder()
-		server := newTestServer(t)
-		require.NotEmpty(t, server)
+		recorder := APITestAfterLogin(t, blockData, http.MethodPost, "/block/create", token)
 
-		data, err := json.Marshal(blockData)
-		require.NoError(t, err)
-		require.NotEmpty(t, data)
-
-		request, err := http.NewRequest(http.MethodPost, "/block/create", bytes.NewReader(data))
-		require.NoError(t, err)
-		require.NotEmpty(t, request)
-
-		request.Header.Set("Content-Type", "application/json")
-		request.Header.Set("Authorization", token)
-
-		server.router.ServeHTTP(recode, request)
-		require.NotEmpty(t, recode)
-
-		buser, err := io.ReadAll(recode.Body)
+		buser, err := io.ReadAll(recorder.Body)
 		require.NoError(t, err)
 
 		err = json.Unmarshal(buser, &createBlockUser)
@@ -57,9 +52,27 @@ func RandomCreateBlockUser(t *testing.T, user1 UserRsp) db.Blockuser {
 }
 
 func TestCreateBlockUser(t *testing.T) {
-	user1 := RandomCreateUserAPI(t, CreateUserRequest{})
+	user1 := createTestUser(t, CreateUserRequest{
+		Username: gofakeit.Name(),
+		Email:    gofakeit.Email(),
+		Birth: pgtype.Date{
+			Time:  util.RandomDate(),
+			Valid: true,
+		},
+		Gender:   util.RandomGender(),
+		Password: util.RandomString(20),
+	})
 	token := "Bearer " + user1.Access_Token
-	BlockUserAccount := RandomCreateUserAPI(t, CreateUserRequest{})
+	BlockUserAccount := createTestUser(t, CreateUserRequest{
+		Username: gofakeit.Name(),
+		Email:    gofakeit.Email(),
+		Birth: pgtype.Date{
+			Time:  util.RandomDate(),
+			Valid: true,
+		},
+		Gender:   util.RandomGender(),
+		Password: util.RandomString(20),
+	})
 
 	blockData := CreateBlockUserRequest{
 		BlockUserID: BlockUserAccount.User_Information.UserID,
@@ -112,32 +125,24 @@ func TestCreateBlockUser(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			recode := httptest.NewRecorder()
-			server := newTestServer(t)
-			require.NotEmpty(t, server)
-
-			data, err := json.Marshal(tc.body)
-			require.NoError(t, err)
-			require.NotEmpty(t, data)
-
-			request, err := http.NewRequest(http.MethodPost, "/block/create", bytes.NewReader(data))
-			require.NoError(t, err)
-			require.NotEmpty(t, request)
-
-			request.Header.Set("Content-Type", "application/json")
-			request.Header.Set("Authorization", tc.token)
-
-			server.router.ServeHTTP(recode, request)
-			require.NotEmpty(t, recode)
-
-			tc.checkResponse(recode)
+			recorder := APITestAfterLogin(t, tc.body, http.MethodPost, "/block/create", tc.token)
+			tc.checkResponse(recorder)
 			fmt.Println(" ")
 		})
 	}
 }
 
 func TestUnBlockUserAPI(t *testing.T) {
-	user := RandomCreateUserAPI(t, CreateUserRequest{})
+	user := createTestUser(t, CreateUserRequest{
+		Username: gofakeit.Name(),
+		Email:    gofakeit.Email(),
+		Birth: pgtype.Date{
+			Time:  util.RandomDate(),
+			Valid: true,
+		},
+		Gender:   util.RandomGender(),
+		Password: util.RandomString(20),
+	})
 	token := "Bearer " + user.Access_Token
 	blockuser := RandomCreateBlockUser(t, user)
 
@@ -187,25 +192,8 @@ func TestUnBlockUserAPI(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			recode := httptest.NewRecorder()
-			server := newTestServer(t)
-			require.NotEmpty(t, server)
-
-			data, err := json.Marshal(tc.body)
-			require.NoError(t, err)
-			require.NotEmpty(t, data)
-
-			request, err := http.NewRequest(http.MethodPut, "/block/update", bytes.NewReader(data))
-			require.NoError(t, err)
-			require.NotEmpty(t, request)
-
-			request.Header.Set("Content-Type", "application/json")
-			request.Header.Set("Authorization", tc.token)
-
-			server.router.ServeHTTP(recode, request)
-			require.NotEmpty(t, recode)
-
-			tc.checkResponse(recode)
+			recorder := APITestAfterLogin(t, tc.body, http.MethodPut, "/block/update", tc.token)
+			tc.checkResponse(recorder)
 			fmt.Println(" ")
 		})
 	}
@@ -213,7 +201,16 @@ func TestUnBlockUserAPI(t *testing.T) {
 }
 
 func TestGetBlockUserByUserAPI(t *testing.T) {
-	user := RandomCreateUserAPI(t, CreateUserRequest{})
+	user := createTestUser(t, CreateUserRequest{
+		Username: gofakeit.Name(),
+		Email:    gofakeit.Email(),
+		Birth: pgtype.Date{
+			Time:  util.RandomDate(),
+			Valid: true,
+		},
+		Gender:   util.RandomGender(),
+		Password: util.RandomString(20),
+	})
 	token := "Bearer " + user.Access_Token
 	for i := 0; i < 10; i++ {
 		RandomCreateBlockUser(t, user)
@@ -241,21 +238,8 @@ func TestGetBlockUserByUserAPI(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			recode := httptest.NewRecorder()
-			server := newTestServer(t)
-			require.NotEmpty(t, server)
-
-			request, err := http.NewRequest(http.MethodGet, "/block/get", nil)
-			require.NoError(t, err)
-			require.NotEmpty(t, request)
-
-			request.Header.Set("Content-Type", "application/json")
-			request.Header.Set("Authorization", tc.token)
-
-			server.router.ServeHTTP(recode, request)
-			require.NotEmpty(t, recode)
-
-			tc.checkResponse(recode)
+			recorder := APITestAfterLogin(t, nil, http.MethodGet, "/block/get", tc.token)
+			tc.checkResponse(recorder)
 			fmt.Println(" ")
 		})
 	}
