@@ -4,9 +4,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Ecc-asplay/backend/util"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
+
+	"github.com/Ecc-asplay/backend/util"
 )
 
 func (s *Server) SendVerificationEmail(ctx *gin.Context) {
