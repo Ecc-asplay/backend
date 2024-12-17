@@ -68,10 +68,13 @@ sqlc:
 test:
 	go test -v -cover ./...
 
+mock:
+	mockgen -package mockdb -destination db/mock/store.go github.com/Ecc-asplay/backend/db/sqlc Store
+
 server:
 	go run main.go
 
 
 .PHONY: postgres dropPsql createDB dropDB migrateup migratedown migrateup1 migratedown1 migrateup2 migratedown2 migrateup3 migratedown3 sqlc tablereset
 		redis dropRedis
-		test server
+		test mock server
