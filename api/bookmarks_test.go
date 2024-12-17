@@ -9,6 +9,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/brianvoe/gofakeit/v7"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/stretchr/testify/require"
 
 	db "github.com/Ecc-asplay/backend/db/sqlc"
@@ -18,7 +20,17 @@ import (
 func RandomCreateBookmarkAPI(t *testing.T, user1 UserRsp) db.Bookmark {
 	token := "Bearer " + user1.Access_Token
 
-	user2 := RandomCreateUserAPI(t, CreateUserRequest{})
+	user2 := createTestUser(t, CreateUserRequest{
+		Username: gofakeit.Name(),
+		Email:    gofakeit.Email(),
+		Birth: pgtype.Date{
+			Time:  util.RandomDate(),
+			Valid: true,
+		},
+		Gender:   util.RandomGender(),
+		Password: util.RandomString(20),
+	})
+
 	post := RandomCreatePostAPI(t, user2)
 
 	BMData := bookmarkRequest{
@@ -28,25 +40,8 @@ func RandomCreateBookmarkAPI(t *testing.T, user1 UserRsp) db.Bookmark {
 	var createBM db.Bookmark
 
 	t.Run("RandomBookmark", func(t *testing.T) {
-		recode := httptest.NewRecorder()
-		server := newTestServer(t)
-		require.NotEmpty(t, server)
-
-		data, err := json.Marshal(BMData)
-		require.NoError(t, err)
-		require.NotEmpty(t, data)
-
-		request, err := http.NewRequest(http.MethodPost, "/bookmark/add", bytes.NewReader(data))
-		require.NoError(t, err)
-		require.NotEmpty(t, request)
-
-		request.Header.Set("Content-Type", "application/json")
-		request.Header.Set("Authorization", token)
-
-		server.router.ServeHTTP(recode, request)
-		require.NotEmpty(t, recode)
-
-		bm, err := io.ReadAll(recode.Body)
+		recorder := APITestAfterLogin(t, BMData, http.MethodPost, "/bookmark/add", token)
+		bm, err := io.ReadAll(recorder.Body)
 		require.NoError(t, err)
 
 		err = json.Unmarshal(bm, &createBM)
@@ -59,7 +54,17 @@ func RandomCreateBookmarkAPI(t *testing.T, user1 UserRsp) db.Bookmark {
 }
 
 func TestCreateBookmarkAPI(t *testing.T) {
-	user := RandomCreateUserAPI(t, CreateUserRequest{})
+	user := createTestUser(t, CreateUserRequest{
+		Username: gofakeit.Name(),
+		Email:    gofakeit.Email(),
+		Birth: pgtype.Date{
+			Time:  util.RandomDate(),
+			Valid: true,
+		},
+		Gender:   util.RandomGender(),
+		Password: util.RandomString(20),
+	})
+
 	token := "Bearer " + user.Access_Token
 	post := RandomCreatePostAPI(t, user)
 	BMData := bookmarkRequest{
@@ -101,32 +106,25 @@ func TestCreateBookmarkAPI(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			recode := httptest.NewRecorder()
-			server := newTestServer(t)
-			require.NotEmpty(t, server)
-
-			data, err := json.Marshal(tc.body)
-			require.NoError(t, err)
-			require.NotEmpty(t, data)
-
-			request, err := http.NewRequest(http.MethodPost, "/bookmark/add", bytes.NewReader(data))
-			require.NoError(t, err)
-			require.NotEmpty(t, request)
-
-			request.Header.Set("Content-Type", "application/json")
-			request.Header.Set("Authorization", tc.token)
-
-			server.router.ServeHTTP(recode, request)
-			require.NotEmpty(t, recode)
-
-			tc.checkResponse(recode)
+			recorder := APITestAfterLogin(t, tc.body, http.MethodPost, "/bookmark/add", tc.token)
+			tc.checkResponse(recorder)
 			fmt.Println(" ")
 		})
 	}
 }
 
 func TestGetBookmark(t *testing.T) {
-	user := RandomCreateUserAPI(t, CreateUserRequest{})
+	user := createTestUser(t, CreateUserRequest{
+		Username: gofakeit.Name(),
+		Email:    gofakeit.Email(),
+		Birth: pgtype.Date{
+			Time:  util.RandomDate(),
+			Valid: true,
+		},
+		Gender:   util.RandomGender(),
+		Password: util.RandomString(20),
+	})
+
 	token := "Bearer " + user.Access_Token
 	for i := 0; i < 10; i++ {
 		RandomCreateBookmarkAPI(t, user)
@@ -153,7 +151,7 @@ func TestGetBookmark(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			recode := httptest.NewRecorder()
+			recorder := httptest.NewRecorder()
 			server := newTestServer(t)
 			require.NotEmpty(t, server)
 
@@ -164,16 +162,26 @@ func TestGetBookmark(t *testing.T) {
 			request.Header.Set("Content-Type", "application/json")
 			request.Header.Set("Authorization", tc.token)
 
-			server.router.ServeHTTP(recode, request)
-			require.NotEmpty(t, recode)
-			tc.checkResponse(recode)
+			server.router.ServeHTTP(recorder, request)
+			require.NotEmpty(t, recorder)
+			tc.checkResponse(recorder)
 			fmt.Println(" ")
 		})
 	}
 }
 
 func DeleteBookmark(t *testing.T) {
-	user := RandomCreateUserAPI(t, CreateUserRequest{})
+	user := createTestUser(t, CreateUserRequest{
+		Username: gofakeit.Name(),
+		Email:    gofakeit.Email(),
+		Birth: pgtype.Date{
+			Time:  util.RandomDate(),
+			Valid: true,
+		},
+		Gender:   util.RandomGender(),
+		Password: util.RandomString(20),
+	})
+
 	token := "Bearer " + user.Access_Token
 	bm := RandomCreateBookmarkAPI(t, user)
 
@@ -212,25 +220,8 @@ func DeleteBookmark(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			recode := httptest.NewRecorder()
-			server := newTestServer(t)
-			require.NotEmpty(t, server)
-
-			data, err := json.Marshal(tc.body)
-			require.NoError(t, err)
-			require.NotEmpty(t, data)
-
-			request, err := http.NewRequest(http.MethodDelete, "/bookmark/del", bytes.NewBuffer(data))
-			require.NoError(t, err)
-			require.NotEmpty(t, request)
-
-			request.Header.Set("Content-Type", "application/json")
-			request.Header.Set("Authorization", tc.token)
-
-			server.router.ServeHTTP(recode, request)
-			require.NotEmpty(t, recode)
-
-			tc.checkResponse(recode)
+			recorder := APITestAfterLogin(t, tc.body, http.MethodDelete, "/bookmark/del", tc.token)
+			tc.checkResponse(recorder)
 			fmt.Println(" ")
 		})
 	}

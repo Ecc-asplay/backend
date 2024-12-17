@@ -28,7 +28,7 @@ func addAuthorization(t *testing.T, request *http.Request, tokenMaker token.Make
 type Cases struct {
 	name          string
 	setupAuth     func(t *testing.T, request *http.Request, tokenMaker token.Maker)
-	checkResponse func(t *testing.T, recoder *httptest.ResponseRecorder)
+	checkResponse func(t *testing.T, recorderr *httptest.ResponseRecorder)
 }
 
 func TestAuthMiddleware(t *testing.T) {
@@ -38,15 +38,15 @@ func TestAuthMiddleware(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, util.CreateUUID(), "user", time.Minute)
 			},
-			checkResponse: func(t *testing.T, recoder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusOK, recoder.Code)
+			checkResponse: func(t *testing.T, recorderr *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recorderr.Code)
 			},
 		},
 		{
 			name:      "NoAuthorization",
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {},
-			checkResponse: func(t *testing.T, recoder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnauthorized, recoder.Code)
+			checkResponse: func(t *testing.T, recorderr *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorderr.Code)
 			},
 		},
 		{
@@ -54,8 +54,8 @@ func TestAuthMiddleware(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorization(t, request, tokenMaker, "unsupported", util.CreateUUID(), "user", time.Minute)
 			},
-			checkResponse: func(t *testing.T, recoder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnauthorized, recoder.Code)
+			checkResponse: func(t *testing.T, recorderr *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorderr.Code)
 			},
 		},
 		{
@@ -63,8 +63,8 @@ func TestAuthMiddleware(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorization(t, request, tokenMaker, "", util.CreateUUID(), "user", time.Minute)
 			},
-			checkResponse: func(t *testing.T, recoder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnauthorized, recoder.Code)
+			checkResponse: func(t *testing.T, recorderr *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorderr.Code)
 			},
 		},
 		{
@@ -72,8 +72,8 @@ func TestAuthMiddleware(t *testing.T) {
 			setupAuth: func(t *testing.T, request *http.Request, tokenMaker token.Maker) {
 				addAuthorization(t, request, tokenMaker, authorizationTypeBearer, util.CreateUUID(), "user", -time.Minute)
 			},
-			checkResponse: func(t *testing.T, recoder *httptest.ResponseRecorder) {
-				require.Equal(t, http.StatusUnauthorized, recoder.Code)
+			checkResponse: func(t *testing.T, recorderr *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusUnauthorized, recorderr.Code)
 			},
 		},
 	}
@@ -91,12 +91,13 @@ func TestAuthMiddleware(t *testing.T) {
 					ctx.JSON(http.StatusOK, gin.H{})
 				},
 			)
-			recoder := httptest.NewRecorder()
+			recorderr := httptest.NewRecorder()
 			request, err := http.NewRequest(http.MethodGet, authPath, nil)
 			require.NoError(t, err)
 			tc.setupAuth(t, request, server.tokenMaker)
-			server.router.ServeHTTP(recoder, request)
-			tc.checkResponse(t, recoder)
+			server.router.ServeHTTP(recorderr, request)
+			tc.checkResponse(t, recorderr)
+			fmt.Println(" ")
 		})
 	}
 }

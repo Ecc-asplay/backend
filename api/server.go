@@ -78,8 +78,8 @@ func (server *Server) GinRequest(config util.Config) {
 	authRoutes := r.Group("/").Use(authMiddleware(server.tokenMaker))
 
 	// ユーザー
+	authRoutes.GET("/users/get", server.GetUserData)
 	authRoutes.DELETE("/users/del", server.DeleteUser)
-	authRoutes.GET("/users", server.GetUserData)
 	authRoutes.PUT("/users/password", server.ResetPassword)
 	authRoutes.PUT("/users/disease-condition", server.UpdateDiseaseAndCondition)
 	authRoutes.PUT("/users/email", server.UpdateEmail)
