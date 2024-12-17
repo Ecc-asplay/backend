@@ -163,7 +163,6 @@ func TestDeleteUserAPI(t *testing.T) {
 			fmt.Println(" ")
 		})
 	}
-
 }
 
 func TestResetPasswordAPI(t *testing.T) {
