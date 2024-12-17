@@ -40,6 +40,9 @@ func newTestServer(t *testing.T) *Server {
 		log.Error().Err(err).Msg("データベースに接続できません")
 		os.Exit(1)
 	}
+	t.Cleanup(func() {
+		conn.Close()
+	})
 
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     config.RedisAddress,

@@ -262,7 +262,6 @@ type LoginRequest struct {
 }
 
 func (s *Server) LoginUser(ctx *gin.Context) {
-
 	var req LoginRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "ユーザー ログイン：無効な入力データです")
