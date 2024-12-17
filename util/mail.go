@@ -32,7 +32,6 @@ func LoadMailConfig(config Config) MailConfig {
 
 func SendMail(config MailConfig, to []string, subject, body string) error {
 	from := fmt.Sprintf("%s <%s>", config.FromName, config.FromAddress)
-
 	msg := "From: " + from + "\n" +
 		"Subject: " + subject + "\n" +
 		"Content-Type: text/html; charset=utf-8\n\n" +
@@ -48,6 +47,10 @@ func SendMail(config MailConfig, to []string, subject, body string) error {
 	}
 	return nil
 }
+
+/*
+	乱数のこと　＝＞　Random.go 使って
+*/
 
 func GenerateVerificationCode() string {
 	rand.Seed(time.Now().UnixNano())

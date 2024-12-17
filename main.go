@@ -32,13 +32,13 @@ func main() {
 		log.Error().Err(err).Msg("データベースに接続できません")
 		os.Exit(1)
 	}
+	defer conn.Close()
 
 	// マイグレーション実行
 	initMigration(config.MigrationURL, config.DBSource)
 
 	// DB 起動
 	store := db.NewStore(conn)
-
 	// Redis キャッシュ接続
 	rdb := redis.NewClient(&redis.Options{
 		Addr:     config.RedisAddress,

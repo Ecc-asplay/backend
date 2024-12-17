@@ -10,10 +10,12 @@ import (
 	"github.com/Ecc-asplay/backend/util"
 )
 
+type SendVerificationEmailReq struct {
+	Email string `json:"email" binding:"required,email"`
+}
+
 func (s *Server) SendVerificationEmail(ctx *gin.Context) {
-	var req struct {
-		Email string `json:"email" binding:"required,email"`
-	}
+	var req SendVerificationEmailReq
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "無効な入力データです")
 		return
@@ -63,12 +65,14 @@ func (s *Server) SendVerificationEmail(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"message": "認証メールが送信されました"})
 }
 
+type VerifyCodeReq struct {
+	Email string `json:"email" binding:"required,email"`
+	Code  string `json:"code" binding:"required"`
+}
+
 // 認証コード確認
 func (s *Server) VerifyCode(ctx *gin.Context) {
-	var req struct {
-		Email string `json:"email" binding:"required,email"`
-		Code  string `json:"code" binding:"required"`
-	}
+	var req VerifyCodeReq
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "無効な入力データです")
 		return

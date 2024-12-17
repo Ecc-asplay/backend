@@ -70,6 +70,10 @@ func (server *Server) GinRequest(config util.Config) {
 	r.GET("/post/getall", server.GetAllPost)
 	// r.POST("/post/search", server.SearchPost)
 
+	//　認証メール
+	r.POST("/mail/send", server.SendVerificationEmail)
+	r.POST("/mail/check", server.VerifyCode)
+
 	// Searchrecord
 	r.POST("/searchrecord/getlist", server.GetSearchedRecordList)
 	r.POST("/searchrecord/create", server.CreateSearchRecord)
@@ -123,10 +127,6 @@ func (server *Server) GinRequest(config util.Config) {
 	authManage := r.Group("/admin").Use(authMiddleware(server.tokenMaker))
 	authManage.POST("/create", server.CreateAdminUser)
 	authManage.DELETE("/del", server.DeleteAdminUser)
-
-	//　認証メール
-	r.POST("/mail/send", server.SendVerificationEmail)
-	r.POST("/mail/cheack", server.VerifyCode)
 
 	server.router = r
 }
