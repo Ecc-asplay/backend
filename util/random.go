@@ -116,9 +116,8 @@ func RandomDate() time.Time {
 	} else {
 		day = RandomInt(31)
 	}
-
 	day += 1
-
+	
 	return time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.UTC)
 }
 

@@ -68,15 +68,11 @@ func (server *Server) GinRequest(config util.Config) {
 	r.POST("/login", server.LoginUser)
 	r.POST("/management", server.LoginAdmin)
 	r.GET("/post/getall", server.GetAllPost)
-	// r.POST("/post/search", server.SearchPost)
+	r.POST("/post/search", server.SearchPost)
 
 	//　認証メール
 	r.POST("/mail/send", server.SendVerificationEmail)
 	r.POST("/mail/check", server.VerifyCode)
-
-	// Searchrecord
-	r.POST("/searchrecord/getlist", server.GetSearchedRecordList)
-	r.POST("/searchrecord/create", server.CreateSearchRecord)
 
 	// ーーーーーー　ログイン後　ーーーーー
 	authRoutes := r.Group("/").Use(authMiddleware(server.tokenMaker))
@@ -106,9 +102,10 @@ func (server *Server) GinRequest(config util.Config) {
 	authRoutes.GET("/bookmark/get", server.GetBookmark)
 
 	// Comment
-	r.GET("/comment/getlist/:post_id", server.GetCommentsList)
-	authRoutes.POST("/comment/create", server.CreateComment)
+	authRoutes.GET("/comment/getlist/:post_id", server.GetPostCommentsList)
 	authRoutes.GET("/comment/all", server.GetAllComments)
+
+	authRoutes.POST("/comment/create", server.CreateComment)
 	authRoutes.PUT("/comment/update", server.UpdateComments)
 	authRoutes.DELETE("/comment/delete/:comment_id", server.DeleteComments)
 
@@ -127,6 +124,9 @@ func (server *Server) GinRequest(config util.Config) {
 	authManage := r.Group("/admin").Use(authMiddleware(server.tokenMaker))
 	authManage.POST("/create", server.CreateAdminUser)
 	authManage.DELETE("/del", server.DeleteAdminUser)
+
+	// Searchrecord
+	authManage.POST("/searchrecord/getlist", server.GetSearchedRecordList)
 
 	server.router = r
 }

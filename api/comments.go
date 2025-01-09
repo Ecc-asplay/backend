@@ -16,7 +16,7 @@ import (
 // "active": コメントが有効で、ユーザーに表示可能な状態。
 // "flagged": コメントが不適切な内容としてフラグされた状態。
 
-type CreateCommentRequest struct {
+type createCommentRequest struct {
 	PostID     uuid.UUID `json:"post_id" binding:"required"`
 	Comments   string    `json:"comments" binding:"required"`
 	IsPublic   bool      `json:"is_public"`
@@ -27,7 +27,7 @@ type CreateCommentRequest struct {
 func (s *Server) CreateComment(ctx *gin.Context) {
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 
-	var req CreateCommentRequest
+	var req createCommentRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "コメント作成：無効な入力データです")
 		return
@@ -53,7 +53,7 @@ func (s *Server) CreateComment(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, comment)
 }
 
-func (s *Server) GetCommentsList(ctx *gin.Context) {
+func (s *Server) GetPostCommentsList(ctx *gin.Context) {
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	if authPayload == nil {
 		handleDBError(ctx, errors.New("404"), "コメントリスト取得：トークンない")

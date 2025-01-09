@@ -24,7 +24,7 @@ func RandomCreatePostAPI(t *testing.T, user UserRsp) db.Post {
 
 	postData := CreatePostRequest{
 		ShowID:   util.RandomString(10),
-		Title:    gofakeit.BookTitle(),
+		Title:    "aaa",
 		Feel:     util.RandomMood(),
 		Content:  jsonData,
 		Reaction: rand.Int31(),
@@ -49,7 +49,7 @@ func RandomCreatePostAPI(t *testing.T, user UserRsp) db.Post {
 }
 
 func TestCreatePostAPI(t *testing.T) {
-	user := createTestUser(t, CreateUserRequest{
+	user := RandomCreateUserAPI(t, CreateUserRequest{
 		Username: gofakeit.Name(),
 		Email:    gofakeit.Email(),
 		Birth: pgtype.Date{
@@ -127,7 +127,7 @@ func TestCreatePostAPI(t *testing.T) {
 }
 
 func TestGetUserPostAPI(t *testing.T) {
-	User := createTestUser(t, CreateUserRequest{
+	User := RandomCreateUserAPI(t, CreateUserRequest{
 		Username: gofakeit.Name(),
 		Email:    gofakeit.Email(),
 		Birth: pgtype.Date{
@@ -172,7 +172,7 @@ func TestGetUserPostAPI(t *testing.T) {
 }
 
 func TestDeletPostAPI(t *testing.T) {
-	User := createTestUser(t, CreateUserRequest{
+	User := RandomCreateUserAPI(t, CreateUserRequest{
 		Username: gofakeit.Name(),
 		Email:    gofakeit.Email(),
 		Birth: pgtype.Date{
@@ -230,7 +230,7 @@ func TestDeletPostAPI(t *testing.T) {
 }
 
 func TestUpdatePostAPI(t *testing.T) {
-	User := createTestUser(t, CreateUserRequest{
+	User := RandomCreateUserAPI(t, CreateUserRequest{
 		Username: gofakeit.Name(),
 		Email:    gofakeit.Email(),
 		Birth: pgtype.Date{
@@ -317,6 +317,49 @@ func TestUpdatePostAPI(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			recorder := APITestAfterLogin(t, tc.body, http.MethodPut, "/post/update", tc.token)
+			tc.checkResponse(recorder)
+			fmt.Println(" ")
+		})
+	}
+}
+
+func TestSearchPostAPI(t *testing.T) {
+	User := RandomCreateUserAPI(t, CreateUserRequest{
+		Username: gofakeit.Name(),
+		Email:    gofakeit.Email(),
+		Birth: pgtype.Date{
+			Time:  util.RandomDate(),
+			Valid: true,
+		},
+		Gender:   util.RandomGender(),
+		Password: util.RandomString(20),
+	})
+	Post := RandomCreatePostAPI(t, User)
+
+	testCases := []struct {
+		name          string
+		body          string
+		checkResponse func(recorder *httptest.ResponseRecorder)
+	}{
+		{
+			name: "OK",
+			body: Post.Title,
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recorder.Code)
+			},
+		},
+		{
+			name: "見つけない",
+			body: util.RandomString(10),
+			checkResponse: func(recorder *httptest.ResponseRecorder) {
+				require.Equal(t, http.StatusOK, recorder.Code)
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			recorder := APITestBeforeLogin(t, tc.body, http.MethodPost, "/post/search")
 			tc.checkResponse(recorder)
 			fmt.Println(" ")
 		})

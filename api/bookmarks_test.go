@@ -20,7 +20,7 @@ import (
 func RandomCreateBookmarkAPI(t *testing.T, user1 UserRsp) db.Bookmark {
 	token := "Bearer " + user1.Access_Token
 
-	user2 := createTestUser(t, CreateUserRequest{
+	user2 := RandomCreateUserAPI(t, CreateUserRequest{
 		Username: gofakeit.Name(),
 		Email:    gofakeit.Email(),
 		Birth: pgtype.Date{
@@ -54,7 +54,7 @@ func RandomCreateBookmarkAPI(t *testing.T, user1 UserRsp) db.Bookmark {
 }
 
 func TestCreateBookmarkAPI(t *testing.T) {
-	user := createTestUser(t, CreateUserRequest{
+	user := RandomCreateUserAPI(t, CreateUserRequest{
 		Username: gofakeit.Name(),
 		Email:    gofakeit.Email(),
 		Birth: pgtype.Date{
@@ -93,7 +93,7 @@ func TestCreateBookmarkAPI(t *testing.T) {
 			},
 		},
 		{
-			name:  "投稿IDない",
+			name:  "投稿ない",
 			token: token,
 			body: bookmarkRequest{
 				PostID: util.CreateUUID(),
@@ -114,7 +114,7 @@ func TestCreateBookmarkAPI(t *testing.T) {
 }
 
 func TestGetBookmark(t *testing.T) {
-	user := createTestUser(t, CreateUserRequest{
+	user := RandomCreateUserAPI(t, CreateUserRequest{
 		Username: gofakeit.Name(),
 		Email:    gofakeit.Email(),
 		Birth: pgtype.Date{
@@ -171,7 +171,7 @@ func TestGetBookmark(t *testing.T) {
 }
 
 func DeleteBookmark(t *testing.T) {
-	user := createTestUser(t, CreateUserRequest{
+	user := RandomCreateUserAPI(t, CreateUserRequest{
 		Username: gofakeit.Name(),
 		Email:    gofakeit.Email(),
 		Birth: pgtype.Date{

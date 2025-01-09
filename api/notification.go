@@ -15,13 +15,14 @@ type CreateNotificationRequest struct {
 }
 
 func (s *Server) CreateNotification(ctx *gin.Context) {
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
 	var req CreateNotificationRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "通知作成：無効な入力データです")
 		return
 	}
 
-	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	arg := db.CreateNotificationParams{
 		UserID:  authPayload.UserID,
 		Content: req.Content,

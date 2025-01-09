@@ -23,7 +23,7 @@ type MockStore struct {
 // MockStoreMockRecorder is the mock recorder for MockStore.
 type MockStoreMockRecorder struct {
 	mock *MockStore
-}
+} 
 
 // NewMockStore creates a new mock instance.
 func NewMockStore(ctrl *gomock.Controller) *MockStore {
