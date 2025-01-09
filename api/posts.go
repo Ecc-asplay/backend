@@ -118,21 +118,33 @@ func (s *Server) GetAllPost(ctx *gin.Context) {
 }
 
 // Search
-// func (s *Server) SearchPost(ctx *gin.Context) {
-// 	var req string
-// 	if err := ctx.ShouldBindJSON(&req); err != nil {
-// 		handleDBError(ctx, err, "投稿検索：無効な入力データです")
-// 		return
-// 	}
+func (s *Server) SearchPost(ctx *gin.Context) {
 
-// 	findPost, err := s.store.SearchPost(ctx, req)
-// 	if err != nil {
-// 		handleDBError(ctx, err, "投稿検索を失敗しました")
-// 		return
-// 	}
+	var req string
+	if err := ctx.ShouldBindJSON(&req); err != nil {
+		handleDBError(ctx, err, "投稿検索：無効な入力データです")
+		return
+	}
 
-// 	ctx.JSON(http.StatusOK, findPost)
-// }
+	findPost, err := s.store.SearchPost(ctx, req)
+	if err != nil {
+		handleDBError(ctx, err, "投稿検索を失敗しました")
+		return
+	} else {
+		arg := db.CreateSearchedRecordParams{
+			SearchContent: req,
+			IsUser:        false,
+		}
+
+		_, err := s.store.CreateSearchedRecord(ctx, arg)
+		if err != nil {
+			handleDBError(ctx, err, "投稿検索：検索レコードの作成に失敗しました")
+			return
+		}
+	}
+
+	ctx.JSON(http.StatusOK, findPost)
+}
 
 // Delete
 type DeletePostRequest struct {

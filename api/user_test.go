@@ -25,7 +25,7 @@ type UserRsp struct {
 	User_Information db.User
 }
 
-func createTestUser(t *testing.T, userData CreateUserRequest) UserRsp {
+func RandomCreateUserAPI(t *testing.T, userData CreateUserRequest) UserRsp {
 	var data db.CreateUserParams
 	server := newTestServer(t)
 	require.NotEmpty(t, server)
@@ -127,7 +127,7 @@ func TestCreateUserAPI(t *testing.T) {
 }
 
 func TestDeleteUserAPI(t *testing.T) {
-	userDelData := createTestUser(t, CreateUserRequest{})
+	userDelData := RandomCreateUserAPI(t, CreateUserRequest{})
 	token := "Bearer " + userDelData.Access_Token
 	testCases := []struct {
 		name          string
@@ -166,7 +166,7 @@ func TestDeleteUserAPI(t *testing.T) {
 }
 
 func TestResetPasswordAPI(t *testing.T) {
-	userRPData := createTestUser(t, CreateUserRequest{})
+	userRPData := RandomCreateUserAPI(t, CreateUserRequest{})
 	token := "Bearer " + userRPData.Access_Token
 	testCases := []struct {
 		name          string
@@ -212,7 +212,7 @@ func TestResetPasswordAPI(t *testing.T) {
 }
 
 func TestUpdateDiseaseConditionAPI(t *testing.T) {
-	userData := createTestUser(t, CreateUserRequest{})
+	userData := RandomCreateUserAPI(t, CreateUserRequest{})
 	token := "Bearer " + userData.Access_Token
 	testCases := []struct {
 		name          string
@@ -261,7 +261,7 @@ func TestUpdateDiseaseConditionAPI(t *testing.T) {
 func TestUpdateEmailAPI(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(0)
-	userData := createTestUser(t, CreateUserRequest{})
+	userData := RandomCreateUserAPI(t, CreateUserRequest{})
 	token := "Bearer " + userData.Access_Token
 	testCases := []struct {
 		name          string
@@ -306,7 +306,7 @@ func TestUpdateEmailAPI(t *testing.T) {
 }
 
 func TestUpdateIsPrivacyAPI(t *testing.T) {
-	userData := createTestUser(t, CreateUserRequest{})
+	userData := RandomCreateUserAPI(t, CreateUserRequest{})
 	token := "Bearer " + userData.Access_Token
 	testCases := []struct {
 		name          string
@@ -351,7 +351,7 @@ func TestUpdateIsPrivacyAPI(t *testing.T) {
 }
 
 func TestUpdateNameAPI(t *testing.T) {
-	userData := createTestUser(t, CreateUserRequest{})
+	userData := RandomCreateUserAPI(t, CreateUserRequest{})
 	token := "Bearer " + userData.Access_Token
 	testCases := []struct {
 		name          string
@@ -396,7 +396,7 @@ func TestUpdateNameAPI(t *testing.T) {
 }
 
 func TestLoginUser(t *testing.T) {
-	userData := createTestUser(t, CreateUserRequest{})
+	userData := RandomCreateUserAPI(t, CreateUserRequest{})
 	myAccount := LoginRequest{
 		Email:    userData.User_Information.Email,
 		Password: "123qwecc",

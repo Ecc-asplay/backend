@@ -19,7 +19,7 @@ import (
 
 func RandomCreateBlockUser(t *testing.T, user1 UserRsp) db.Blockuser {
 	token := "Bearer " + user1.Access_Token
-	BlockUserAccount := createTestUser(t, CreateUserRequest{
+	BlockUserAccount := RandomCreateUserAPI(t, CreateUserRequest{
 		Username: gofakeit.Name(),
 		Email:    gofakeit.Email(),
 		Birth: pgtype.Date{
@@ -52,7 +52,7 @@ func RandomCreateBlockUser(t *testing.T, user1 UserRsp) db.Blockuser {
 }
 
 func TestCreateBlockUser(t *testing.T) {
-	user1 := createTestUser(t, CreateUserRequest{
+	user1 := RandomCreateUserAPI(t, CreateUserRequest{
 		Username: gofakeit.Name(),
 		Email:    gofakeit.Email(),
 		Birth: pgtype.Date{
@@ -63,7 +63,7 @@ func TestCreateBlockUser(t *testing.T) {
 		Password: util.RandomString(20),
 	})
 	token := "Bearer " + user1.Access_Token
-	BlockUserAccount := createTestUser(t, CreateUserRequest{
+	BlockUserAccount := RandomCreateUserAPI(t, CreateUserRequest{
 		Username: gofakeit.Name(),
 		Email:    gofakeit.Email(),
 		Birth: pgtype.Date{
@@ -133,7 +133,7 @@ func TestCreateBlockUser(t *testing.T) {
 }
 
 func TestUnBlockUserAPI(t *testing.T) {
-	user := createTestUser(t, CreateUserRequest{
+	user := RandomCreateUserAPI(t, CreateUserRequest{
 		Username: gofakeit.Name(),
 		Email:    gofakeit.Email(),
 		Birth: pgtype.Date{
@@ -201,7 +201,7 @@ func TestUnBlockUserAPI(t *testing.T) {
 }
 
 func TestGetBlockUserByUserAPI(t *testing.T) {
-	user := createTestUser(t, CreateUserRequest{
+	user := RandomCreateUserAPI(t, CreateUserRequest{
 		Username: gofakeit.Name(),
 		Email:    gofakeit.Email(),
 		Birth: pgtype.Date{

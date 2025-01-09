@@ -22,7 +22,6 @@ func (s *Server) SendVerificationEmail(ctx *gin.Context) {
 	}
 
 	mailConfig := util.LoadMailConfig(s.config)
-
 	// 認証コードを生成
 	verificationCode := util.GenerateVerificationCode()
 
@@ -62,7 +61,7 @@ func (s *Server) SendVerificationEmail(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"message": "認証メールが送信されました"})
+	ctx.JSON(http.StatusOK, gin.H{"message": "認証メールが送信されました", "email": req.Email})
 }
 
 type VerifyCodeReq struct {

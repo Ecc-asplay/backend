@@ -18,7 +18,7 @@ import (
 )
 
 func RandomCreateTagAPI(t *testing.T) db.Tag {
-	user := createTestUser(t, CreateUserRequest{
+	user := RandomCreateUserAPI(t, CreateUserRequest{
 		Username: gofakeit.Name(),
 		Email:    gofakeit.Email(),
 		Birth: pgtype.Date{
@@ -55,7 +55,7 @@ func RandomCreateTagAPI(t *testing.T) db.Tag {
 }
 
 func TestCreateTagAPI(t *testing.T) {
-	user := createTestUser(t, CreateUserRequest{
+	user := RandomCreateUserAPI(t, CreateUserRequest{
 		Username: gofakeit.Name(),
 		Email:    gofakeit.Email(),
 		Birth: pgtype.Date{
