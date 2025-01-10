@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -21,9 +22,8 @@ func (s *Server) SendVerificationEmail(ctx *gin.Context) {
 		return
 	}
 
-	mailConfig := util.LoadMailConfig(s.config)
 	// 認証コードを生成
-	verificationCode := util.GenerateVerificationCode()
+	verificationCode := fmt.Sprintf("%06d", util.RandomInt(900000)+100000)
 
 	// 認証コードを保存（有効期限5分）
 	err := s.redis.Set(req.Email, verificationCode, 5*time.Minute).Err()
@@ -55,7 +55,7 @@ func (s *Server) SendVerificationEmail(ctx *gin.Context) {
 	</html>`
 
 	// メール送信
-	err = util.SendMail(mailConfig, []string{req.Email}, subject, body)
+	err = util.SendMail(s.config, []string{req.Email}, subject, body)
 	if err != nil {
 		handleDBError(ctx, err, "メール送信に失敗しました")
 		return
