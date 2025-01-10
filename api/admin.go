@@ -27,7 +27,7 @@ func (s *Server) LoginAdmin(ctx *gin.Context) {
 
 	isValid, err := util.CheckPassword(req.Password, adminData.Hashpassword)
 	if err != nil {
-		handleDBError(ctx, err, "Admin ログイン：パスワード認証を失��しました")
+		handleDBError(ctx, err, "Admin ログイン：パスワード認証を失敗しました")
 		return
 	}
 	if !isValid {
