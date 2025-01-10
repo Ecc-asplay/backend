@@ -119,7 +119,6 @@ func (s *Server) GetAllPost(ctx *gin.Context) {
 
 // Search
 func (s *Server) SearchPost(ctx *gin.Context) {
-
 	var req string
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "投稿検索：無効な入力データです")
