@@ -110,7 +110,7 @@ func (server *Server) GinRequest(config util.Config) {
 	authRoutes.DELETE("/comment/delete/:comment_id", server.DeleteComments)
 
 	// Notification
-	authRoutes.POST("/notification/create", server.CreateNotification)
+	// authRoutes.POST("/notification/create", server.CreateNotification)
 	authRoutes.GET("/notification/get", server.GetNotificationsByUser)
 	authRoutes.PUT("/notification/read", server.MarkNotificationsAsRead)
 
@@ -126,7 +126,7 @@ func (server *Server) GinRequest(config util.Config) {
 	authManage.DELETE("/del", server.DeleteAdminUser)
 
 	// Searchrecord
-	authManage.POST("/searchrecord/getlist", server.GetSearchedRecordList)
+	authManage.GET("/searchrecord/getlist", server.GetSearchedRecordList)
 
 	server.router = r
 }
