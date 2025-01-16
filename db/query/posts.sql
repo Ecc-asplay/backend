@@ -6,7 +6,6 @@ INSERT INTO POSTS (
     TITLE,
     FEEL,
     CONTENT,
-    REACTION,
     IS_SENSITIVE,
     STATUS
 ) VALUES (
@@ -17,8 +16,7 @@ INSERT INTO POSTS (
     $5,
     $6,
     $7,
-    $8,
-    $9
+    $8
 ) RETURNING *;
 
 -- name: GetUserAllPosts :many
@@ -65,14 +63,14 @@ SET
     TITLE = COALESCE($4, TITLE),
     FEEL = COALESCE($5, FEEL),
     CONTENT = COALESCE($6, CONTENT),
-    REACTION = COALESCE($7, REACTION),
-    IS_SENSITIVE = COALESCE($8, IS_SENSITIVE),
-    status = COALESCE($9, status),
+    IS_SENSITIVE = COALESCE($7, IS_SENSITIVE),
+    status = COALESCE($8, status),
     UPDATED_AT = NOW()
 WHERE
     USER_ID = $1
     AND POST_ID = $2
 RETURNING *;
+
 
 -- name: DeletePost :exec
 DELETE FROM POSTS

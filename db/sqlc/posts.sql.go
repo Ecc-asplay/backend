@@ -19,7 +19,6 @@ INSERT INTO POSTS (
     TITLE,
     FEEL,
     CONTENT,
-    REACTION,
     IS_SENSITIVE,
     STATUS
 ) VALUES (
@@ -30,9 +29,8 @@ INSERT INTO POSTS (
     $5,
     $6,
     $7,
-    $8,
-    $9
-) RETURNING user_id, post_id, show_id, title, feel, content, reaction, is_sensitive, status, created_at, updated_at
+    $8
+) RETURNING user_id, post_id, show_id, title, feel, content, is_sensitive, status, created_at, updated_at
 `
 
 type CreatePostParams struct {
@@ -42,7 +40,6 @@ type CreatePostParams struct {
 	Title       string    `json:"title"`
 	Feel        string    `json:"feel"`
 	Content     []byte    `json:"content"`
-	Reaction    int32     `json:"reaction"`
 	IsSensitive bool      `json:"is_sensitive"`
 	Status      string    `json:"status"`
 }
@@ -55,7 +52,6 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, e
 		arg.Title,
 		arg.Feel,
 		arg.Content,
-		arg.Reaction,
 		arg.IsSensitive,
 		arg.Status,
 	)
@@ -67,7 +63,6 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (Post, e
 		&i.Title,
 		&i.Feel,
 		&i.Content,
-		&i.Reaction,
 		&i.IsSensitive,
 		&i.Status,
 		&i.CreatedAt,
@@ -80,7 +75,7 @@ const deletePost = `-- name: DeletePost :exec
 DELETE FROM POSTS
 WHERE
     USER_ID = $1
-    AND POST_ID = $2 RETURNING user_id, post_id, show_id, title, feel, content, reaction, is_sensitive, status, created_at, updated_at
+    AND POST_ID = $2 RETURNING user_id, post_id, show_id, title, feel, content, is_sensitive, status, created_at, updated_at
 `
 
 type DeletePostParams struct {
@@ -95,7 +90,7 @@ func (q *Queries) DeletePost(ctx context.Context, arg DeletePostParams) error {
 
 const getPostsList = `-- name: GetPostsList :many
 SELECT
-    user_id, post_id, show_id, title, feel, content, reaction, is_sensitive, status, created_at, updated_at
+    user_id, post_id, show_id, title, feel, content, is_sensitive, status, created_at, updated_at
 FROM
     POSTS
 ORDER BY
@@ -118,7 +113,6 @@ func (q *Queries) GetPostsList(ctx context.Context) ([]Post, error) {
 			&i.Title,
 			&i.Feel,
 			&i.Content,
-			&i.Reaction,
 			&i.IsSensitive,
 			&i.Status,
 			&i.CreatedAt,
@@ -136,7 +130,7 @@ func (q *Queries) GetPostsList(ctx context.Context) ([]Post, error) {
 
 const getUserAllPosts = `-- name: GetUserAllPosts :many
 SELECT
-    user_id, post_id, show_id, title, feel, content, reaction, is_sensitive, status, created_at, updated_at
+    user_id, post_id, show_id, title, feel, content, is_sensitive, status, created_at, updated_at
 FROM
     POSTS
 WHERE
@@ -159,7 +153,6 @@ func (q *Queries) GetUserAllPosts(ctx context.Context, userID uuid.UUID) ([]Post
 			&i.Title,
 			&i.Feel,
 			&i.Content,
-			&i.Reaction,
 			&i.IsSensitive,
 			&i.Status,
 			&i.CreatedAt,
@@ -177,7 +170,7 @@ func (q *Queries) GetUserAllPosts(ctx context.Context, userID uuid.UUID) ([]Post
 
 const searchPost = `-- name: SearchPost :many
 SELECT
-    user_id, post_id, show_id, title, feel, content, reaction, is_sensitive, status, created_at, updated_at
+    user_id, post_id, show_id, title, feel, content, is_sensitive, status, created_at, updated_at
 FROM
     POSTS
 WHERE
@@ -213,7 +206,6 @@ func (q *Queries) SearchPost(ctx context.Context, dollar_1 string) ([]Post, erro
 			&i.Title,
 			&i.Feel,
 			&i.Content,
-			&i.Reaction,
 			&i.IsSensitive,
 			&i.Status,
 			&i.CreatedAt,
@@ -236,14 +228,13 @@ SET
     TITLE = COALESCE($4, TITLE),
     FEEL = COALESCE($5, FEEL),
     CONTENT = COALESCE($6, CONTENT),
-    REACTION = COALESCE($7, REACTION),
-    IS_SENSITIVE = COALESCE($8, IS_SENSITIVE),
-    status = COALESCE($9, status),
+    IS_SENSITIVE = COALESCE($7, IS_SENSITIVE),
+    status = COALESCE($8, status),
     UPDATED_AT = NOW()
 WHERE
     USER_ID = $1
     AND POST_ID = $2
-RETURNING user_id, post_id, show_id, title, feel, content, reaction, is_sensitive, status, created_at, updated_at
+RETURNING user_id, post_id, show_id, title, feel, content, is_sensitive, status, created_at, updated_at
 `
 
 type UpdatePostsParams struct {
@@ -253,7 +244,6 @@ type UpdatePostsParams struct {
 	Title       string    `json:"title"`
 	Feel        string    `json:"feel"`
 	Content     []byte    `json:"content"`
-	Reaction    int32     `json:"reaction"`
 	IsSensitive bool      `json:"is_sensitive"`
 	Status      string    `json:"status"`
 }
@@ -266,7 +256,6 @@ func (q *Queries) UpdatePosts(ctx context.Context, arg UpdatePostsParams) (Post,
 		arg.Title,
 		arg.Feel,
 		arg.Content,
-		arg.Reaction,
 		arg.IsSensitive,
 		arg.Status,
 	)
@@ -278,7 +267,6 @@ func (q *Queries) UpdatePosts(ctx context.Context, arg UpdatePostsParams) (Post,
 		&i.Title,
 		&i.Feel,
 		&i.Content,
-		&i.Reaction,
 		&i.IsSensitive,
 		&i.Status,
 		&i.CreatedAt,

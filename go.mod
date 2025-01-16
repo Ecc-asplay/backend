@@ -21,6 +21,7 @@ require (
 	github.com/spf13/viper v1.19.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/exp v0.0.0-20241215155358-4a5509556b9e
+	golang.org/x/time v0.5.0
 )
 
 require (

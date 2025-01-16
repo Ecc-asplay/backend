@@ -140,6 +140,7 @@ var (
 	ErrPermissionDenied = errors.New("権限が拒否されました")
 	ErrConflict         = errors.New("リソースの競合です")
 	ErrUnauthorized     = errors.New("認証に失敗しました")
+	TooManyRequests     = errors.New("リクエストが多すぎます")
 )
 
 func errorResponse(err error, msg string) gin.H {
@@ -162,6 +163,9 @@ func handleDBError(ctx *gin.Context, err error, msg string) {
 
 	case errors.Is(err, ErrUnauthorized):
 		ctx.JSON(http.StatusUnauthorized, errorResponse(err, msg))
+
+	case errors.Is(err, TooManyRequests):
+		ctx.JSON(http.StatusTooManyRequests, errorResponse(err, msg))
 
 	default:
 		ctx.JSON(http.StatusInternalServerError, errorResponse(err, msg))
