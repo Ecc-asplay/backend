@@ -15,9 +15,11 @@ type Querier interface {
 	CreateBlock(ctx context.Context, arg CreateBlockParams) (Blockuser, error)
 	CreateBookmarks(ctx context.Context, arg CreateBookmarksParams) (Bookmark, error)
 	CreateComments(ctx context.Context, arg CreateCommentsParams) (Comment, error)
+	CreateCommentsReaction(ctx context.Context, arg CreateCommentsReactionParams) (CommentsReaction, error)
 	CreateImage(ctx context.Context, arg CreateImageParams) (Image, error)
 	CreateNotification(ctx context.Context, arg CreateNotificationParams) (Notification, error)
 	CreatePost(ctx context.Context, arg CreatePostParams) (Post, error)
+	CreatePostsReaction(ctx context.Context, arg CreatePostsReactionParams) (PostsReaction, error)
 	CreateSearchedRecord(ctx context.Context, arg CreateSearchedRecordParams) (Searchrecord, error)
 	CreateTag(ctx context.Context, arg CreateTagParams) (Tag, error)
 	CreateToken(ctx context.Context, arg CreateTokenParams) (Token, error)
@@ -25,8 +27,10 @@ type Querier interface {
 	DeleteAdminUser(ctx context.Context, email string) error
 	DeleteBookmarks(ctx context.Context, arg DeleteBookmarksParams) error
 	DeleteComments(ctx context.Context, commentID uuid.UUID) error
+	DeleteCommentsReaction(ctx context.Context, arg DeleteCommentsReactionParams) error
 	DeleteImage(ctx context.Context, postID uuid.UUID) error
 	DeletePost(ctx context.Context, arg DeletePostParams) error
+	DeletePostsReaction(ctx context.Context, arg DeletePostsReactionParams) error
 	DeleteUser(ctx context.Context, arg DeleteUserParams) error
 	FindTag(ctx context.Context, dollar_1 string) ([]string, error)
 	GetAdminLogin(ctx context.Context, email string) (GetAdminLoginRow, error)
@@ -35,10 +39,12 @@ type Querier interface {
 	GetAllComments(ctx context.Context, postUser uuid.UUID) ([]Comment, error)
 	GetBlockUserlist(ctx context.Context, userID uuid.UUID) ([]Blockuser, error)
 	GetCommentsList(ctx context.Context, postID uuid.UUID) ([]Comment, error)
+	GetCommentsReaction(ctx context.Context, commentID uuid.UUID) ([]CommentsReaction, error)
 	GetImage(ctx context.Context, postID uuid.UUID) ([]Image, error)
 	GetLogin(ctx context.Context, email string) (GetLoginRow, error)
 	GetNotification(ctx context.Context, userID uuid.UUID) ([]Notification, error)
 	GetPostsList(ctx context.Context) ([]Post, error)
+	GetPostsReaction(ctx context.Context, postID uuid.UUID) ([]PostsReaction, error)
 	GetSearchedRecordList(ctx context.Context) ([]Searchrecord, error)
 	GetSession(ctx context.Context, id uuid.UUID) (Token, error)
 	GetUserAllPosts(ctx context.Context, userID uuid.UUID) ([]Post, error)
@@ -47,6 +53,10 @@ type Querier interface {
 	SearchPost(ctx context.Context, dollar_1 string) ([]Post, error)
 	UnBlockUser(ctx context.Context, arg UnBlockUserParams) (Blockuser, error)
 	UpdateComments(ctx context.Context, arg UpdateCommentsParams) (Comment, error)
+	UpdateCommentsReactionHeartPlusOne(ctx context.Context, arg UpdateCommentsReactionHeartPlusOneParams) (CommentsReaction, error)
+	UpdateCommentsReactionHelpfulPlusOne(ctx context.Context, arg UpdateCommentsReactionHelpfulPlusOneParams) (CommentsReaction, error)
+	UpdateCommentsReactionThanksPlusOne(ctx context.Context, arg UpdateCommentsReactionThanksPlusOneParams) (CommentsReaction, error)
+	UpdateCommentsReactionUsefulPlusOne(ctx context.Context, arg UpdateCommentsReactionUsefulPlusOneParams) (CommentsReaction, error)
 	UpdateDiseaseAndCondition(ctx context.Context, arg UpdateDiseaseAndConditionParams) error
 	UpdateEmail(ctx context.Context, arg UpdateEmailParams) error
 	UpdateImage(ctx context.Context, arg UpdateImageParams) (Image, error)
@@ -54,6 +64,10 @@ type Querier interface {
 	UpdateName(ctx context.Context, arg UpdateNameParams) (User, error)
 	UpdateNotification(ctx context.Context, userID uuid.UUID) ([]Notification, error)
 	UpdatePosts(ctx context.Context, arg UpdatePostsParams) (Post, error)
+	UpdatePostsReactionHeartPlusOne(ctx context.Context, arg UpdatePostsReactionHeartPlusOneParams) (PostsReaction, error)
+	UpdatePostsReactionHelpfulPlusOne(ctx context.Context, arg UpdatePostsReactionHelpfulPlusOneParams) (PostsReaction, error)
+	UpdatePostsReactionThanksPlusOne(ctx context.Context, arg UpdatePostsReactionThanksPlusOneParams) (PostsReaction, error)
+	UpdatePostsReactionUsefulPlusOne(ctx context.Context, arg UpdatePostsReactionUsefulPlusOneParams) (PostsReaction, error)
 }
 
 var _ Querier = (*Queries)(nil)

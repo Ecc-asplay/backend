@@ -21,7 +21,6 @@ CREATE TABLE "posts" (
     "title" VARCHAR NOT NULL,
     "feel" VARCHAR NOT NULL,
     "content" JSONB NOT NULL,
-    "reaction" INT NOT NULL,
     "is_sensitive" BOOLEAN NOT NULL DEFAULT FALSE,
     "status" VARCHAR NOT NULL,
     "created_at" TIMESTAMP(0) NOT NULL DEFAULT NOW(),
@@ -35,7 +34,6 @@ CREATE TABLE "comments" (
     "status" VARCHAR NOT NULL,
     "is_public" BOOLEAN NOT NULL,
     "comments" VARCHAR NOT NULL,
-    "reaction" INT NOT NULL,
     "is_censored" BOOLEAN NOT NULL DEFAULT FALSE,
     "created_at" TIMESTAMP(0) NOT NULL DEFAULT NOW(),
     "updated_at" TIMESTAMP(0)
