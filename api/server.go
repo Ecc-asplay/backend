@@ -67,10 +67,15 @@ func (server *Server) GinRequest(config util.Config) {
 	r.POST("/users", server.CreateUser)
 	r.POST("/login", server.LoginUser)
 	r.POST("/management", server.LoginAdmin)
-	r.GET("/post/getall", server.GetAllPost)
 	r.POST("/post/search", server.SearchPost)
+	r.GET("/post/getall", server.GetAllPost)
+	r.GET("/comment/getpublic", server.GetAllPublicComments)
+
 	r.GET("/post/reaction/all", server.GetAllPostsReaction)
-	r.GET("/post/reaction/:post_id", server.GetPostReactions)
+	// r.GET("/post/reaction/:post_id", server.GetPostReactions)
+
+	r.GET("/comment/reaction/allpublic", server.GetAllCommentsReaction)
+	// r.GET("/comment/reaction/:comment", server.GetCommentReactions)
 
 	//　認証メール
 	r.POST("/mail/send", server.SendVerificationEmail)

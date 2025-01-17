@@ -124,6 +124,46 @@ func (q *Queries) GetAllComments(ctx context.Context, postUser uuid.UUID) ([]Com
 	return items, nil
 }
 
+const getAllPublicComments = `-- name: GetAllPublicComments :many
+SELECT
+    comment_id, user_id, post_id, status, is_public, comments, is_censored, created_at, updated_at, post_user
+FROM
+    COMMENTS
+WHERE
+    IS_PUBLIC = TRUE
+`
+
+func (q *Queries) GetAllPublicComments(ctx context.Context) ([]Comment, error) {
+	rows, err := q.db.Query(ctx, getAllPublicComments)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Comment{}
+	for rows.Next() {
+		var i Comment
+		if err := rows.Scan(
+			&i.CommentID,
+			&i.UserID,
+			&i.PostID,
+			&i.Status,
+			&i.IsPublic,
+			&i.Comments,
+			&i.IsCensored,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.PostUser,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getCommentsList = `-- name: GetCommentsList :many
 SELECT
     comment_id, user_id, post_id, status, is_public, comments, is_censored, created_at, updated_at, post_user

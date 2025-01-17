@@ -1,11 +1,15 @@
 package api
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 
 	db "github.com/Ecc-asplay/backend/db/sqlc"
 	"github.com/Ecc-asplay/backend/token"
@@ -61,7 +65,7 @@ func (s *Server) GetPostCommentsList(ctx *gin.Context) {
 	postIDStr := ctx.Param("post_id")
 	postID, err := uuid.Parse(postIDStr)
 	if err != nil {
-		handleDBError(ctx, err, "コメントリスト取得：投稿ID取得に失敗しました")
+		handleDBError(ctx, err, "コメントリスト取得：コメントID取得に失敗しました")
 		return
 	}
 
@@ -140,4 +144,44 @@ func (s *Server) GetAllComments(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, allComment)
+}
+
+func (s *Server) GetAllPublicComments(ctx *gin.Context) {
+	allComments, err := s.redis.Get("allComments").Result()
+	if err != nil && err != redis.Nil {
+		handleDBError(ctx, err, "Redisコメント取得：データ締め切りました")
+		return
+	}
+
+	if allComments != "" {
+		var comments []db.Comment
+		err := json.Unmarshal([]byte(allComments), &comments)
+		if err != nil {
+			handleDBError(ctx, err, "Redisコメント取得：データ変更を失敗しました")
+			return
+		}
+
+		ctx.JSON(http.StatusOK, comments)
+	} else {
+		comment, err := s.store.GetAllPublicComments(ctx)
+		if err != nil {
+			handleDBError(ctx, err, "Psqlコメント取得を失敗しました")
+			return
+		}
+
+		commentJSON, err := json.Marshal(comment)
+		if err != nil {
+			handleDBError(ctx, err, "Psqlコメント取得：JSON変更を失敗しました")
+			return
+		}
+
+		err = s.redis.Set("allComments", commentJSON, 5*time.Minute).Err()
+		if err != nil {
+			handleDBError(ctx, err, "Redisコメント保存を失敗しました")
+			return
+		}
+
+		log.Info().Msg("すべてのコメントがRedisに追加されました")
+		ctx.JSON(http.StatusOK, comment)
+	}
 }

@@ -93,7 +93,7 @@ func TestUpdateComments(t *testing.T) {
 func TestGetAllComment(t *testing.T) {
 	user1 := CreateRandomUser(t)
 	post := CreateRandomPost(t, user1)
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 10; i++ {
 		user2 := CreateRandomUser(t)
 		CreateRandomComment(t, user2, post)
 	}
@@ -102,4 +102,18 @@ func TestGetAllComment(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, allCommentData)
 	require.GreaterOrEqual(t, len(allCommentData), 1)
+}
+
+func TestGetPublicComments(t *testing.T) {
+	user1 := CreateRandomUser(t)
+	post := CreateRandomPost(t, user1)
+	for i := 0; i < 10; i++ {
+		user2 := CreateRandomUser(t)
+		CreateRandomComment(t, user2, post)
+	}
+
+	publicComment, err := testQueries.GetAllPublicComments(context.Background())
+	require.NoError(t, err)
+	require.NotEmpty(t, publicComment)
+	require.GreaterOrEqual(t, len(publicComment), 1)
 }

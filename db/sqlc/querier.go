@@ -38,6 +38,7 @@ type Querier interface {
 	GetAllBookmarks(ctx context.Context, userID uuid.UUID) ([]Bookmark, error)
 	GetAllComments(ctx context.Context, postUser uuid.UUID) ([]Comment, error)
 	GetAllPostsReaction(ctx context.Context) ([]PostsReaction, error)
+	GetAllPublicComments(ctx context.Context) ([]Comment, error)
 	GetBlockUserlist(ctx context.Context, userID uuid.UUID) ([]Blockuser, error)
 	GetCommentsHeartOfTrue(ctx context.Context, commentID uuid.UUID) (int64, error)
 	GetCommentsHelpfulOfTrue(ctx context.Context, commentID uuid.UUID) (int64, error)

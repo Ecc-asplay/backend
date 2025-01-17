@@ -39,6 +39,14 @@ WHERE
 ORDER BY
     COMMENT_ID DESC;
 
+-- name: GetAllPublicComments :many
+SELECT
+    *
+FROM
+    COMMENTS
+WHERE
+    IS_PUBLIC = TRUE;
+
 -- name: UpdateComments :one
 UPDATE COMMENTS
 SET
