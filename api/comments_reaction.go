@@ -210,13 +210,14 @@ func (s *Server) GetCommentReactions(ctx *gin.Context) {
 }
 
 func (s *Server) GetAllCommentsReaction(ctx *gin.Context) {
-	allCommenReaction, err := s.redis.Get("AllcommentsReacrion").Result()
+	allCommenReaction, err := s.redis.Get("allCommentsReacrion").Result()
 	if err != nil && err != redis.Nil {
 		handleDBError(ctx, err, "RedisコメントReaction取得：データ締め切りました")
 		return
 	}
+
 	if allCommenReaction != "" {
-		var commentsReaction []db.CommentsReaction
+		var commentsReaction []CommentReactionTotals
 		err := json.Unmarshal([]byte(allCommenReaction), &commentsReaction)
 		if err != nil {
 			handleDBError(ctx, err, "RedisコメントReaction取得：データ変更を失敗しました")
@@ -224,8 +225,8 @@ func (s *Server) GetAllCommentsReaction(ctx *gin.Context) {
 		}
 
 		ctx.JSON(http.StatusOK, commentsReaction)
-
 	} else {
+		// if Redis have not Reaction. but Redis have post data
 		allComment, err := s.redis.Get("allComments").Result()
 		if err != nil && err != redis.Nil {
 			handleDBError(ctx, err, "Redisコメント取得：データ締め切りました")
@@ -280,14 +281,13 @@ func (s *Server) GetAllCommentsReaction(ctx *gin.Context) {
 				return
 			}
 
-			err = s.redis.Set("AllcommentsReacrion", commentReactionJSON, 5*time.Minute).Err()
+			err = s.redis.Set("allCommentsReacrion", commentReactionJSON, 5*time.Minute).Err()
 			if err != nil {
 				handleDBError(ctx, err, "Redis コメント Reaction保存を失敗しました")
 				return
 			}
 
 			ctx.JSON(http.StatusOK, allCommentsReaction)
-
 		} else {
 			comment, err := s.store.GetAllPublicComments(ctx)
 			if err != nil {
@@ -296,7 +296,6 @@ func (s *Server) GetAllCommentsReaction(ctx *gin.Context) {
 			}
 
 			var allCommentsReaction []CommentReactionTotals
-
 			for _, comment := range comment {
 				thanks, err := s.store.GetCommentsThanksOfTrue(ctx, comment.CommentID)
 				if err != nil {
@@ -348,7 +347,7 @@ func (s *Server) GetAllCommentsReaction(ctx *gin.Context) {
 				return
 			}
 
-			err = s.redis.Set("AllcommentsReacrion", commentReactionJSON, 5*time.Minute).Err()
+			err = s.redis.Set("allCommentsReacrion", commentReactionJSON, 5*time.Minute).Err()
 			if err != nil {
 				handleDBError(ctx, err, "Redis コメント Reaction保存を失敗しました")
 				return
