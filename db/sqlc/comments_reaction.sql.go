@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createCommentsReaction = `-- name: CreateCommentsReaction :one
@@ -31,12 +30,12 @@ INSERT INTO COMMENTS_REACTION (
 `
 
 type CreateCommentsReactionParams struct {
-	UserID           uuid.UUID   `json:"user_id"`
-	CommentID        uuid.UUID   `json:"comment_id"`
-	CReactionThanks  pgtype.Bool `json:"c_reaction_thanks"`
-	CReactionHelpful pgtype.Bool `json:"c_reaction_helpful"`
-	CReactionUseful  pgtype.Bool `json:"c_reaction_useful"`
-	CReactionHeart   pgtype.Bool `json:"c_reaction_heart"`
+	UserID           uuid.UUID `json:"user_id"`
+	CommentID        uuid.UUID `json:"comment_id"`
+	CReactionThanks  bool      `json:"c_reaction_thanks"`
+	CReactionHelpful bool      `json:"c_reaction_helpful"`
+	CReactionUseful  bool      `json:"c_reaction_useful"`
+	CReactionHeart   bool      `json:"c_reaction_heart"`
 }
 
 func (q *Queries) CreateCommentsReaction(ctx context.Context, arg CreateCommentsReactionParams) (CommentsReaction, error) {
@@ -78,6 +77,32 @@ func (q *Queries) DeleteCommentsReaction(ctx context.Context, arg DeleteComments
 	return err
 }
 
+const getCommentsHeartOfTrue = `-- name: GetCommentsHeartOfTrue :one
+SELECT COUNT(*)
+FROM COMMENTS_REACTION
+WHERE C_REACTION_HEART = TRUE AND COMMENT_ID = $1
+`
+
+func (q *Queries) GetCommentsHeartOfTrue(ctx context.Context, commentID uuid.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, getCommentsHeartOfTrue, commentID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const getCommentsHelpfulOfTrue = `-- name: GetCommentsHelpfulOfTrue :one
+SELECT COUNT(*)
+FROM COMMENTS_REACTION
+WHERE C_REACTION_HELPFUL = TRUE AND COMMENT_ID = $1
+`
+
+func (q *Queries) GetCommentsHelpfulOfTrue(ctx context.Context, commentID uuid.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, getCommentsHelpfulOfTrue, commentID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const getCommentsReaction = `-- name: GetCommentsReaction :many
 SELECT user_id, comment_id, c_reaction_thanks, c_reaction_heart, c_reaction_helpful, c_reaction_useful, created_at FROM COMMENTS_REACTION 
 WHERE COMMENT_ID = $1
@@ -111,22 +136,48 @@ func (q *Queries) GetCommentsReaction(ctx context.Context, commentID uuid.UUID) 
 	return items, nil
 }
 
-const updateCommentsReactionHeartPlusOne = `-- name: UpdateCommentsReactionHeartPlusOne :one
+const getCommentsThanksOfTrue = `-- name: GetCommentsThanksOfTrue :one
+SELECT COUNT(*)
+FROM COMMENTS_REACTION
+WHERE C_REACTION_THANKS = TRUE AND COMMENT_ID = $1
+`
+
+func (q *Queries) GetCommentsThanksOfTrue(ctx context.Context, commentID uuid.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, getCommentsThanksOfTrue, commentID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const getCommentsUsefulOfTrue = `-- name: GetCommentsUsefulOfTrue :one
+SELECT COUNT(*)
+FROM COMMENTS_REACTION
+WHERE C_REACTION_USEFUL = TRUE AND COMMENT_ID = $1
+`
+
+func (q *Queries) GetCommentsUsefulOfTrue(ctx context.Context, commentID uuid.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, getCommentsUsefulOfTrue, commentID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const updateCommentsReactionHeart = `-- name: UpdateCommentsReactionHeart :one
 UPDATE COMMENTS_REACTION
 SET 
-    C_REACTION_HEART = TRUE
+    C_REACTION_HEART = NOT C_REACTION_HEART
 WHERE 
     USER_ID = $1 AND COMMENT_ID = $2
 RETURNING user_id, comment_id, c_reaction_thanks, c_reaction_heart, c_reaction_helpful, c_reaction_useful, created_at
 `
 
-type UpdateCommentsReactionHeartPlusOneParams struct {
+type UpdateCommentsReactionHeartParams struct {
 	UserID    uuid.UUID `json:"user_id"`
 	CommentID uuid.UUID `json:"comment_id"`
 }
 
-func (q *Queries) UpdateCommentsReactionHeartPlusOne(ctx context.Context, arg UpdateCommentsReactionHeartPlusOneParams) (CommentsReaction, error) {
-	row := q.db.QueryRow(ctx, updateCommentsReactionHeartPlusOne, arg.UserID, arg.CommentID)
+func (q *Queries) UpdateCommentsReactionHeart(ctx context.Context, arg UpdateCommentsReactionHeartParams) (CommentsReaction, error) {
+	row := q.db.QueryRow(ctx, updateCommentsReactionHeart, arg.UserID, arg.CommentID)
 	var i CommentsReaction
 	err := row.Scan(
 		&i.UserID,
@@ -140,22 +191,22 @@ func (q *Queries) UpdateCommentsReactionHeartPlusOne(ctx context.Context, arg Up
 	return i, err
 }
 
-const updateCommentsReactionHelpfulPlusOne = `-- name: UpdateCommentsReactionHelpfulPlusOne :one
+const updateCommentsReactionHelpful = `-- name: UpdateCommentsReactionHelpful :one
 UPDATE COMMENTS_REACTION
 SET 
-    C_REACTION_HELPFUL = TRUE
+    C_REACTION_HELPFUL = NOT C_REACTION_HELPFUL
 WHERE 
     USER_ID = $1 AND COMMENT_ID = $2
 RETURNING user_id, comment_id, c_reaction_thanks, c_reaction_heart, c_reaction_helpful, c_reaction_useful, created_at
 `
 
-type UpdateCommentsReactionHelpfulPlusOneParams struct {
+type UpdateCommentsReactionHelpfulParams struct {
 	UserID    uuid.UUID `json:"user_id"`
 	CommentID uuid.UUID `json:"comment_id"`
 }
 
-func (q *Queries) UpdateCommentsReactionHelpfulPlusOne(ctx context.Context, arg UpdateCommentsReactionHelpfulPlusOneParams) (CommentsReaction, error) {
-	row := q.db.QueryRow(ctx, updateCommentsReactionHelpfulPlusOne, arg.UserID, arg.CommentID)
+func (q *Queries) UpdateCommentsReactionHelpful(ctx context.Context, arg UpdateCommentsReactionHelpfulParams) (CommentsReaction, error) {
+	row := q.db.QueryRow(ctx, updateCommentsReactionHelpful, arg.UserID, arg.CommentID)
 	var i CommentsReaction
 	err := row.Scan(
 		&i.UserID,
@@ -169,22 +220,22 @@ func (q *Queries) UpdateCommentsReactionHelpfulPlusOne(ctx context.Context, arg 
 	return i, err
 }
 
-const updateCommentsReactionThanksPlusOne = `-- name: UpdateCommentsReactionThanksPlusOne :one
+const updateCommentsReactionThanks = `-- name: UpdateCommentsReactionThanks :one
 UPDATE COMMENTS_REACTION
 SET 
-    C_REACTION_THANKS = TRUE
+    C_REACTION_THANKS = NOT C_REACTION_THANKS
 WHERE 
     USER_ID = $1 AND COMMENT_ID = $2
 RETURNING user_id, comment_id, c_reaction_thanks, c_reaction_heart, c_reaction_helpful, c_reaction_useful, created_at
 `
 
-type UpdateCommentsReactionThanksPlusOneParams struct {
+type UpdateCommentsReactionThanksParams struct {
 	UserID    uuid.UUID `json:"user_id"`
 	CommentID uuid.UUID `json:"comment_id"`
 }
 
-func (q *Queries) UpdateCommentsReactionThanksPlusOne(ctx context.Context, arg UpdateCommentsReactionThanksPlusOneParams) (CommentsReaction, error) {
-	row := q.db.QueryRow(ctx, updateCommentsReactionThanksPlusOne, arg.UserID, arg.CommentID)
+func (q *Queries) UpdateCommentsReactionThanks(ctx context.Context, arg UpdateCommentsReactionThanksParams) (CommentsReaction, error) {
+	row := q.db.QueryRow(ctx, updateCommentsReactionThanks, arg.UserID, arg.CommentID)
 	var i CommentsReaction
 	err := row.Scan(
 		&i.UserID,
@@ -198,22 +249,22 @@ func (q *Queries) UpdateCommentsReactionThanksPlusOne(ctx context.Context, arg U
 	return i, err
 }
 
-const updateCommentsReactionUsefulPlusOne = `-- name: UpdateCommentsReactionUsefulPlusOne :one
+const updateCommentsReactionUseful = `-- name: UpdateCommentsReactionUseful :one
 UPDATE COMMENTS_REACTION
 SET 
-    C_REACTION_USEFUL = TRUE
+    C_REACTION_USEFUL = NOT C_REACTION_USEFUL
 WHERE 
     USER_ID = $1 AND COMMENT_ID = $2
 RETURNING user_id, comment_id, c_reaction_thanks, c_reaction_heart, c_reaction_helpful, c_reaction_useful, created_at
 `
 
-type UpdateCommentsReactionUsefulPlusOneParams struct {
+type UpdateCommentsReactionUsefulParams struct {
 	UserID    uuid.UUID `json:"user_id"`
 	CommentID uuid.UUID `json:"comment_id"`
 }
 
-func (q *Queries) UpdateCommentsReactionUsefulPlusOne(ctx context.Context, arg UpdateCommentsReactionUsefulPlusOneParams) (CommentsReaction, error) {
-	row := q.db.QueryRow(ctx, updateCommentsReactionUsefulPlusOne, arg.UserID, arg.CommentID)
+func (q *Queries) UpdateCommentsReactionUseful(ctx context.Context, arg UpdateCommentsReactionUsefulParams) (CommentsReaction, error) {
+	row := q.db.QueryRow(ctx, updateCommentsReactionUseful, arg.UserID, arg.CommentID)
 	var i CommentsReaction
 	err := row.Scan(
 		&i.UserID,

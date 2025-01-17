@@ -20,7 +20,6 @@ type createCommentRequest struct {
 	PostID     uuid.UUID `json:"post_id" binding:"required"`
 	Comments   string    `json:"comments" binding:"required"`
 	IsPublic   bool      `json:"is_public"`
-	Reaction   int32     `json:"reaction"`
 	IsCensored bool      `json:"is_censored"`
 }
 
@@ -40,7 +39,6 @@ func (s *Server) CreateComment(ctx *gin.Context) {
 		Status:     "active",
 		IsPublic:   false,
 		Comments:   req.Comments,
-		Reaction:   req.Reaction,
 		IsCensored: req.IsCensored,
 	}
 
@@ -80,7 +78,6 @@ type UpdateCommentRequest struct {
 	CommentID uuid.UUID `json:"comment_id" binding:"required"`
 	Comments  string    `json:"comments" binding:"required"`
 	IsPublic  bool      `json:"is_public"`
-	Reaction  int32     `json:"reaction"`
 }
 
 func (s *Server) UpdateComments(ctx *gin.Context) {
@@ -95,7 +92,6 @@ func (s *Server) UpdateComments(ctx *gin.Context) {
 		Status:    "active",
 		IsPublic:  req.IsPublic,
 		Comments:  req.Comments,
-		Reaction:  req.Reaction,
 	}
 
 	comment, err := s.store.UpdateComments(ctx, arg)

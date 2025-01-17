@@ -34,29 +34,25 @@ type Bookmark struct {
 }
 
 type Comment struct {
-	CommentID        uuid.UUID        `json:"comment_id"`
-	UserID           uuid.UUID        `json:"user_id"`
-	PostID           uuid.UUID        `json:"post_id"`
-	Status           string           `json:"status"`
-	IsPublic         bool             `json:"is_public"`
-	Comments         string           `json:"comments"`
-	CReactionThanks  int32            `json:"c_reaction_thanks"`
-	CReactionHeart   int32            `json:"c_reaction_heart"`
-	CReactionHelpful int32            `json:"c_reaction_helpful"`
-	CReactionUseful  int32            `json:"c_reaction_useful"`
-	IsCensored       bool             `json:"is_censored"`
-	CreatedAt        pgtype.Timestamp `json:"created_at"`
-	UpdatedAt        pgtype.Timestamp `json:"updated_at"`
-	PostUser         uuid.UUID        `json:"post_user"`
+	CommentID  uuid.UUID        `json:"comment_id"`
+	UserID     uuid.UUID        `json:"user_id"`
+	PostID     uuid.UUID        `json:"post_id"`
+	Status     string           `json:"status"`
+	IsPublic   bool             `json:"is_public"`
+	Comments   string           `json:"comments"`
+	IsCensored bool             `json:"is_censored"`
+	CreatedAt  pgtype.Timestamp `json:"created_at"`
+	UpdatedAt  pgtype.Timestamp `json:"updated_at"`
+	PostUser   uuid.UUID        `json:"post_user"`
 }
 
 type CommentsReaction struct {
 	UserID           uuid.UUID        `json:"user_id"`
 	CommentID        uuid.UUID        `json:"comment_id"`
-	CReactionThanks  pgtype.Bool      `json:"c_reaction_thanks"`
-	CReactionHeart   pgtype.Bool      `json:"c_reaction_heart"`
-	CReactionHelpful pgtype.Bool      `json:"c_reaction_helpful"`
-	CReactionUseful  pgtype.Bool      `json:"c_reaction_useful"`
+	CReactionThanks  bool             `json:"c_reaction_thanks"`
+	CReactionHeart   bool             `json:"c_reaction_heart"`
+	CReactionHelpful bool             `json:"c_reaction_helpful"`
+	CReactionUseful  bool             `json:"c_reaction_useful"`
 	CreatedAt        pgtype.Timestamp `json:"created_at"`
 }
 
@@ -96,10 +92,10 @@ type Post struct {
 type PostsReaction struct {
 	UserID           uuid.UUID        `json:"user_id"`
 	PostID           uuid.UUID        `json:"post_id"`
-	PReactionThanks  pgtype.Bool      `json:"p_reaction_thanks"`
-	PReactionHeart   pgtype.Bool      `json:"p_reaction_heart"`
-	PReactionHelpful pgtype.Bool      `json:"p_reaction_helpful"`
-	PReactionUseful  pgtype.Bool      `json:"p_reaction_useful"`
+	PReactionThanks  bool             `json:"p_reaction_thanks"`
+	PReactionHeart   bool             `json:"p_reaction_heart"`
+	PReactionHelpful bool             `json:"p_reaction_helpful"`
+	PReactionUseful  bool             `json:"p_reaction_useful"`
 	CreatedAt        pgtype.Timestamp `json:"created_at"`
 }
 

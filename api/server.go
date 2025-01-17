@@ -69,6 +69,8 @@ func (server *Server) GinRequest(config util.Config) {
 	r.POST("/management", server.LoginAdmin)
 	r.GET("/post/getall", server.GetAllPost)
 	r.POST("/post/search", server.SearchPost)
+	r.GET("/post/reaction/all", server.GetAllPostsReaction)
+	r.GET("/post/reaction/:post_id", server.GetPostReactions)
 
 	//　認証メール
 	r.POST("/mail/send", server.SendVerificationEmail)
@@ -91,6 +93,12 @@ func (server *Server) GinRequest(config util.Config) {
 	authRoutes.DELETE("/post/del", server.DeletePost)
 	authRoutes.PUT("/post/update", server.UpdatePost)
 	authRoutes.GET("/post/get", server.GetUserPost)
+
+	// 投稿Reaction
+	authRoutes.PUT("/post/reaction/Thanks", server.UpdatePostReactionThanks)
+	authRoutes.PUT("/post/reaction/Heart", server.UpdatePostReactionHeart)
+	authRoutes.PUT("/post/reaction/Useful", server.UpdatePostReactionUesful)
+	authRoutes.PUT("/post/reaction/Helpful", server.UpdatePostReactionHelpful)
 
 	// タグ
 	authRoutes.POST("/tag/add", server.CreateTag)

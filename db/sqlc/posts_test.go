@@ -8,7 +8,6 @@ import (
 
 	"github.com/brianvoe/gofakeit/v7"
 	"github.com/stretchr/testify/require"
-	"golang.org/x/exp/rand"
 
 	"github.com/Ecc-asplay/backend/util"
 )
@@ -76,7 +75,6 @@ func CreateRandomPost(t *testing.T, user User) Post {
 		Title:       gofakeit.BookTitle(),
 		Feel:        util.RandomMood(),
 		Content:     contentJson,
-		Reaction:    rand.Int31(),
 		IsSensitive: util.RandomBool(),
 		Status:      util.RandomStatus(),
 	}
@@ -89,7 +87,6 @@ func CreateRandomPost(t *testing.T, user User) Post {
 	require.Equal(t, newPost.ShowID, post.ShowID)
 	require.Equal(t, newPost.Title, post.Title)
 	require.Equal(t, newPost.Feel, post.Feel)
-	require.Equal(t, newPost.Reaction, post.Reaction)
 	require.Equal(t, newPost.IsSensitive, post.IsSensitive)
 	require.Equal(t, newPost.Status, post.Status)
 	require.NotEmpty(t, post.CreatedAt.Time)
@@ -208,7 +205,6 @@ func TestUpdatePosts(t *testing.T) {
 		Title:       gofakeit.BookTitle(),
 		Feel:        util.RandomMood(),
 		Content:     contentJson,
-		Reaction:    rand.Int31(),
 		IsSensitive: util.RandomBool(),
 		Status:      util.RandomStatus(),
 	}

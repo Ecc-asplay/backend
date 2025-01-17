@@ -17,12 +17,11 @@ import (
 
 // Create
 type CreatePostRequest struct {
-	ShowID   string `json:"show_id"`
-	Title    string `json:"title"`
-	Feel     string `json:"feel"`
-	Content  []byte `json:"content"`
-	Reaction int32  `json:"reaction"`
-	Status   string `json:"status" binding:"required"`
+	ShowID  string `json:"show_id"`
+	Title   string `json:"title"`
+	Feel    string `json:"feel"`
+	Content []byte `json:"content"`
+	Status  string `json:"status" binding:"required"`
 }
 
 func (s *Server) CreatePost(ctx *gin.Context) {
@@ -44,14 +43,13 @@ func (s *Server) CreatePost(ctx *gin.Context) {
 	}
 
 	postData := db.CreatePostParams{
-		UserID:   authPayload.UserID,
-		PostID:   postID,
-		ShowID:   showID,
-		Title:    req.Title,
-		Feel:     req.Feel,
-		Content:  req.Content,
-		Reaction: req.Reaction,
-		Status:   req.Status,
+		UserID:  authPayload.UserID,
+		PostID:  postID,
+		ShowID:  showID,
+		Title:   req.Title,
+		Feel:    req.Feel,
+		Content: req.Content,
+		Status:  req.Status,
 	}
 
 	post, err := s.store.CreatePost(ctx, postData)
@@ -179,7 +177,6 @@ type UpdatePostsRequest struct {
 	Title       string    `json:"title"`
 	Feel        string    `json:"feel"`
 	Content     []byte    `json:"content"`
-	Reaction    int32     `json:"reaction"`
 	IsSensitive bool      `json:"is_sensitive"`
 	Status      string    `json:"status" binding:"required"`
 }
@@ -200,7 +197,6 @@ func (s *Server) UpdatePost(ctx *gin.Context) {
 		Title:       req.Title,
 		Feel:        req.Feel,
 		Content:     req.Content,
-		Reaction:    req.Reaction,
 		IsSensitive: req.IsSensitive,
 		Status:      req.Status,
 	}

@@ -16,6 +16,7 @@ INSERT INTO COMMENTS (
     COMMENT_ID,
     USER_ID,
     POST_ID,
+    POST_USER,
     STATUS,
     IS_PUBLIC,
     COMMENTS,
@@ -27,14 +28,16 @@ INSERT INTO COMMENTS (
     $4,
     $5,
     $6,
-    $7
-) RETURNING comment_id, user_id, post_id, status, is_public, comments, c_reaction_thanks, c_reaction_heart, c_reaction_helpful, c_reaction_useful, is_censored, created_at, updated_at, post_user
+    $7,
+    $8
+) RETURNING comment_id, user_id, post_id, status, is_public, comments, is_censored, created_at, updated_at, post_user
 `
 
 type CreateCommentsParams struct {
 	CommentID  uuid.UUID `json:"comment_id"`
 	UserID     uuid.UUID `json:"user_id"`
 	PostID     uuid.UUID `json:"post_id"`
+	PostUser   uuid.UUID `json:"post_user"`
 	Status     string    `json:"status"`
 	IsPublic   bool      `json:"is_public"`
 	Comments   string    `json:"comments"`
@@ -46,6 +49,7 @@ func (q *Queries) CreateComments(ctx context.Context, arg CreateCommentsParams) 
 		arg.CommentID,
 		arg.UserID,
 		arg.PostID,
+		arg.PostUser,
 		arg.Status,
 		arg.IsPublic,
 		arg.Comments,
@@ -59,10 +63,6 @@ func (q *Queries) CreateComments(ctx context.Context, arg CreateCommentsParams) 
 		&i.Status,
 		&i.IsPublic,
 		&i.Comments,
-		&i.CReactionThanks,
-		&i.CReactionHeart,
-		&i.CReactionHelpful,
-		&i.CReactionUseful,
 		&i.IsCensored,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -84,7 +84,7 @@ func (q *Queries) DeleteComments(ctx context.Context, commentID uuid.UUID) error
 
 const getAllComments = `-- name: GetAllComments :many
 SELECT
-    comment_id, user_id, post_id, status, is_public, comments, c_reaction_thanks, c_reaction_heart, c_reaction_helpful, c_reaction_useful, is_censored, created_at, updated_at, post_user
+    comment_id, user_id, post_id, status, is_public, comments, is_censored, created_at, updated_at, post_user
 FROM
     COMMENTS
 WHERE
@@ -109,10 +109,6 @@ func (q *Queries) GetAllComments(ctx context.Context, postUser uuid.UUID) ([]Com
 			&i.Status,
 			&i.IsPublic,
 			&i.Comments,
-			&i.CReactionThanks,
-			&i.CReactionHeart,
-			&i.CReactionHelpful,
-			&i.CReactionUseful,
 			&i.IsCensored,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -130,7 +126,7 @@ func (q *Queries) GetAllComments(ctx context.Context, postUser uuid.UUID) ([]Com
 
 const getCommentsList = `-- name: GetCommentsList :many
 SELECT
-    comment_id, user_id, post_id, status, is_public, comments, c_reaction_thanks, c_reaction_heart, c_reaction_helpful, c_reaction_useful, is_censored, created_at, updated_at, post_user
+    comment_id, user_id, post_id, status, is_public, comments, is_censored, created_at, updated_at, post_user
 FROM
     COMMENTS
 WHERE
@@ -155,10 +151,6 @@ func (q *Queries) GetCommentsList(ctx context.Context, postID uuid.UUID) ([]Comm
 			&i.Status,
 			&i.IsPublic,
 			&i.Comments,
-			&i.CReactionThanks,
-			&i.CReactionHeart,
-			&i.CReactionHelpful,
-			&i.CReactionUseful,
 			&i.IsCensored,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -184,7 +176,7 @@ SET
     UPDATED_AT = NOW()
 WHERE
     COMMENT_ID = $1
-RETURNING comment_id, user_id, post_id, status, is_public, comments, c_reaction_thanks, c_reaction_heart, c_reaction_helpful, c_reaction_useful, is_censored, created_at, updated_at, post_user
+RETURNING comment_id, user_id, post_id, status, is_public, comments, is_censored, created_at, updated_at, post_user
 `
 
 type UpdateCommentsParams struct {
@@ -211,10 +203,6 @@ func (q *Queries) UpdateComments(ctx context.Context, arg UpdateCommentsParams) 
 		&i.Status,
 		&i.IsPublic,
 		&i.Comments,
-		&i.CReactionThanks,
-		&i.CReactionHeart,
-		&i.CReactionHelpful,
-		&i.CReactionUseful,
 		&i.IsCensored,
 		&i.CreatedAt,
 		&i.UpdatedAt,

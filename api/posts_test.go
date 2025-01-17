@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -23,12 +22,11 @@ func RandomCreatePostAPI(t *testing.T, user UserRsp) db.Post {
 	jsonData := ReturnContext()
 
 	postData := CreatePostRequest{
-		ShowID:   util.RandomString(10),
-		Title:    "aaa",
-		Feel:     util.RandomMood(),
-		Content:  jsonData,
-		Reaction: rand.Int31(),
-		Status:   util.RandomStatus(),
+		ShowID:  util.RandomString(10),
+		Title:   "aaa",
+		Feel:    util.RandomMood(),
+		Content: jsonData,
+		Status:  util.RandomStatus(),
 	}
 
 	var createPost db.Post
@@ -64,12 +62,11 @@ func TestCreatePostAPI(t *testing.T) {
 	jsonData := ReturnContext()
 
 	postData := CreatePostRequest{
-		ShowID:   util.RandomString(10),
-		Title:    gofakeit.BookTitle(),
-		Feel:     util.RandomMood(),
-		Content:  jsonData,
-		Reaction: rand.Int31(),
-		Status:   util.RandomStatus(),
+		ShowID:  util.RandomString(10),
+		Title:   gofakeit.BookTitle(),
+		Feel:    util.RandomMood(),
+		Content: jsonData,
+		Status:  util.RandomStatus(),
 	}
 
 	testCases := []struct {
@@ -90,12 +87,11 @@ func TestCreatePostAPI(t *testing.T) {
 		{
 			name: "トークンない",
 			body: CreatePostRequest{
-				ShowID:   util.RandomString(10),
-				Title:    gofakeit.BookTitle(),
-				Feel:     util.RandomMood(),
-				Content:  jsonData,
-				Reaction: rand.Int31(),
-				Status:   util.RandomStatus(),
+				ShowID:  util.RandomString(10),
+				Title:   gofakeit.BookTitle(),
+				Feel:    util.RandomMood(),
+				Content: jsonData,
+				Status:  util.RandomStatus(),
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnauthorized, recorder.Code)
@@ -105,11 +101,10 @@ func TestCreatePostAPI(t *testing.T) {
 			name:  "状態ない",
 			token: token,
 			body: CreatePostRequest{
-				ShowID:   util.RandomString(10),
-				Title:    gofakeit.BookTitle(),
-				Feel:     util.RandomMood(),
-				Content:  jsonData,
-				Reaction: rand.Int31(),
+				ShowID:  util.RandomString(10),
+				Title:   gofakeit.BookTitle(),
+				Feel:    util.RandomMood(),
+				Content: jsonData,
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -255,13 +250,12 @@ func TestUpdatePostAPI(t *testing.T) {
 			name:  "OK",
 			token: token,
 			body: UpdatePostsRequest{
-				PostID:   Post.PostID,
-				ShowID:   util.RandomString(10),
-				Title:    gofakeit.BookTitle(),
-				Feel:     util.RandomMood(),
-				Content:  jsonData,
-				Reaction: rand.Int31(),
-				Status:   util.RandomStatus(),
+				PostID:  Post.PostID,
+				ShowID:  util.RandomString(10),
+				Title:   gofakeit.BookTitle(),
+				Feel:    util.RandomMood(),
+				Content: jsonData,
+				Status:  util.RandomStatus(),
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusOK, recorder.Code)
@@ -270,13 +264,12 @@ func TestUpdatePostAPI(t *testing.T) {
 		{
 			name: "トークンない",
 			body: UpdatePostsRequest{
-				PostID:   Post.PostID,
-				ShowID:   util.RandomString(10),
-				Title:    gofakeit.BookTitle(),
-				Feel:     util.RandomMood(),
-				Content:  jsonData,
-				Reaction: rand.Int31(),
-				Status:   util.RandomStatus(),
+				PostID:  Post.PostID,
+				ShowID:  util.RandomString(10),
+				Title:   gofakeit.BookTitle(),
+				Feel:    util.RandomMood(),
+				Content: jsonData,
+				Status:  util.RandomStatus(),
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusUnauthorized, recorder.Code)
@@ -286,12 +279,11 @@ func TestUpdatePostAPI(t *testing.T) {
 			name:  "投稿IDない",
 			token: token,
 			body: UpdatePostsRequest{
-				ShowID:   util.RandomString(10),
-				Title:    gofakeit.BookTitle(),
-				Feel:     util.RandomMood(),
-				Content:  jsonData,
-				Reaction: rand.Int31(),
-				Status:   util.RandomStatus(),
+				ShowID:  util.RandomString(10),
+				Title:   gofakeit.BookTitle(),
+				Feel:    util.RandomMood(),
+				Content: jsonData,
+				Status:  util.RandomStatus(),
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -301,12 +293,11 @@ func TestUpdatePostAPI(t *testing.T) {
 			name:  "状態ない",
 			token: token,
 			body: UpdatePostsRequest{
-				PostID:   Post.PostID,
-				ShowID:   util.RandomString(10),
-				Title:    gofakeit.BookTitle(),
-				Feel:     util.RandomMood(),
-				Content:  jsonData,
-				Reaction: rand.Int31(),
+				PostID:  Post.PostID,
+				ShowID:  util.RandomString(10),
+				Title:   gofakeit.BookTitle(),
+				Feel:    util.RandomMood(),
+				Content: jsonData,
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -381,7 +372,6 @@ func requireBodyMatchPost(t *testing.T, body *bytes.Buffer, post CreatePostReque
 	require.Equal(t, getPost.ShowID, post.ShowID)
 	require.Equal(t, getPost.Title, post.Title)
 	require.Equal(t, getPost.Feel, post.Feel)
-	require.Equal(t, getPost.Reaction, post.Reaction)
 	require.Equal(t, getPost.Status, post.Status)
 }
 

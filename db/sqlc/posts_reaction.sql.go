@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createPostsReaction = `-- name: CreatePostsReaction :one
@@ -31,12 +30,12 @@ INSERT INTO POSTS_REACTION (
 `
 
 type CreatePostsReactionParams struct {
-	UserID           uuid.UUID   `json:"user_id"`
-	PostID           uuid.UUID   `json:"post_id"`
-	PReactionThanks  pgtype.Bool `json:"p_reaction_thanks"`
-	PReactionHelpful pgtype.Bool `json:"p_reaction_helpful"`
-	PReactionUseful  pgtype.Bool `json:"p_reaction_useful"`
-	PReactionHeart   pgtype.Bool `json:"p_reaction_heart"`
+	UserID           uuid.UUID `json:"user_id"`
+	PostID           uuid.UUID `json:"post_id"`
+	PReactionThanks  bool      `json:"p_reaction_thanks"`
+	PReactionHelpful bool      `json:"p_reaction_helpful"`
+	PReactionUseful  bool      `json:"p_reaction_useful"`
+	PReactionHeart   bool      `json:"p_reaction_heart"`
 }
 
 func (q *Queries) CreatePostsReaction(ctx context.Context, arg CreatePostsReactionParams) (PostsReaction, error) {
@@ -78,6 +77,64 @@ func (q *Queries) DeletePostsReaction(ctx context.Context, arg DeletePostsReacti
 	return err
 }
 
+const getAllPostsReaction = `-- name: GetAllPostsReaction :many
+SELECT user_id, post_id, p_reaction_thanks, p_reaction_heart, p_reaction_helpful, p_reaction_useful, created_at FROM POSTS_REACTION
+`
+
+func (q *Queries) GetAllPostsReaction(ctx context.Context) ([]PostsReaction, error) {
+	rows, err := q.db.Query(ctx, getAllPostsReaction)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []PostsReaction{}
+	for rows.Next() {
+		var i PostsReaction
+		if err := rows.Scan(
+			&i.UserID,
+			&i.PostID,
+			&i.PReactionThanks,
+			&i.PReactionHeart,
+			&i.PReactionHelpful,
+			&i.PReactionUseful,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPostsHeartOfTrue = `-- name: GetPostsHeartOfTrue :one
+SELECT COUNT(*)
+FROM POSTS_REACTION
+WHERE P_REACTION_HEART = TRUE AND POST_ID = $1
+`
+
+func (q *Queries) GetPostsHeartOfTrue(ctx context.Context, postID uuid.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, getPostsHeartOfTrue, postID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const getPostsHelpfulOfTrue = `-- name: GetPostsHelpfulOfTrue :one
+SELECT COUNT(*)
+FROM POSTS_REACTION
+WHERE P_REACTION_HELPFUL = TRUE AND POST_ID = $1
+`
+
+func (q *Queries) GetPostsHelpfulOfTrue(ctx context.Context, postID uuid.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, getPostsHelpfulOfTrue, postID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const getPostsReaction = `-- name: GetPostsReaction :many
 SELECT user_id, post_id, p_reaction_thanks, p_reaction_heart, p_reaction_helpful, p_reaction_useful, created_at FROM POSTS_REACTION 
 WHERE POST_ID = $1
@@ -111,22 +168,48 @@ func (q *Queries) GetPostsReaction(ctx context.Context, postID uuid.UUID) ([]Pos
 	return items, nil
 }
 
-const updatePostsReactionHeartPlusOne = `-- name: UpdatePostsReactionHeartPlusOne :one
+const getPostsThanksOfTrue = `-- name: GetPostsThanksOfTrue :one
+SELECT COUNT(*)
+FROM POSTS_REACTION
+WHERE P_REACTION_THANKS = TRUE AND POST_ID = $1
+`
+
+func (q *Queries) GetPostsThanksOfTrue(ctx context.Context, postID uuid.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, getPostsThanksOfTrue, postID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const getPostsUsefulOfTrue = `-- name: GetPostsUsefulOfTrue :one
+SELECT COUNT(*)
+FROM POSTS_REACTION
+WHERE P_REACTION_USEFUL = TRUE AND POST_ID = $1
+`
+
+func (q *Queries) GetPostsUsefulOfTrue(ctx context.Context, postID uuid.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, getPostsUsefulOfTrue, postID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
+const updatePostsReactionHeart = `-- name: UpdatePostsReactionHeart :one
 UPDATE POSTS_REACTION
 SET 
-    P_REACTION_HEART = TRUE
+    P_REACTION_HEART = NOT P_REACTION_HEART
 WHERE 
     USER_ID = $1 AND POST_ID = $2
 RETURNING user_id, post_id, p_reaction_thanks, p_reaction_heart, p_reaction_helpful, p_reaction_useful, created_at
 `
 
-type UpdatePostsReactionHeartPlusOneParams struct {
+type UpdatePostsReactionHeartParams struct {
 	UserID uuid.UUID `json:"user_id"`
 	PostID uuid.UUID `json:"post_id"`
 }
 
-func (q *Queries) UpdatePostsReactionHeartPlusOne(ctx context.Context, arg UpdatePostsReactionHeartPlusOneParams) (PostsReaction, error) {
-	row := q.db.QueryRow(ctx, updatePostsReactionHeartPlusOne, arg.UserID, arg.PostID)
+func (q *Queries) UpdatePostsReactionHeart(ctx context.Context, arg UpdatePostsReactionHeartParams) (PostsReaction, error) {
+	row := q.db.QueryRow(ctx, updatePostsReactionHeart, arg.UserID, arg.PostID)
 	var i PostsReaction
 	err := row.Scan(
 		&i.UserID,
@@ -140,22 +223,22 @@ func (q *Queries) UpdatePostsReactionHeartPlusOne(ctx context.Context, arg Updat
 	return i, err
 }
 
-const updatePostsReactionHelpfulPlusOne = `-- name: UpdatePostsReactionHelpfulPlusOne :one
+const updatePostsReactionHelpful = `-- name: UpdatePostsReactionHelpful :one
 UPDATE POSTS_REACTION
 SET 
-    P_REACTION_HELPFUL = TRUE
+    P_REACTION_HELPFUL = NOT P_REACTION_HELPFUL
 WHERE 
     USER_ID = $1 AND POST_ID = $2
 RETURNING user_id, post_id, p_reaction_thanks, p_reaction_heart, p_reaction_helpful, p_reaction_useful, created_at
 `
 
-type UpdatePostsReactionHelpfulPlusOneParams struct {
+type UpdatePostsReactionHelpfulParams struct {
 	UserID uuid.UUID `json:"user_id"`
 	PostID uuid.UUID `json:"post_id"`
 }
 
-func (q *Queries) UpdatePostsReactionHelpfulPlusOne(ctx context.Context, arg UpdatePostsReactionHelpfulPlusOneParams) (PostsReaction, error) {
-	row := q.db.QueryRow(ctx, updatePostsReactionHelpfulPlusOne, arg.UserID, arg.PostID)
+func (q *Queries) UpdatePostsReactionHelpful(ctx context.Context, arg UpdatePostsReactionHelpfulParams) (PostsReaction, error) {
+	row := q.db.QueryRow(ctx, updatePostsReactionHelpful, arg.UserID, arg.PostID)
 	var i PostsReaction
 	err := row.Scan(
 		&i.UserID,
@@ -169,22 +252,22 @@ func (q *Queries) UpdatePostsReactionHelpfulPlusOne(ctx context.Context, arg Upd
 	return i, err
 }
 
-const updatePostsReactionThanksPlusOne = `-- name: UpdatePostsReactionThanksPlusOne :one
+const updatePostsReactionThanks = `-- name: UpdatePostsReactionThanks :one
 UPDATE POSTS_REACTION
 SET 
-    P_REACTION_THANKS = TRUE
+    P_REACTION_THANKS = NOT P_REACTION_THANKS
 WHERE 
     USER_ID = $1 AND POST_ID = $2
 RETURNING user_id, post_id, p_reaction_thanks, p_reaction_heart, p_reaction_helpful, p_reaction_useful, created_at
 `
 
-type UpdatePostsReactionThanksPlusOneParams struct {
+type UpdatePostsReactionThanksParams struct {
 	UserID uuid.UUID `json:"user_id"`
 	PostID uuid.UUID `json:"post_id"`
 }
 
-func (q *Queries) UpdatePostsReactionThanksPlusOne(ctx context.Context, arg UpdatePostsReactionThanksPlusOneParams) (PostsReaction, error) {
-	row := q.db.QueryRow(ctx, updatePostsReactionThanksPlusOne, arg.UserID, arg.PostID)
+func (q *Queries) UpdatePostsReactionThanks(ctx context.Context, arg UpdatePostsReactionThanksParams) (PostsReaction, error) {
+	row := q.db.QueryRow(ctx, updatePostsReactionThanks, arg.UserID, arg.PostID)
 	var i PostsReaction
 	err := row.Scan(
 		&i.UserID,
@@ -198,22 +281,22 @@ func (q *Queries) UpdatePostsReactionThanksPlusOne(ctx context.Context, arg Upda
 	return i, err
 }
 
-const updatePostsReactionUsefulPlusOne = `-- name: UpdatePostsReactionUsefulPlusOne :one
+const updatePostsReactionUseful = `-- name: UpdatePostsReactionUseful :one
 UPDATE POSTS_REACTION
 SET 
-    P_REACTION_USEFUL = TRUE
+    P_REACTION_USEFUL = NOT P_REACTION_USEFUL
 WHERE 
     USER_ID = $1 AND POST_ID = $2
 RETURNING user_id, post_id, p_reaction_thanks, p_reaction_heart, p_reaction_helpful, p_reaction_useful, created_at
 `
 
-type UpdatePostsReactionUsefulPlusOneParams struct {
+type UpdatePostsReactionUsefulParams struct {
 	UserID uuid.UUID `json:"user_id"`
 	PostID uuid.UUID `json:"post_id"`
 }
 
-func (q *Queries) UpdatePostsReactionUsefulPlusOne(ctx context.Context, arg UpdatePostsReactionUsefulPlusOneParams) (PostsReaction, error) {
-	row := q.db.QueryRow(ctx, updatePostsReactionUsefulPlusOne, arg.UserID, arg.PostID)
+func (q *Queries) UpdatePostsReactionUseful(ctx context.Context, arg UpdatePostsReactionUsefulParams) (PostsReaction, error) {
+	row := q.db.QueryRow(ctx, updatePostsReactionUseful, arg.UserID, arg.PostID)
 	var i PostsReaction
 	err := row.Scan(
 		&i.UserID,

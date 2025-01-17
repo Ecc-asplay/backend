@@ -2,7 +2,6 @@ package db
 
 import (
 	"context"
-	"math/rand"
 	"testing"
 
 	"github.com/brianvoe/gofakeit/v7"
@@ -20,7 +19,6 @@ func CreateRandomComment(t *testing.T, user User, post Post) Comment {
 		Status:     util.RandomStatus(),
 		IsPublic:   util.RandomBool(),
 		Comments:   gofakeit.Sentence(20),
-		Reaction:   rand.Int31n(20) + 1,
 		IsCensored: util.RandomBool(),
 	}
 
@@ -34,7 +32,6 @@ func CreateRandomComment(t *testing.T, user User, post Post) Comment {
 	require.Equal(t, comment.Status, commentData.Status)
 	require.Equal(t, comment.IsPublic, commentData.IsPublic)
 	require.Equal(t, comment.Comments, commentData.Comments)
-	require.Equal(t, comment.Reaction, commentData.Reaction)
 	require.Equal(t, comment.IsCensored, commentData.IsCensored)
 
 	return comment
@@ -82,7 +79,6 @@ func TestUpdateComments(t *testing.T) {
 		CommentID:  comment.CommentID,
 		Status:     util.RandomStatus(),
 		IsPublic:   util.RandomBool(),
-		Reaction:   rand.Int31n(20) + 1,
 		IsCensored: util.RandomBool(),
 	}
 

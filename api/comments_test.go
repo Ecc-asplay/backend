@@ -25,7 +25,6 @@ func RandomCreateCommentAPI(t *testing.T, postUser, user2 UserRsp) db.Comment {
 		PostID:     post.PostID,
 		Comments:   "aaaaaabbcdbdbhcjdsbhdjs",
 		IsPublic:   false,
-		Reaction:   0,
 		IsCensored: false,
 	}
 
@@ -75,7 +74,6 @@ func TestCreateCommentsAPI(t *testing.T) {
 		PostID:     comment.PostID,
 		Comments:   "aaaaaabbcdbdbhcjdsbhdjs",
 		IsPublic:   false,
-		Reaction:   0,
 		IsCensored: false,
 	}
 
@@ -106,7 +104,6 @@ func TestCreateCommentsAPI(t *testing.T) {
 			body: createCommentRequest{
 				Comments:   "aaaaaabbcdbdbhcjdsbhdjs",
 				IsPublic:   false,
-				Reaction:   0,
 				IsCensored: false,
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
@@ -119,7 +116,6 @@ func TestCreateCommentsAPI(t *testing.T) {
 			body: createCommentRequest{
 				PostID:     comment.PostID,
 				IsPublic:   false,
-				Reaction:   0,
 				IsCensored: false,
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
@@ -296,7 +292,6 @@ func TestUpdateCommentsAPI(t *testing.T) {
 		CommentID: comment.CommentID,
 		Comments:  "aaaaaabbcdbdbhcjdsbhdjs",
 		IsPublic:  !comment.IsPublic,
-		Reaction:  comment.Reaction,
 	}
 
 	testCases := []struct {
@@ -326,7 +321,6 @@ func TestUpdateCommentsAPI(t *testing.T) {
 			body: UpdateCommentRequest{
 				Comments: "aaaaaabbcdbdbhcjdsbhdjs",
 				IsPublic: !comment.IsPublic,
-				Reaction: comment.Reaction,
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
@@ -338,7 +332,6 @@ func TestUpdateCommentsAPI(t *testing.T) {
 			body: UpdateCommentRequest{
 				CommentID: comment.CommentID,
 				IsPublic:  !comment.IsPublic,
-				Reaction:  comment.Reaction,
 			},
 			checkResponse: func(recorder *httptest.ResponseRecorder) {
 				require.Equal(t, http.StatusInternalServerError, recorder.Code)
