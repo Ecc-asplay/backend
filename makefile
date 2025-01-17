@@ -44,7 +44,6 @@ migratedown2:
 migratedown3:
 	migrate -path db/migration -database "${DBSource}" -verbose down 3
 
-
 #psql reset
 tablereset:
 	make migratedown

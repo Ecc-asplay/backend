@@ -45,14 +45,12 @@ func (s *Server) UpdatePostReactionThanks(ctx *gin.Context) {
 			return
 		}
 
-		s.store.DeletePostsReaction(ctx, db.DeletePostsReactionParams{UserID: authPayload.UserID, PostID: req.PostID})
 		ctx.JSON(http.StatusOK, reaction)
 	} else {
 		handleDBError(ctx, err, "投稿Thanks：更新を失敗しました")
 		return
 	}
 
-	s.store.DeletePostsReaction(ctx, db.DeletePostsReactionParams{UserID: authPayload.UserID, PostID: req.PostID})
 	ctx.JSON(http.StatusOK, thanks)
 }
 
@@ -82,14 +80,12 @@ func (s *Server) UpdatePostReactionHeart(ctx *gin.Context) {
 			return
 		}
 
-		s.store.DeletePostsReaction(ctx, db.DeletePostsReactionParams{UserID: authPayload.UserID, PostID: req.PostID})
 		ctx.JSON(http.StatusOK, reaction)
 	} else {
 		handleDBError(ctx, err, "投稿Heart：更新を失敗しました")
 		return
 	}
 
-	s.store.DeletePostsReaction(ctx, db.DeletePostsReactionParams{UserID: authPayload.UserID, PostID: req.PostID})
 	ctx.JSON(http.StatusOK, heart)
 }
 
@@ -119,14 +115,12 @@ func (s *Server) UpdatePostReactionUesful(ctx *gin.Context) {
 			return
 		}
 
-		s.store.DeletePostsReaction(ctx, db.DeletePostsReactionParams{UserID: authPayload.UserID, PostID: req.PostID})
 		ctx.JSON(http.StatusOK, reaction)
 	} else {
 		handleDBError(ctx, err, "投稿Useful：更新を失敗しました")
 		return
 	}
 
-	s.store.DeletePostsReaction(ctx, db.DeletePostsReactionParams{UserID: authPayload.UserID, PostID: req.PostID})
 	ctx.JSON(http.StatusOK, useful)
 }
 
@@ -156,14 +150,12 @@ func (s *Server) UpdatePostReactionHelpful(ctx *gin.Context) {
 			return
 		}
 
-		s.store.DeletePostsReaction(ctx, db.DeletePostsReactionParams{UserID: authPayload.UserID, PostID: req.PostID})
 		ctx.JSON(http.StatusOK, reaction)
 	} else {
 		handleDBError(ctx, err, "投稿Helpful：更新を失敗しました")
 		return
 	}
 
-	s.store.DeletePostsReaction(ctx, db.DeletePostsReactionParams{UserID: authPayload.UserID, PostID: req.PostID})
 	ctx.JSON(http.StatusOK, useful)
 }
 

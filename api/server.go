@@ -112,10 +112,15 @@ func (server *Server) GinRequest(config util.Config) {
 	// Comment
 	authRoutes.GET("/comment/getlist/:post_id", server.GetPostCommentsList)
 	authRoutes.GET("/comment/all", server.GetAllComments)
-
 	authRoutes.POST("/comment/create", server.CreateComment)
 	authRoutes.PUT("/comment/update", server.UpdateComments)
 	authRoutes.DELETE("/comment/delete/:comment_id", server.DeleteComments)
+
+	// コメント　Reaction
+	authRoutes.PUT("/comment/reaction/Thanks", server.UpdateCommentReactionThanks)
+	authRoutes.PUT("/comment/reaction/Heart", server.UpdateCommentReactionHeart)
+	authRoutes.PUT("/comment/reaction/Useful", server.UpdateCommentReactionUesful)
+	authRoutes.PUT("/comment/reaction/Helpful", server.UpdateCommentReactionHelpful)
 
 	// Notification
 	// authRoutes.POST("/notification/create", server.CreateNotification)
