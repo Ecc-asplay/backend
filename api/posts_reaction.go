@@ -167,7 +167,7 @@ type PostReactionTotals struct {
 	Helpful int64     `json:"helpful"`
 }
 
-func (s *Server) PostReactions(ctx *gin.Context) {
+func (s *Server) GetPostReactions(ctx *gin.Context) {
 	var req UpdatePostReactionRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "投稿Reaction：無効な入力データです")
@@ -206,7 +206,7 @@ func (s *Server) PostReactions(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, reaction)
 }
 
-func (s *Server) AllPostsReaction(ctx *gin.Context) {
+func (s *Server) GetAllPostsReaction(ctx *gin.Context) {
 	// Redisから投稿Reactionデータ取り
 	allPostsReacrion, err := s.redis.Get("allPostsReacrion").Result()
 	if err != nil && err != redis.Nil {
