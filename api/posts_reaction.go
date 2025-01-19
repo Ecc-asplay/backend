@@ -167,31 +167,31 @@ type PostReactionTotals struct {
 	Helpful int64     `json:"helpful"`
 }
 
-func (s *Server) GetPostReactions(ctx *gin.Context) {
+func (s *Server) PostReactions(ctx *gin.Context) {
 	var req UpdatePostReactionRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		handleDBError(ctx, err, "投稿 Reaction Get：無効な入力データです")
+		handleDBError(ctx, err, "投稿Reaction：無効な入力データです")
 		return
 	}
 
 	thanks, err := s.store.GetPostsThanksOfTrue(ctx, req.PostID)
 	if err != nil {
-		handleDBError(ctx, err, "投稿 Reaction Get thanks：取得を失敗しました")
+		handleDBError(ctx, err, "投稿Reaction：thanks取得を失敗しました")
 		return
 	}
 	heart, err := s.store.GetPostsHeartOfTrue(ctx, req.PostID)
 	if err != nil {
-		handleDBError(ctx, err, "投稿 Reaction Get heart：取得を失敗しました")
+		handleDBError(ctx, err, "投稿Reaction：heart取得を失敗しました")
 		return
 	}
 	helpful, err := s.store.GetPostsHelpfulOfTrue(ctx, req.PostID)
 	if err != nil {
-		handleDBError(ctx, err, "投稿 Reaction Get helpful：取得を失敗しました")
+		handleDBError(ctx, err, "投稿Reaction：helpful取得を失敗しました")
 		return
 	}
 	useful, err := s.store.GetPostsUsefulOfTrue(ctx, req.PostID)
 	if err != nil {
-		handleDBError(ctx, err, "投稿 Reaction Get Useful：取得を失敗しました")
+		handleDBError(ctx, err, "投稿Reaction：Useful取得を失敗しました")
 		return
 	}
 
@@ -206,13 +206,15 @@ func (s *Server) GetPostReactions(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, reaction)
 }
 
-func (s *Server) GetAllPostsReaction(ctx *gin.Context) {
+func (s *Server) AllPostsReaction(ctx *gin.Context) {
+	// Redisから投稿Reactionデータ取り
 	allPostsReacrion, err := s.redis.Get("allPostsReacrion").Result()
 	if err != nil && err != redis.Nil {
 		handleDBError(ctx, err, "Redis投稿Reaction取得：データ締め切りました")
 		return
 	}
 
+	// Redisに投稿Reactionデータあり
 	if allPostsReacrion != "" {
 		var postsReaction []PostReactionTotals
 		err := json.Unmarshal([]byte(allPostsReacrion), &postsReaction)
@@ -223,14 +225,15 @@ func (s *Server) GetAllPostsReaction(ctx *gin.Context) {
 
 		ctx.JSON(http.StatusOK, postsReaction)
 	} else {
-		// if Redis have not Reaction. but Redis have post data
+		// Redisに投稿Reactionデータない
 		allPosts, err := s.redis.Get("allPosts").Result()
 		if err != nil && err != redis.Nil {
-			handleDBError(ctx, err, "Redisコメント取得：データ締め切りました")
+			handleDBError(ctx, err, "Redis投稿取得：データ締め切りました")
 			return
 		}
 
 		if allPosts != "" {
+			// Redisに投稿データあり
 			var posts []db.Post
 			err := json.Unmarshal([]byte(allPosts), &posts)
 			if err != nil {
@@ -238,121 +241,73 @@ func (s *Server) GetAllPostsReaction(ctx *gin.Context) {
 				return
 			}
 
-			var allPostsReaction []PostReactionTotals
-			for _, post := range posts {
-				thanks, err := s.store.GetPostsThanksOfTrue(ctx, post.PostID)
-				if err != nil {
-					handleDBError(ctx, err, "All 投稿 Reaction Get thanks：取得を失敗しました")
-					return
-				}
-				heart, err := s.store.GetPostsHeartOfTrue(ctx, post.PostID)
-				if err != nil {
-					handleDBError(ctx, err, "All 投稿 Reaction Get heart：取得を失敗しました")
-					return
-				}
-				helpful, err := s.store.GetPostsHelpfulOfTrue(ctx, post.PostID)
-				if err != nil {
-					handleDBError(ctx, err, "All 投稿 Reaction Get helpful：取得を失敗しました")
-					return
-				}
-				useful, err := s.store.GetPostsUsefulOfTrue(ctx, post.PostID)
-				if err != nil {
-					handleDBError(ctx, err, "All 投稿 Reaction Get Useful：取得を失敗しました")
-					return
-				}
-
-				reaction := PostReactionTotals{
-					PostID:  post.PostID,
-					Thanks:  thanks,
-					Heart:   heart,
-					Useful:  useful,
-					Helpful: helpful,
-				}
-
-				allPostsReaction = append(allPostsReaction, reaction)
-			}
-
-			allPostsReactionJSON, err := json.Marshal(allPostsReaction)
-			if err != nil {
-				handleDBError(ctx, err, "Psql投稿Reaction保存：JSON変更を失敗しました")
-				return
-			}
-
-			err = s.redis.Set("allPostsReacrion", allPostsReactionJSON, 5*time.Minute).Err()
-			if err != nil {
-				handleDBError(ctx, err, "Redis 投稿 Reaction保存を失敗しました")
-				return
-			}
+			allPostsReaction := TakeAllPostsReaction(ctx, s, posts)
+			PostSaveToRedis(ctx, s, allPostsReaction, "allPostsReacrion")
 
 			ctx.JSON(http.StatusOK, allPostsReaction)
-
 		} else {
+			// Redisに投稿データない
 			post, err := s.store.GetPostsList(ctx)
 			if err != nil {
 				handleDBError(ctx, err, "Psql投稿取得を失敗しました")
 				return
 			}
+			PostSaveToRedis(ctx, s, post, "allPosts")
 
-			var allPostsReaction []PostReactionTotals
-
-			for _, post := range post {
-				thanks, err := s.store.GetPostsThanksOfTrue(ctx, post.PostID)
-				if err != nil {
-					handleDBError(ctx, err, "All 投稿 Reaction Get thanks：取得を失敗しました")
-					return
-				}
-				heart, err := s.store.GetPostsHeartOfTrue(ctx, post.PostID)
-				if err != nil {
-					handleDBError(ctx, err, "All 投稿 Reaction Get heart：取得を失敗しました")
-					return
-				}
-				helpful, err := s.store.GetPostsHelpfulOfTrue(ctx, post.PostID)
-				if err != nil {
-					handleDBError(ctx, err, "All 投稿 Reaction Get helpful：取得を失敗しました")
-					return
-				}
-				useful, err := s.store.GetPostsUsefulOfTrue(ctx, post.PostID)
-				if err != nil {
-					handleDBError(ctx, err, "All 投稿 Reaction Get Useful：取得を失敗しました")
-					return
-				}
-
-				reaction := PostReactionTotals{
-					PostID:  post.PostID,
-					Thanks:  thanks,
-					Heart:   heart,
-					Useful:  useful,
-					Helpful: helpful,
-				}
-
-				allPostsReaction = append(allPostsReaction, reaction)
-			}
-
-			postJSON, err := json.Marshal(post)
-			if err != nil {
-				handleDBError(ctx, err, "Psql投稿取得：JSON変更を失敗しました")
-				return
-			}
-
-			err = s.redis.Set("allPosts", postJSON, 5*time.Minute).Err()
-			if err != nil {
-				handleDBError(ctx, err, "Redis投稿保存を失敗しました")
-				return
-			}
-
-			allPostsReactionJSON, err := json.Marshal(allPostsReaction)
-			if err != nil {
-				handleDBError(ctx, err, "Psql投稿Reaction保存：JSON変更を失敗しました")
-				return
-			}
-
-			err = s.redis.Set("allPostsReacrion", allPostsReactionJSON, 5*time.Minute).Err()
-			if err != nil {
-				handleDBError(ctx, err, "Redis 投稿 Reaction保存を失敗しました")
-				return
-			}
+			allPostsReaction := TakeAllPostsReaction(ctx, s, post)
+			PostSaveToRedis(ctx, s, allPostsReaction, "allPostsReacrion")
 
 			ctx.JSON(http.StatusOK, allPostsReaction)
 		}
+	}
+}
+
+func TakeAllPostsReaction(ctx *gin.Context, s *Server, post []db.Post) []PostReactionTotals {
+	var allPostsReaction []PostReactionTotals
+	for _, post := range post {
+		thanks, err := s.store.GetPostsThanksOfTrue(ctx, post.PostID)
+		if err != nil {
+			handleDBError(ctx, err, "投稿Reaction：thanks取得を失敗しました")
+			return nil
+		}
+		heart, err := s.store.GetPostsHeartOfTrue(ctx, post.PostID)
+		if err != nil {
+			handleDBError(ctx, err, "投稿Reaction：heart取得を失敗しました")
+			return nil
+		}
+		helpful, err := s.store.GetPostsHelpfulOfTrue(ctx, post.PostID)
+		if err != nil {
+			handleDBError(ctx, err, "投稿Reaction：helpful取得を失敗しました")
+			return nil
+		}
+		useful, err := s.store.GetPostsUsefulOfTrue(ctx, post.PostID)
+		if err != nil {
+			handleDBError(ctx, err, "投稿Reaction：Useful取得を失敗しました")
+			return nil
+		}
+
+		reaction := PostReactionTotals{
+			PostID:  post.PostID,
+			Thanks:  thanks,
+			Heart:   heart,
+			Useful:  useful,
+			Helpful: helpful,
+		}
+
+		allPostsReaction = append(allPostsReaction, reaction)
+	}
+
+	return allPostsReaction
+}
+
+func PostSaveToRedis(ctx *gin.Context, s *Server, data any, tagname string) {
+	JSON, err := json.Marshal(data)
+	if err != nil {
+		handleDBError(ctx, err, "投稿Reaction保存：JSON変更を失敗しました")
+	}
+
+	err = s.redis.Set(tagname, JSON, 5*time.Minute).Err()
+	if err != nil {
+		handleDBError(ctx, err, "Redis投稿Reaction保存を失敗しました")
 	}
 }

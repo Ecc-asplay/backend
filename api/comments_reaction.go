@@ -170,28 +170,28 @@ type CommentReactionTotals struct {
 func (s *Server) GetCommentReactions(ctx *gin.Context) {
 	var req UpdateCommentsReactionRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		handleDBError(ctx, err, "コメント Reaction Get：無効な入力データです")
+		handleDBError(ctx, err, "コメントReaction：無効な入力データです")
 		return
 	}
 
 	thanks, err := s.store.GetCommentsThanksOfTrue(ctx, req.CommentID)
 	if err != nil {
-		handleDBError(ctx, err, "コメント Reaction Get thanks：取得を失敗しました")
+		handleDBError(ctx, err, "コメントReaction：thanks取得を失敗しました")
 		return
 	}
 	heart, err := s.store.GetCommentsHeartOfTrue(ctx, req.CommentID)
 	if err != nil {
-		handleDBError(ctx, err, "コメント Reaction Get heart：取得を失敗しました")
+		handleDBError(ctx, err, "コメントReaction：heart取得を失敗しました")
 		return
 	}
 	helpful, err := s.store.GetCommentsHelpfulOfTrue(ctx, req.CommentID)
 	if err != nil {
-		handleDBError(ctx, err, "コメント Reaction Get helpful：取得を失敗しました")
+		handleDBError(ctx, err, "コメントReaction：helpful取得を失敗しました")
 		return
 	}
 	useful, err := s.store.GetCommentsUsefulOfTrue(ctx, req.CommentID)
 	if err != nil {
-		handleDBError(ctx, err, "コメント Reaction Get Useful：取得を失敗しました")
+		handleDBError(ctx, err, "コメントReaction：Useful取得を失敗しました")
 		return
 	}
 
@@ -210,12 +210,14 @@ func (s *Server) GetCommentReactions(ctx *gin.Context) {
 }
 
 func (s *Server) GetAllCommentsReaction(ctx *gin.Context) {
+	// RedisからコメントReactionデータ取り
 	allCommenReaction, err := s.redis.Get("allCommentsReacrion").Result()
 	if err != nil && err != redis.Nil {
 		handleDBError(ctx, err, "RedisコメントReaction取得：データ締め切りました")
 		return
 	}
 
+	// RedisにコメントReactionデータあり
 	if allCommenReaction != "" {
 		var commentsReaction []CommentReactionTotals
 		err := json.Unmarshal([]byte(allCommenReaction), &commentsReaction)
@@ -226,7 +228,7 @@ func (s *Server) GetAllCommentsReaction(ctx *gin.Context) {
 
 		ctx.JSON(http.StatusOK, commentsReaction)
 	} else {
-		// if Redis have not Reaction. but Redis have post data
+		// RedisにコメントReactionデータない
 		allComment, err := s.redis.Get("allComments").Result()
 		if err != nil && err != redis.Nil {
 			handleDBError(ctx, err, "Redisコメント取得：データ締め切りました")
@@ -234,6 +236,7 @@ func (s *Server) GetAllCommentsReaction(ctx *gin.Context) {
 		}
 
 		if allComment != "" {
+			// Redisにコメントデータあり
 			var comments []db.Comment
 			err := json.Unmarshal([]byte(allComment), &comments)
 			if err != nil {
@@ -241,119 +244,73 @@ func (s *Server) GetAllCommentsReaction(ctx *gin.Context) {
 				return
 			}
 
-			var allCommentsReaction []CommentReactionTotals
-			for _, comment := range comments {
-				thanks, err := s.store.GetCommentsThanksOfTrue(ctx, comment.CommentID)
-				if err != nil {
-					handleDBError(ctx, err, "All コメント Reaction Get thanks：取得を失敗しました")
-					return
-				}
-				heart, err := s.store.GetCommentsHeartOfTrue(ctx, comment.CommentID)
-				if err != nil {
-					handleDBError(ctx, err, "All コメント Reaction Get heart：取得を失敗しました")
-					return
-				}
-				helpful, err := s.store.GetCommentsHelpfulOfTrue(ctx, comment.CommentID)
-				if err != nil {
-					handleDBError(ctx, err, "All コメント Reaction Get helpful：取得を失敗しました")
-					return
-				}
-				useful, err := s.store.GetCommentsUsefulOfTrue(ctx, comment.CommentID)
-				if err != nil {
-					handleDBError(ctx, err, "All コメント Reaction Get Useful：取得を失敗しました")
-					return
-				}
-
-				reaction := CommentReactionTotals{
-					CommentID: comment.CommentID,
-					Thanks:    thanks,
-					Heart:     heart,
-					Useful:    useful,
-					Helpful:   helpful,
-				}
-
-				allCommentsReaction = append(allCommentsReaction, reaction)
-			}
-
-			commentReactionJSON, err := json.Marshal(allCommentsReaction)
-			if err != nil {
-				handleDBError(ctx, err, "Psqlコメント取得：JSON変更を失敗しました")
-				return
-			}
-
-			err = s.redis.Set("allCommentsReacrion", commentReactionJSON, 5*time.Minute).Err()
-			if err != nil {
-				handleDBError(ctx, err, "Redis コメント Reaction保存を失敗しました")
-				return
-			}
+			allCommentsReaction := TakeAllCommentsReaction(ctx, s, comments)
+			CommentSaveToRedis(ctx, s, allCommentsReaction, "allCommentsReacrion")
 
 			ctx.JSON(http.StatusOK, allCommentsReaction)
 		} else {
+			// Redisにコメントデータない
 			comment, err := s.store.GetAllPublicComments(ctx)
 			if err != nil {
 				handleDBError(ctx, err, "Psqlコメント取得を失敗しました")
 				return
 			}
+			CommentSaveToRedis(ctx, s, comment, "allComments")
 
-			var allCommentsReaction []CommentReactionTotals
-			for _, comment := range comment {
-				thanks, err := s.store.GetCommentsThanksOfTrue(ctx, comment.CommentID)
-				if err != nil {
-					handleDBError(ctx, err, "All コメント Reaction Get thanks：取得を失敗しました")
-					return
-				}
-				heart, err := s.store.GetCommentsHeartOfTrue(ctx, comment.CommentID)
-				if err != nil {
-					handleDBError(ctx, err, "All コメント Reaction Get heart：取得を失敗しました")
-					return
-				}
-				helpful, err := s.store.GetCommentsHelpfulOfTrue(ctx, comment.CommentID)
-				if err != nil {
-					handleDBError(ctx, err, "All コメント Reaction Get helpful：取得を失敗しました")
-					return
-				}
-				useful, err := s.store.GetCommentsUsefulOfTrue(ctx, comment.CommentID)
-				if err != nil {
-					handleDBError(ctx, err, "All コメント Reaction Get Useful：取得を失敗しました")
-					return
-				}
-
-				reaction := CommentReactionTotals{
-					CommentID: comment.CommentID,
-					Thanks:    thanks,
-					Heart:     heart,
-					Useful:    useful,
-					Helpful:   helpful,
-				}
-
-				allCommentsReaction = append(allCommentsReaction, reaction)
-			}
-
-			commentJSON, err := json.Marshal(comment)
-			if err != nil {
-				handleDBError(ctx, err, "Psqlコメント取得：JSON変更を失敗しました")
-				return
-			}
-
-			err = s.redis.Set("allComments", commentJSON, 5*time.Minute).Err()
-			if err != nil {
-				handleDBError(ctx, err, "Redisコメント保存を失敗しました")
-				return
-			}
-
-			commentReactionJSON, err := json.Marshal(allCommentsReaction)
-			if err != nil {
-				handleDBError(ctx, err, "Psqlコメント取得：JSON変更を失敗しました")
-				return
-			}
-
-			err = s.redis.Set("allCommentsReacrion", commentReactionJSON, 5*time.Minute).Err()
-			if err != nil {
-				handleDBError(ctx, err, "Redis コメント Reaction保存を失敗しました")
-				return
-			}
+			allCommentsReaction := TakeAllCommentsReaction(ctx, s, comment)
+			CommentSaveToRedis(ctx, s, allCommentsReaction, "allCommentsReacrion")
 
 			ctx.JSON(http.StatusOK, allCommentsReaction)
 		}
+	}
+}
+
+func TakeAllCommentsReaction(ctx *gin.Context, s *Server, comment []db.Comment) []CommentReactionTotals {
+	var allCommentsReaction []CommentReactionTotals
+	for _, comment := range comment {
+		thanks, err := s.store.GetCommentsThanksOfTrue(ctx, comment.CommentID)
+		if err != nil {
+			handleDBError(ctx, err, "コメントReaction：thanks取得を失敗しました")
+			return nil
+		}
+		heart, err := s.store.GetCommentsHeartOfTrue(ctx, comment.CommentID)
+		if err != nil {
+			handleDBError(ctx, err, "コメントReaction：heart取得を失敗しました")
+			return nil
+		}
+		helpful, err := s.store.GetCommentsHelpfulOfTrue(ctx, comment.CommentID)
+		if err != nil {
+			handleDBError(ctx, err, "コメントReaction：helpful取得を失敗しました")
+			return nil
+		}
+		useful, err := s.store.GetCommentsUsefulOfTrue(ctx, comment.CommentID)
+		if err != nil {
+			handleDBError(ctx, err, "コメントReaction：Useful取得を失敗しました")
+			return nil
+		}
+
+		reaction := CommentReactionTotals{
+			CommentID: comment.CommentID,
+			Thanks:    thanks,
+			Heart:     heart,
+			Useful:    useful,
+			Helpful:   helpful,
+		}
+
+		allCommentsReaction = append(allCommentsReaction, reaction)
+	}
+
+	return allCommentsReaction
+}
+
+func CommentSaveToRedis(ctx *gin.Context, s *Server, data any, tagname string) {
+	JSON, err := json.Marshal(data)
+	if err != nil {
+		handleDBError(ctx, err, "コメントReaction保存：JSON変更を失敗しました")
+	}
+
+	err = s.redis.Set(tagname, JSON, 5*time.Minute).Err()
+	if err != nil {
+		handleDBError(ctx, err, "RedisコメントReaction保存を失敗しました")
 	}
 }
