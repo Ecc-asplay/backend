@@ -215,3 +215,12 @@ func TestUpdatePosts(t *testing.T) {
 	require.Equal(t, updateData.PostID, newPost.PostID)
 	require.Equal(t, updateData.UserID, newPost.UserID)
 }
+
+func TestGetOnePost(t *testing.T) {
+	user := CreateRandomUser(t)
+	post := CreateRandomPost(t, user)
+
+	p, err := testQueries.GetOnePost(context.Background(), post.PostID)
+	require.NoError(t, err)
+	require.NotEmpty(t, p)
+}

@@ -36,10 +36,17 @@ func (s *Server) CreateComment(ctx *gin.Context) {
 		return
 	}
 
+	post, err := s.store.GetOnePost(ctx, req.PostID)
+	if err != nil {
+		handleDBError(ctx, err, "コメント作成：投稿が見つかりません")
+		return
+	}
+
 	arg := db.CreateCommentsParams{
 		CommentID:  util.CreateUUID(),
 		UserID:     authPayload.UserID,
 		PostID:     req.PostID,
+		PostUser:   post.PostID,
 		Status:     "active",
 		IsPublic:   false,
 		Comments:   req.Comments,

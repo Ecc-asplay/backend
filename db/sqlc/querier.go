@@ -49,6 +49,7 @@ type Querier interface {
 	GetImage(ctx context.Context, postID uuid.UUID) ([]Image, error)
 	GetLogin(ctx context.Context, email string) (GetLoginRow, error)
 	GetNotification(ctx context.Context, userID uuid.UUID) ([]Notification, error)
+	GetOnePost(ctx context.Context, postID uuid.UUID) (Post, error)
 	GetPostsHeartOfTrue(ctx context.Context, postID uuid.UUID) (int64, error)
 	GetPostsHelpfulOfTrue(ctx context.Context, postID uuid.UUID) (int64, error)
 	GetPostsList(ctx context.Context) ([]Post, error)

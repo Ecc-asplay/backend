@@ -27,6 +27,14 @@ FROM
 WHERE
     USER_ID = $1;
 
+-- name: GetOnePost :one
+SELECT
+    *
+FROM
+    POSTS
+WHERE
+    POST_ID = $1;
+
 -- name: GetPostsList :many
 SELECT
     *

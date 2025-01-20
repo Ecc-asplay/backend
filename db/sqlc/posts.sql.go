@@ -88,6 +88,33 @@ func (q *Queries) DeletePost(ctx context.Context, arg DeletePostParams) error {
 	return err
 }
 
+const getOnePost = `-- name: GetOnePost :one
+SELECT
+    user_id, post_id, show_id, title, feel, content, is_sensitive, status, created_at, updated_at
+FROM
+    POSTS
+WHERE
+    POST_ID = $1
+`
+
+func (q *Queries) GetOnePost(ctx context.Context, postID uuid.UUID) (Post, error) {
+	row := q.db.QueryRow(ctx, getOnePost, postID)
+	var i Post
+	err := row.Scan(
+		&i.UserID,
+		&i.PostID,
+		&i.ShowID,
+		&i.Title,
+		&i.Feel,
+		&i.Content,
+		&i.IsSensitive,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getPostsList = `-- name: GetPostsList :many
 SELECT
     user_id, post_id, show_id, title, feel, content, is_sensitive, status, created_at, updated_at
