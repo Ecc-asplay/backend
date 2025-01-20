@@ -413,7 +413,7 @@ func TestDeleteCommentsAPI(t *testing.T) {
 			if tc.body != uuid.Nil {
 				url = `/comment/delete/` + tc.body.String()
 			} else {
-				url = `/comment/getlist/`
+				url = `/comment/delete/`
 			}
 			recorder := APITestAfterLogin(t, nil, http.MethodDelete, url, tc.token)
 			tc.checkResponse(recorder)
