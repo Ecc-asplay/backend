@@ -168,35 +168,36 @@ type CommentReactionTotals struct {
 }
 
 func (s *Server) GetCommentReactions(ctx *gin.Context) {
-	var req UpdateCommentsReactionRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		handleDBError(ctx, err, "コメントReaction：無効な入力データです")
+	commentIDStr := ctx.Param("comment_id")
+	commentID, err := uuid.Parse(commentIDStr)
+	if err != nil {
+		handleDBError(ctx, err, "コメント削除：コメントID取得に失敗しました")
 		return
 	}
 
-	thanks, err := s.store.GetCommentsThanksOfTrue(ctx, req.CommentID)
+	thanks, err := s.store.GetCommentsThanksOfTrue(ctx, commentID)
 	if err != nil {
 		handleDBError(ctx, err, "コメントReaction：thanks取得を失敗しました")
 		return
 	}
-	heart, err := s.store.GetCommentsHeartOfTrue(ctx, req.CommentID)
+	heart, err := s.store.GetCommentsHeartOfTrue(ctx, commentID)
 	if err != nil {
 		handleDBError(ctx, err, "コメントReaction：heart取得を失敗しました")
 		return
 	}
-	helpful, err := s.store.GetCommentsHelpfulOfTrue(ctx, req.CommentID)
+	helpful, err := s.store.GetCommentsHelpfulOfTrue(ctx, commentID)
 	if err != nil {
 		handleDBError(ctx, err, "コメントReaction：helpful取得を失敗しました")
 		return
 	}
-	useful, err := s.store.GetCommentsUsefulOfTrue(ctx, req.CommentID)
+	useful, err := s.store.GetCommentsUsefulOfTrue(ctx, commentID)
 	if err != nil {
 		handleDBError(ctx, err, "コメントReaction：Useful取得を失敗しました")
 		return
 	}
 
 	reaction := CommentReactionTotals{
-		CommentID: req.CommentID,
+		CommentID: commentID,
 		Thanks:    thanks,
 		Heart:     heart,
 		Useful:    useful,
@@ -204,7 +205,7 @@ func (s *Server) GetCommentReactions(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
-		"CommentID": req.CommentID,
+		"CommentID": commentID,
 		"Reaction":  reaction,
 	})
 }
