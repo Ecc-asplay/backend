@@ -72,10 +72,10 @@ func (server *Server) GinRequest(config util.Config) {
 	r.GET("/comment/getpublic", server.GetAllPublicComments)
 
 	r.GET("/post/reaction/all", server.GetAllPostsReaction)
-	r.GET("/post/reaction/:post_id", server.GetPostReactions)
+	r.GET("/post/reaction/one", server.GetPostReactions)
 
 	r.GET("/comment/reaction/allpublic", server.GetAllCommentsReaction)
-	r.GET("/comment/reaction/:comment", server.GetCommentReactions)
+	r.GET("/comment/reaction/one", server.GetCommentReactions)
 
 	//　認証メール
 	r.POST("/mail/send", server.SendVerificationEmail)
@@ -115,11 +115,11 @@ func (server *Server) GinRequest(config util.Config) {
 	authRoutes.GET("/bookmark/get", server.GetBookmark)
 
 	// Comment
-	authRoutes.GET("/comment/getlist/:post_id", server.GetPostCommentsList)
+	authRoutes.GET("/comment/getlist", server.GetPostCommentsList)
 	authRoutes.GET("/comment/all", server.GetAllComments)
 	authRoutes.POST("/comment/create", server.CreateComment)
 	authRoutes.PUT("/comment/update", server.UpdateComments)
-	authRoutes.DELETE("/comment/delete/:comment_id", server.DeleteComments)
+	authRoutes.DELETE("/comment/delete", server.DeleteComments)
 
 	// コメント　Reaction
 	authRoutes.PUT("/comment/reaction/Thanks", server.UpdateCommentReactionThanks)
