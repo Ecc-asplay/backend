@@ -168,35 +168,35 @@ type PostReactionTotals struct {
 }
 
 func (s *Server) GetPostReactions(ctx *gin.Context) {
-	var req UpdatePostReactionRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		handleDBError(ctx, err, "投稿Reaction：無効な入力データです")
-		return
+	postIDStr := ctx.Param("post_id")
+	postID, err := uuid.Parse(postIDStr)
+	if err != nil {
+		handleDBError(ctx, err, "投稿Reaction：投稿ID取得に失敗しました")
 	}
 
-	thanks, err := s.store.GetPostsThanksOfTrue(ctx, req.PostID)
+	thanks, err := s.store.GetPostsThanksOfTrue(ctx, postID)
 	if err != nil {
 		handleDBError(ctx, err, "投稿Reaction：thanks取得を失敗しました")
 		return
 	}
-	heart, err := s.store.GetPostsHeartOfTrue(ctx, req.PostID)
+	heart, err := s.store.GetPostsHeartOfTrue(ctx, postID)
 	if err != nil {
 		handleDBError(ctx, err, "投稿Reaction：heart取得を失敗しました")
 		return
 	}
-	helpful, err := s.store.GetPostsHelpfulOfTrue(ctx, req.PostID)
+	helpful, err := s.store.GetPostsHelpfulOfTrue(ctx, postID)
 	if err != nil {
 		handleDBError(ctx, err, "投稿Reaction：helpful取得を失敗しました")
 		return
 	}
-	useful, err := s.store.GetPostsUsefulOfTrue(ctx, req.PostID)
+	useful, err := s.store.GetPostsUsefulOfTrue(ctx, postID)
 	if err != nil {
 		handleDBError(ctx, err, "投稿Reaction：Useful取得を失敗しました")
 		return
 	}
 
 	reaction := PostReactionTotals{
-		PostID:  req.PostID,
+		PostID:  postID,
 		Thanks:  thanks,
 		Heart:   heart,
 		Useful:  useful,

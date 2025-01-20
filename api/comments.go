@@ -55,10 +55,6 @@ func (s *Server) CreateComment(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, comment)
 }
 
-type GetPostCommentsRequest struct {
-	PostID uuid.UUID `json:"post_id" binding:"required"`
-}
-
 func (s *Server) GetPostCommentsList(ctx *gin.Context) {
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	if authPayload == nil {
@@ -66,13 +62,13 @@ func (s *Server) GetPostCommentsList(ctx *gin.Context) {
 		return
 	}
 
-	var req GetPostCommentsRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		handleDBError(ctx, err, "コメントリスト取得：無効な入力データです")
-		return
+	postIDStr := ctx.Param("post_id")
+	postID, err := uuid.Parse(postIDStr)
+	if err != nil {
+		handleDBError(ctx, err, "コメントリスト取得：コメントID取得に失敗しました")
 	}
 
-	comments, err := s.store.GetCommentsList(ctx, req.PostID)
+	comments, err := s.store.GetCommentsList(ctx, postID)
 	if err != nil {
 		handleDBError(ctx, err, "コメントリスト取得に失敗しました")
 		return
@@ -110,10 +106,6 @@ func (s *Server) UpdateComments(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, comment)
 }
 
-type DeleteCommentRequest struct {
-	CommentID uuid.UUID `json:"comment_id" binding:"required"`
-}
-
 func (s *Server) DeleteComments(ctx *gin.Context) {
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	if authPayload == nil {
@@ -121,13 +113,13 @@ func (s *Server) DeleteComments(ctx *gin.Context) {
 		return
 	}
 
-	var req DeleteCommentRequest
-	if err := ctx.ShouldBindJSON(&req); err != nil {
-		handleDBError(ctx, err, "コメント削除：無効な入力データです")
-		return
+	commentIDStr := ctx.Param("comment_id")
+	commentID, err := uuid.Parse(commentIDStr)
+	if err != nil {
+		handleDBError(ctx, err, "コメントリスト取得：コメントID取得に失敗しました")
 	}
 
-	err := s.store.DeleteComments(ctx, req.CommentID)
+	err = s.store.DeleteComments(ctx, commentID)
 	if err != nil {
 		handleDBError(ctx, err, "コメント削除に失敗しました")
 		return
