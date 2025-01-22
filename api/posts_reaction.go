@@ -21,6 +21,7 @@ type UpdatePostReactionRequest struct {
 
 func (s *Server) UpdatePostReactionThanks(ctx *gin.Context) {
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+
 	var req UpdatePostReactionRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		handleDBError(ctx, err, "投稿Thanks：無効な入力データです")
@@ -33,20 +34,25 @@ func (s *Server) UpdatePostReactionThanks(ctx *gin.Context) {
 	}
 
 	thanks, err := s.store.UpdatePostsReactionThanks(ctx, data)
-	if errors.Is(err, sql.ErrNoRows) {
-		data := db.CreatePostsReactionParams{
-			UserID:          authPayload.UserID,
-			PostID:          req.PostID,
-			PReactionThanks: true,
-		}
-		reaction, err := s.store.CreatePostsReaction(ctx, data)
-		if err != nil {
-			handleDBError(ctx, err, "投稿生成Thanks：登録を失敗しました")
-			return
-		}
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			data := db.CreatePostsReactionParams{
+				UserID:           authPayload.UserID,
+				PostID:           req.PostID,
+				PReactionThanks:  true,
+				PReactionHelpful: false,
+				PReactionUseful:  false,
+				PReactionHeart:   false,
+			}
 
-		ctx.JSON(http.StatusOK, reaction)
-	} else {
+			reaction, err := s.store.CreatePostsReaction(ctx, data)
+			if err != nil {
+				handleDBError(ctx, err, "投稿生成Thanks：登録を失敗しました")
+				return
+			}
+
+			ctx.JSON(http.StatusOK, reaction)
+		}
 		handleDBError(ctx, err, "投稿Thanks：更新を失敗しました")
 		return
 	}
@@ -70,9 +76,12 @@ func (s *Server) UpdatePostReactionHeart(ctx *gin.Context) {
 	heart, err := s.store.UpdatePostsReactionHeart(ctx, data)
 	if errors.Is(err, sql.ErrNoRows) {
 		data := db.CreatePostsReactionParams{
-			UserID:         authPayload.UserID,
-			PostID:         req.PostID,
-			PReactionHeart: true,
+			UserID:           authPayload.UserID,
+			PostID:           req.PostID,
+			PReactionHeart:   true,
+			PReactionHelpful: false,
+			PReactionUseful:  false,
+			PReactionThanks:  false,
 		}
 		reaction, err := s.store.CreatePostsReaction(ctx, data)
 		if err != nil {
@@ -105,9 +114,12 @@ func (s *Server) UpdatePostReactionUesful(ctx *gin.Context) {
 	useful, err := s.store.UpdatePostsReactionUseful(ctx, data)
 	if errors.Is(err, sql.ErrNoRows) {
 		data := db.CreatePostsReactionParams{
-			UserID:          authPayload.UserID,
-			PostID:          req.PostID,
-			PReactionUseful: true,
+			UserID:           authPayload.UserID,
+			PostID:           req.PostID,
+			PReactionUseful:  true,
+			PReactionThanks:  false,
+			PReactionHeart:   false,
+			PReactionHelpful: false,
 		}
 		reaction, err := s.store.CreatePostsReaction(ctx, data)
 		if err != nil {
@@ -143,6 +155,9 @@ func (s *Server) UpdatePostReactionHelpful(ctx *gin.Context) {
 			UserID:           authPayload.UserID,
 			PostID:           req.PostID,
 			PReactionHelpful: true,
+			PReactionThanks:  false,
+			PReactionHeart:   false,
+			PReactionUseful:  false,
 		}
 		reaction, err := s.store.CreatePostsReaction(ctx, data)
 		if err != nil {

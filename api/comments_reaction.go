@@ -35,9 +35,12 @@ func (s *Server) UpdateCommentReactionThanks(ctx *gin.Context) {
 	thanks, err := s.store.UpdateCommentsReactionThanks(ctx, data)
 	if errors.Is(err, sql.ErrNoRows) {
 		data := db.CreateCommentsReactionParams{
-			UserID:          authPayload.UserID,
-			CommentID:       req.CommentID,
-			CReactionThanks: true,
+			UserID:           authPayload.UserID,
+			CommentID:        req.CommentID,
+			CReactionThanks:  true,
+			CReactionHelpful: false,
+			CReactionUseful:  false,
+			CReactionHeart:   false,
 		}
 		reaction, err := s.store.CreateCommentsReaction(ctx, data)
 		if err != nil {
@@ -70,9 +73,12 @@ func (s *Server) UpdateCommentReactionHeart(ctx *gin.Context) {
 	Heart, err := s.store.UpdateCommentsReactionHeart(ctx, data)
 	if errors.Is(err, sql.ErrNoRows) {
 		data := db.CreateCommentsReactionParams{
-			UserID:         authPayload.UserID,
-			CommentID:      req.CommentID,
-			CReactionHeart: true,
+			UserID:           authPayload.UserID,
+			CommentID:        req.CommentID,
+			CReactionHeart:   true,
+			CReactionHelpful: false,
+			CReactionUseful:  false,
+			CReactionThanks:  false,
 		}
 		reaction, err := s.store.CreateCommentsReaction(ctx, data)
 		if err != nil {
@@ -105,9 +111,12 @@ func (s *Server) UpdateCommentReactionUesful(ctx *gin.Context) {
 	Heart, err := s.store.UpdateCommentsReactionUseful(ctx, data)
 	if errors.Is(err, sql.ErrNoRows) {
 		data := db.CreateCommentsReactionParams{
-			UserID:          authPayload.UserID,
-			CommentID:       req.CommentID,
-			CReactionUseful: true,
+			UserID:           authPayload.UserID,
+			CommentID:        req.CommentID,
+			CReactionUseful:  true,
+			CReactionThanks:  false,
+			CReactionHeart:   false,
+			CReactionHelpful: false,
 		}
 		reaction, err := s.store.CreateCommentsReaction(ctx, data)
 		if err != nil {
@@ -143,6 +152,9 @@ func (s *Server) UpdateCommentReactionHelpful(ctx *gin.Context) {
 			UserID:           authPayload.UserID,
 			CommentID:        req.CommentID,
 			CReactionHelpful: true,
+			CReactionThanks:  false,
+			CReactionUseful:  false,
+			CReactionHeart:   false,
 		}
 		reaction, err := s.store.CreateCommentsReaction(ctx, data)
 		if err != nil {
