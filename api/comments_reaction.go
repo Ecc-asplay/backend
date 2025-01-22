@@ -16,7 +16,7 @@ import (
 )
 
 type UpdateCommentsReactionRequest struct {
-	CommentID uuid.UUID `json:"commet_id" binding:"required"`
+	CommentID uuid.UUID `json:"comment_id" binding:"required"`
 }
 
 func (s *Server) UpdateCommentReactionThanks(ctx *gin.Context) {
@@ -33,23 +33,24 @@ func (s *Server) UpdateCommentReactionThanks(ctx *gin.Context) {
 	}
 
 	thanks, err := s.store.UpdateCommentsReactionThanks(ctx, data)
-	if errors.Is(err, sql.ErrNoRows) {
-		data := db.CreateCommentsReactionParams{
-			UserID:           authPayload.UserID,
-			CommentID:        req.CommentID,
-			CReactionThanks:  true,
-			CReactionHelpful: false,
-			CReactionUseful:  false,
-			CReactionHeart:   false,
-		}
-		reaction, err := s.store.CreateCommentsReaction(ctx, data)
-		if err != nil {
-			handleDBError(ctx, err, "コメント生成Thanks：登録を失敗しました")
-			return
-		}
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			data := db.CreateCommentsReactionParams{
+				UserID:           authPayload.UserID,
+				CommentID:        req.CommentID,
+				CReactionThanks:  true,
+				CReactionHelpful: false,
+				CReactionUseful:  false,
+				CReactionHeart:   false,
+			}
+			reaction, err := s.store.CreateCommentsReaction(ctx, data)
+			if err != nil {
+				handleDBError(ctx, err, "コメント生成Thanks：登録を失敗しました")
+				return
+			}
 
-		ctx.JSON(http.StatusOK, reaction)
-	} else {
+			ctx.JSON(http.StatusOK, reaction)
+		}
 		handleDBError(ctx, err, "コメントThanks：更新を失敗しました")
 		return
 	}
@@ -71,23 +72,24 @@ func (s *Server) UpdateCommentReactionHeart(ctx *gin.Context) {
 	}
 
 	Heart, err := s.store.UpdateCommentsReactionHeart(ctx, data)
-	if errors.Is(err, sql.ErrNoRows) {
-		data := db.CreateCommentsReactionParams{
-			UserID:           authPayload.UserID,
-			CommentID:        req.CommentID,
-			CReactionHeart:   true,
-			CReactionHelpful: false,
-			CReactionUseful:  false,
-			CReactionThanks:  false,
-		}
-		reaction, err := s.store.CreateCommentsReaction(ctx, data)
-		if err != nil {
-			handleDBError(ctx, err, "コメント生成Heart：登録を失敗しました")
-			return
-		}
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			data := db.CreateCommentsReactionParams{
+				UserID:           authPayload.UserID,
+				CommentID:        req.CommentID,
+				CReactionHeart:   true,
+				CReactionHelpful: false,
+				CReactionUseful:  false,
+				CReactionThanks:  false,
+			}
+			reaction, err := s.store.CreateCommentsReaction(ctx, data)
+			if err != nil {
+				handleDBError(ctx, err, "コメント生成Heart：登録を失敗しました")
+				return
+			}
 
-		ctx.JSON(http.StatusOK, reaction)
-	} else {
+			ctx.JSON(http.StatusOK, reaction)
+		}
 		handleDBError(ctx, err, "コメントHeart：更新を失敗しました")
 		return
 	}
@@ -109,23 +111,24 @@ func (s *Server) UpdateCommentReactionUesful(ctx *gin.Context) {
 	}
 
 	Heart, err := s.store.UpdateCommentsReactionUseful(ctx, data)
-	if errors.Is(err, sql.ErrNoRows) {
-		data := db.CreateCommentsReactionParams{
-			UserID:           authPayload.UserID,
-			CommentID:        req.CommentID,
-			CReactionUseful:  true,
-			CReactionThanks:  false,
-			CReactionHeart:   false,
-			CReactionHelpful: false,
-		}
-		reaction, err := s.store.CreateCommentsReaction(ctx, data)
-		if err != nil {
-			handleDBError(ctx, err, "コメント生成Useful：登録を失敗しました")
-			return
-		}
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			data := db.CreateCommentsReactionParams{
+				UserID:           authPayload.UserID,
+				CommentID:        req.CommentID,
+				CReactionUseful:  true,
+				CReactionThanks:  false,
+				CReactionHeart:   false,
+				CReactionHelpful: false,
+			}
+			reaction, err := s.store.CreateCommentsReaction(ctx, data)
+			if err != nil {
+				handleDBError(ctx, err, "コメント生成Useful：登録を失敗しました")
+				return
+			}
 
-		ctx.JSON(http.StatusOK, reaction)
-	} else {
+			ctx.JSON(http.StatusOK, reaction)
+		}
 		handleDBError(ctx, err, "コメントUseful：更新を失敗しました")
 		return
 	}
@@ -147,23 +150,24 @@ func (s *Server) UpdateCommentReactionHelpful(ctx *gin.Context) {
 	}
 
 	Heart, err := s.store.UpdateCommentsReactionHelpful(ctx, data)
-	if errors.Is(err, sql.ErrNoRows) {
-		data := db.CreateCommentsReactionParams{
-			UserID:           authPayload.UserID,
-			CommentID:        req.CommentID,
-			CReactionHelpful: true,
-			CReactionThanks:  false,
-			CReactionUseful:  false,
-			CReactionHeart:   false,
-		}
-		reaction, err := s.store.CreateCommentsReaction(ctx, data)
-		if err != nil {
-			handleDBError(ctx, err, "コメント生成Helpful：登録を失敗しました")
-			return
-		}
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			data := db.CreateCommentsReactionParams{
+				UserID:           authPayload.UserID,
+				CommentID:        req.CommentID,
+				CReactionHelpful: true,
+				CReactionThanks:  false,
+				CReactionUseful:  false,
+				CReactionHeart:   false,
+			}
+			reaction, err := s.store.CreateCommentsReaction(ctx, data)
+			if err != nil {
+				handleDBError(ctx, err, "コメント生成Helpful：登録を失敗しました")
+				return
+			}
 
-		ctx.JSON(http.StatusOK, reaction)
-	} else {
+			ctx.JSON(http.StatusOK, reaction)
+		}
 		handleDBError(ctx, err, "コメントHelpful：更新を失敗しました")
 		return
 	}

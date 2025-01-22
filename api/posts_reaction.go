@@ -74,23 +74,24 @@ func (s *Server) UpdatePostReactionHeart(ctx *gin.Context) {
 	}
 
 	heart, err := s.store.UpdatePostsReactionHeart(ctx, data)
-	if errors.Is(err, sql.ErrNoRows) {
-		data := db.CreatePostsReactionParams{
-			UserID:           authPayload.UserID,
-			PostID:           req.PostID,
-			PReactionHeart:   true,
-			PReactionHelpful: false,
-			PReactionUseful:  false,
-			PReactionThanks:  false,
-		}
-		reaction, err := s.store.CreatePostsReaction(ctx, data)
-		if err != nil {
-			handleDBError(ctx, err, "投稿生成Heart：登録を失敗しました")
-			return
-		}
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			data := db.CreatePostsReactionParams{
+				UserID:           authPayload.UserID,
+				PostID:           req.PostID,
+				PReactionHeart:   true,
+				PReactionHelpful: false,
+				PReactionUseful:  false,
+				PReactionThanks:  false,
+			}
+			reaction, err := s.store.CreatePostsReaction(ctx, data)
+			if err != nil {
+				handleDBError(ctx, err, "投稿生成Heart：登録を失敗しました")
+				return
+			}
 
-		ctx.JSON(http.StatusOK, reaction)
-	} else {
+			ctx.JSON(http.StatusOK, reaction)
+		}
 		handleDBError(ctx, err, "投稿Heart：更新を失敗しました")
 		return
 	}
@@ -112,23 +113,24 @@ func (s *Server) UpdatePostReactionUesful(ctx *gin.Context) {
 	}
 
 	useful, err := s.store.UpdatePostsReactionUseful(ctx, data)
-	if errors.Is(err, sql.ErrNoRows) {
-		data := db.CreatePostsReactionParams{
-			UserID:           authPayload.UserID,
-			PostID:           req.PostID,
-			PReactionUseful:  true,
-			PReactionThanks:  false,
-			PReactionHeart:   false,
-			PReactionHelpful: false,
-		}
-		reaction, err := s.store.CreatePostsReaction(ctx, data)
-		if err != nil {
-			handleDBError(ctx, err, "投稿生成Useful：登録を失敗しました")
-			return
-		}
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			data := db.CreatePostsReactionParams{
+				UserID:           authPayload.UserID,
+				PostID:           req.PostID,
+				PReactionUseful:  true,
+				PReactionThanks:  false,
+				PReactionHeart:   false,
+				PReactionHelpful: false,
+			}
+			reaction, err := s.store.CreatePostsReaction(ctx, data)
+			if err != nil {
+				handleDBError(ctx, err, "投稿生成Useful：登録を失敗しました")
+				return
+			}
 
-		ctx.JSON(http.StatusOK, reaction)
-	} else {
+			ctx.JSON(http.StatusOK, reaction)
+		}
 		handleDBError(ctx, err, "投稿Useful：更新を失敗しました")
 		return
 	}
@@ -150,23 +152,24 @@ func (s *Server) UpdatePostReactionHelpful(ctx *gin.Context) {
 	}
 
 	useful, err := s.store.UpdatePostsReactionHelpful(ctx, data)
-	if errors.Is(err, sql.ErrNoRows) {
-		data := db.CreatePostsReactionParams{
-			UserID:           authPayload.UserID,
-			PostID:           req.PostID,
-			PReactionHelpful: true,
-			PReactionThanks:  false,
-			PReactionHeart:   false,
-			PReactionUseful:  false,
-		}
-		reaction, err := s.store.CreatePostsReaction(ctx, data)
-		if err != nil {
-			handleDBError(ctx, err, "投稿生成Helpful：登録を失敗しました")
-			return
-		}
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			data := db.CreatePostsReactionParams{
+				UserID:           authPayload.UserID,
+				PostID:           req.PostID,
+				PReactionHelpful: true,
+				PReactionThanks:  false,
+				PReactionHeart:   false,
+				PReactionUseful:  false,
+			}
+			reaction, err := s.store.CreatePostsReaction(ctx, data)
+			if err != nil {
+				handleDBError(ctx, err, "投稿生成Helpful：登録を失敗しました")
+				return
+			}
 
-		ctx.JSON(http.StatusOK, reaction)
-	} else {
+			ctx.JSON(http.StatusOK, reaction)
+		}
 		handleDBError(ctx, err, "投稿Helpful：更新を失敗しました")
 		return
 	}
