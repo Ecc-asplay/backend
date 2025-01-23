@@ -128,6 +128,9 @@ func (server *Server) GinRequest(config util.Config) {
 	// Searchrecord
 	authManage.POST("/searchrecord/getlist", server.GetSearchedRecordList)
 
+	// image
+	authManage.POST("/images", server.UploadImagesHandler)
+
 	server.router = r
 }
 
