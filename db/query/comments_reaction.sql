@@ -19,6 +19,9 @@ INSERT INTO COMMENTS_REACTION (
 SELECT * FROM COMMENTS_REACTION 
 WHERE COMMENT_ID = $1;
 
+-- name: GetAllCommentsReactionData :many
+SELECT * FROM COMMENTS_REACTION;
+
 
 -- name: UpdateCommentsReactionThanks :one
 UPDATE COMMENTS_REACTION

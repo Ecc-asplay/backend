@@ -177,7 +177,17 @@ func (s *Server) UpdatePostReactionHelpful(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, useful)
 }
 
+func (s *Server) GetAllPostsReactionsData(ctx *gin.Context) {
+	postReaction, err := s.store.GetAllPostsReactionData(ctx)
+	if err != nil {
+		handleDBError(ctx, err, "投稿AllReactionData：取得に失敗しました")
+		return
+	}
+	ctx.JSON(http.StatusOK, postReaction)
+}
+
 type PostReactionTotals struct {
+	UserID  uuid.UUID `json:"user_id"`
 	PostID  uuid.UUID `json:"post_id"`
 	Thanks  int64     `json:"thanks`
 	Heart   int64     `json:"heart"`

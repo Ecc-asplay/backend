@@ -19,7 +19,7 @@ INSERT INTO POSTS_REACTION (
 SELECT * FROM POSTS_REACTION 
 WHERE POST_ID = $1;
 
--- name: GetAllPostsReaction :many
+-- name: GetAllPostsReactionData :many
 SELECT * FROM POSTS_REACTION;
 
 -- name: UpdatePostsReactionThanks :one

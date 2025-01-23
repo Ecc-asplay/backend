@@ -72,9 +72,11 @@ func (server *Server) GinRequest(config util.Config) {
 	r.GET("/comment/getpublic", server.GetAllPublicComments)
 
 	r.GET("/post/reaction/all", server.GetAllPostsReaction)
+	r.GET("/post/reaction/allData", server.GetAllPostsReactionsData)
 	r.GET("/post/reaction/:post_id", server.GetPostReactions)
 
 	r.GET("/comment/reaction/allpublic", server.GetAllCommentsReaction)
+	r.GET("/comment/reaction/allData", server.GetAllCommentsReactionsData)
 	r.GET("/comment/reaction/:comment_id", server.GetCommentReactions)
 
 	//　認証メール

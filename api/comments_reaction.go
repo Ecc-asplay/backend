@@ -176,6 +176,7 @@ func (s *Server) UpdateCommentReactionHelpful(ctx *gin.Context) {
 }
 
 type CommentReactionTotals struct {
+	UserID    uuid.UUID `json:"user_id"`
 	CommentID uuid.UUID `json:"comment_id"`
 	Thanks    int64     `json:"thanks`
 	Heart     int64     `json:"heart"`
@@ -279,6 +280,15 @@ func (s *Server) GetAllCommentsReaction(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, allCommentsReaction)
 		}
 	}
+}
+
+func (s *Server) GetAllCommentsReactionsData(ctx *gin.Context) {
+	data, err := s.store.GetAllCommentsReactionData(ctx)
+	if err != nil {
+		handleDBError(ctx, err, "コメントAllReaction：データ取得を失敗しました")
+		return
+	}
+	ctx.JSON(http.StatusOK, data)
 }
 
 func TakeAllCommentsReaction(ctx *gin.Context, s *Server, comment []db.Comment) []CommentReactionTotals {
