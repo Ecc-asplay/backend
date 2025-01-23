@@ -50,9 +50,10 @@ func (s *Server) UpdateCommentReactionThanks(ctx *gin.Context) {
 			}
 
 			ctx.JSON(http.StatusOK, reaction)
+		} else {
+			handleDBError(ctx, err, "コメントThanks：更新を失敗しました")
+			return
 		}
-		handleDBError(ctx, err, "コメントThanks：更新を失敗しました")
-		return
 	}
 
 	ctx.JSON(http.StatusOK, thanks)
@@ -89,9 +90,10 @@ func (s *Server) UpdateCommentReactionHeart(ctx *gin.Context) {
 			}
 
 			ctx.JSON(http.StatusOK, reaction)
+		} else {
+			handleDBError(ctx, err, "コメントHeart：更新を失敗しました")
+			return
 		}
-		handleDBError(ctx, err, "コメントHeart：更新を失敗しました")
-		return
 	}
 
 	ctx.JSON(http.StatusOK, Heart)
@@ -128,9 +130,10 @@ func (s *Server) UpdateCommentReactionUesful(ctx *gin.Context) {
 			}
 
 			ctx.JSON(http.StatusOK, reaction)
+		} else {
+			handleDBError(ctx, err, "コメントUseful：更新を失敗しました")
+			return
 		}
-		handleDBError(ctx, err, "コメントUseful：更新を失敗しました")
-		return
 	}
 
 	ctx.JSON(http.StatusOK, Heart)
@@ -167,9 +170,10 @@ func (s *Server) UpdateCommentReactionHelpful(ctx *gin.Context) {
 			}
 
 			ctx.JSON(http.StatusOK, reaction)
+		} else {
+			handleDBError(ctx, err, "コメントHelpful：更新を失敗しました")
+			return
 		}
-		handleDBError(ctx, err, "コメントHelpful：更新を失敗しました")
-		return
 	}
 
 	ctx.JSON(http.StatusOK, Heart)
