@@ -206,6 +206,48 @@ func (q *Queries) GetCommentsList(ctx context.Context, postID uuid.UUID) ([]Comm
 	return items, nil
 }
 
+const getMyComments = `-- name: GetMyComments :many
+SELECT
+    comment_id, user_id, post_id, status, is_public, comments, is_censored, created_at, updated_at, post_user
+FROM
+    COMMENTS
+WHERE
+    user_id = $1
+ORDER BY
+    COMMENT_ID DESC
+`
+
+func (q *Queries) GetMyComments(ctx context.Context, userID uuid.UUID) ([]Comment, error) {
+	rows, err := q.db.Query(ctx, getMyComments, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Comment{}
+	for rows.Next() {
+		var i Comment
+		if err := rows.Scan(
+			&i.CommentID,
+			&i.UserID,
+			&i.PostID,
+			&i.Status,
+			&i.IsPublic,
+			&i.Comments,
+			&i.IsCensored,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.PostUser,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateComments = `-- name: UpdateComments :one
 UPDATE COMMENTS
 SET

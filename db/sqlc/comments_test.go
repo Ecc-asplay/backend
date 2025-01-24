@@ -68,6 +68,20 @@ func TestGetCommentsList(t *testing.T) {
 	require.GreaterOrEqual(t, len(allCommentData), 1)
 }
 
+func TestGetMyComment(t *testing.T) {
+	user1 := CreateRandomUser(t)
+	for i := 0; i < 20; i++ {
+		user2 := CreateRandomUser(t)
+		post := CreateRandomPost(t, user2)
+		CreateRandomComment(t, user1, post)
+	}
+
+	allMyComments, err := testQueries.GetMyComments(context.Background(), user1.UserID)
+	require.NoError(t, err)
+	require.NotEmpty(t, allMyComments)
+	require.GreaterOrEqual(t, len(allMyComments), 1)
+}
+
 func TestUpdateComments(t *testing.T) {
 	user1 := CreateRandomUser(t)
 	post := CreateRandomPost(t, user1)

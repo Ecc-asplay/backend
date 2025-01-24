@@ -117,6 +117,7 @@ func (server *Server) GinRequest(config util.Config) {
 	authRoutes.GET("/bookmark/get", server.GetBookmark)
 
 	// Comment
+	authRoutes.GET("/comment/getmycomment", server.GetMyComments)
 	authRoutes.GET("/comment/getlist/:post_id", server.GetPostCommentsList)
 	authRoutes.GET("/comment/all", server.GetAllComments)
 	authRoutes.POST("/comment/create", server.CreateComment)

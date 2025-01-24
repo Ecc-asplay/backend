@@ -39,6 +39,17 @@ WHERE
 ORDER BY
     COMMENT_ID DESC;
 
+-- name: GetMyComments :many
+SELECT
+    *
+FROM
+    COMMENTS
+WHERE
+    user_id = $1
+ORDER BY
+    COMMENT_ID DESC;
+
+
 -- name: GetAllPublicComments :many
 SELECT
     *

@@ -62,6 +62,20 @@ func (s *Server) CreateComment(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, comment)
 }
 
+func (s *Server) GetMyComments(ctx *gin.Context) {
+	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
+	if authPayload == nil {
+		handleDBError(ctx, errors.New("404"), "自分コメント取得：トークンない")
+		return
+	}
+	comments, err := s.store.GetMyComments(ctx, authPayload.UserID)
+	if err != nil {
+		handleDBError(ctx, err, "自分コメント取得に失敗しました")
+		return
+	}
+	ctx.JSON(http.StatusOK, comments)
+}
+
 func (s *Server) GetPostCommentsList(ctx *gin.Context) {
 	authPayload := ctx.MustGet(authorizationPayloadKey).(*token.Payload)
 	if authPayload == nil {

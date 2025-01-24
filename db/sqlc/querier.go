@@ -49,6 +49,7 @@ type Querier interface {
 	GetCommentsUsefulOfTrue(ctx context.Context, commentID uuid.UUID) (int64, error)
 	GetImage(ctx context.Context, postID uuid.UUID) ([]Image, error)
 	GetLogin(ctx context.Context, email string) (GetLoginRow, error)
+	GetMyComments(ctx context.Context, userID uuid.UUID) ([]Comment, error)
 	GetNotification(ctx context.Context, userID uuid.UUID) ([]Notification, error)
 	GetOnePost(ctx context.Context, postID uuid.UUID) (Post, error)
 	GetPostsHeartOfTrue(ctx context.Context, postID uuid.UUID) (int64, error)
